@@ -14,10 +14,10 @@ class App {
 		AuthApp.startApp(scanner);
 		System.out.println(SessionData.getUser());
 		AdminApp.startApp(scanner);
+		scanner.close();
 		
-		
-//		UserRepository r1 = new UserRepository();
-//		System.out.println(r1.getAll());
+		UserRepository r1 = new UserRepository();
+		System.out.println(r1.getAll());
 //		CourseRepository r2 = new CourseRepository();
 //		System.out.println(r2.getAll());
 		

@@ -3,7 +3,7 @@ package model;
 import java.io.*;
 import java.util.*;
 
-public abstract class Repository<T extends Serializable & Indexed> {
+public abstract class BaseRepository<T extends Serializable & Indexed> {
     
     protected abstract String getFilePath();
     
@@ -11,7 +11,7 @@ public abstract class Repository<T extends Serializable & Indexed> {
     
     protected int globalId;
 
-    public Repository() {
+    public BaseRepository() {
         load();
         globalId = data.stream().map(elem->elem.getId()).max(Integer::compare).orElse(0)+1;
     }

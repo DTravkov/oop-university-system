@@ -35,7 +35,7 @@ public class AdminApp {
 	                    System.out.print("Enter login of user to update: ");
 	                    String targetLogin = scanner.nextLine();
 	                    
-	                    User user = userService.getRepository().getByLogin(targetLogin);
+	                    User user = userService.findOrThrow(targetLogin);
 	                    
 	                    if (user != null) {
 	                    	
@@ -90,7 +90,7 @@ public class AdminApp {
                         System.out.print("Enter surname: ");
                         surname = scanner.nextLine();
                         authService.registerUser(new Student(regLogin, regPass, name, surname));
-                        System.out.println("User registered successfully");
+                        System.out.println("Student registered successfully");
                         return;
 	                case "5":
 	                    System.out.print("Enter course name: ");

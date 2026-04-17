@@ -6,43 +6,44 @@ import model.User;
 import model.UserRepository;
 import utils.PasswordUtils;
 
-public class UserService {
-    private static UserRepository repo = new UserRepository();
+public class UserService extends BaseService<User, UserRepository> {
 
-   
+	public UserService() {
+		super(new UserRepository());
+	}
+	public UserService(UserRepository repository, UserService userService) {
+		super(repository);
+	}
+	
     public void createUser(User user) {
-    	this.checkNotExist(user.getLogin());
+    	this.throwIfExists(user.getLogin());
     	user.setPassword(PasswordUtils.hashPassword(user.getPassword()));
-        this.repo.add(user);
+        this.repository.add(user);
     }
     
     public void updateUser(User old, User updated) {
-        this.getByLogin(old.getLogin());
+        this.findOrThrow(old.getLogin());
         updated.setPassword(PasswordUtils.hashPassword(updated.getPassword()));
-        this.repo.update(old, updated);
+        this.repository.update(old, updated);
     }
 
     public void deleteUser(String login) {
-        User user = this.getByLogin(login);
-        this.repo.delete(user);
+        User user = this.findOrThrow(login);
+        this.repository.delete(user);
     }
     
-    public User getByLogin(String login) {
-        User user = this.repo.getByLogin(login);
+    public User findOrThrow(String login) {
+        User user = this.repository.getByLogin(login);
+        if (user == null) throw new DoesNotExist("User not found.");
         
-        if (user == null) {
-            throw new DoesNotExist("User not found.");
-        }
         return user;
     }
     
-    private boolean checkNotExist(String login) {
-        User user = this.repo.getByLogin(login);
+    private boolean throwIfExists(String login) {
+        User user = this.repository.getByLogin(login);
         if(user != null) throw new AlreadyExists();
         return true;
     }
-    public UserRepository getRepository() {
-    	return this.repo;
-    }
+
 
 }

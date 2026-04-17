@@ -1,6 +1,6 @@
 package model;
 
-public class UserRepository extends Repository<User> {
+public class UserRepository extends BaseRepository<User> {
     @Override
     protected String getFilePath() {
         return "users.ser";
