@@ -99,7 +99,7 @@ public class User implements Serializable, Indexed {
 	}
 	@Override
 	public String toString() {
-		return this.getClass().getName() + "[id=" + this.getId() + ", login=" + this.getLogin() + ", banned=" + this.isBanned() +"]";
+		return this.getClass().getSimpleName() + "[id=" + this.getId() + ", login=" + this.getLogin() + ", banned=" + this.isBanned() +"]";
 	}
 	
 	

@@ -17,8 +17,8 @@ public abstract class BaseService<T extends Serializable & Indexed, R extends Ba
     
     public T findOrThrow(int id) {
         T item = this.repository.getById(id);
-        if (item == null) throw new DoesNotExist();
-    	return this.repository.getById(id);
+        if (item == null) throw new DoesNotExist("Object with id " + id);
+    	return item;
     }
     
     public Collection<T> getAll() {

@@ -9,6 +9,7 @@ public class Student extends User {
     private final Date admissionDate;
     private int currentCredits;
     private int failedDisciplines;
+    private boolean isPhdStudent = false;
 
     public Student(String login, String password, String name, String surname) {
 		super(login, password, name, surname);
@@ -36,6 +37,14 @@ public class Student extends User {
 	public Date getAdmissionDate() {
 		return admissionDate;
 	}
+	
+	public boolean isPhdStudent() {
+		return isPhdStudent;
+	}
+
+	public void setPhdStudent(boolean isPhdStudent) {
+		this.isPhdStudent = isPhdStudent;
+	}
 
 	@Override
 	public int hashCode() {
@@ -57,6 +66,7 @@ public class Student extends User {
 		return Objects.equals(admissionDate, other.admissionDate) && currentCredits == other.currentCredits
 				&& failedDisciplines == other.failedDisciplines;
 	}
+
 	
 	
 

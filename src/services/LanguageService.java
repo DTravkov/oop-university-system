@@ -1,5 +1,6 @@
 package services;
 
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.Locale;
 
@@ -21,6 +22,11 @@ public class LanguageService {
 
     public static String translate(String key) {
         return getBundle().getString(key);
+    }
+
+    public static String translate(String key, Object... args) {
+        String pattern = getBundle().getString(key);
+        return MessageFormat.format(pattern, args);
     }
 
     public static void updateLanguage(LanguagePreference pref) {

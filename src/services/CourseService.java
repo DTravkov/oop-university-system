@@ -1,51 +1,52 @@
 package services;
 
-
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import model.Course;
 import model.CourseRepository;
 
 public class CourseService extends BaseService<Course, CourseRepository> {
-	
-    
+
     public CourseService() {
-		super(new CourseRepository());
-	}
+        super(new CourseRepository());
+    }
+
     public CourseService(CourseRepository repository) {
-		super(repository);
-	}
-
-	public void createCourse(Course course) {
-    	this.throwIfExists(course.getName());
-        this.repository.add(course);
+        super(repository);
     }
 
-    public void updateCourse(Course old, Course updated) {
-    	if(!old.getName().equalsIgnoreCase(updated.getName())) {
-    		this.throwIfExists(updated.getName());
-    	}
-        this.repository.update(old, updated);
+    public void createCourse(Course course) {
+        ensureNotExists(course.getName());
+        repository.add(course);
     }
-    
-    
-    public Course findOrThrow(String name) {
-        Course course = this.repository.getByName(name);
-        if (course == null) {
-            throw new DoesNotExist();
+
+    public void updateCourse(Course oldCourse, Course updatedCourse) {
+
+        if (!oldCourse.getName().equalsIgnoreCase(updatedCourse.getName())) {
+            ensureNotExists(updatedCourse.getName());
         }
+
+        repository.update(oldCourse, updatedCourse);
+    }
+
+    public Course findOrThrow(String name) {
+        Course course = repository.getByName(name);
+
+        if (course == null) {
+            throw new DoesNotExist("Course '" + name + "'");
+        }
+
         return course;
     }
 
     public void deleteCourse(String name) {
-        Course course = this.findOrThrow(name);
-        this.repository.delete(course);
+        Course course = findOrThrow(name);
+        repository.delete(course);
     }
-    
-    private boolean throwIfExists(String name) {
-        Course course = this.repository.getByName(name);
-        if(course != null) throw new AlreadyExists();
-        return true;
+
+    private void ensureNotExists(String name) {
+        if (repository.getByName(name) != null) {
+            throw new AlreadyExists("Course '" + name + "'");
+        }
     }
-   
 }

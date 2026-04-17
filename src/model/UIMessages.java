@@ -2,82 +2,71 @@ package model;
 
 public enum UIMessages {
 
-    // =========================
-    // Titles / Menus
-    // =========================
-    ADMIN_TITLE("admin_title"),
-    AUTH_TITLE("auth_title"),
+    TITLE_AUTH("title.auth"),
+    TITLE_ADMIN("title.admin"),
+    TITLE_USER("title.user"),
+    TITLE_ENROLL("title.enroll"),
+    TITLE_MSG("title.msg"),
 
-    AUTH_CHANGE_LANG("auth_change_lang"),
-    AUTH_SIGNUP("auth_signup"),
-    AUTH_LOGIN("auth_login"),
-    AUTH_EXIT("auth_exit"),
+    CHOOSE("menu.choose"),
+    EXIT("menu.exit"),
 
-    ADMIN_UPDATE("admin_update"),
-    ADMIN_DELETE("admin_delete"),
-    ADMIN_REG_ADMIN("admin_reg_admin"),
-    ADMIN_REG_STUDENT("admin_reg_student"),
-    ADMIN_REG_COURSE("admin_reg_course"),
-    ADMIN_EXIT("admin_exit"),
+    CHANGE_LANG("auth.change_lang"),
+    SIGN_UP("auth.sign_up"),
+    LOG_IN("auth.log_in"),
+    GOODBYE("auth.goodbye"),
+    WELCOME("auth.welcome"),
 
-    ADMIN_PICK_OPTION("admin_pick_option"),
+    LOGIN("input.login"),
+    PASSWORD("input.password"),
+    NAME("input.name"),
+    SURNAME("input.surname"),
+    TARGET_LOGIN("input.target_login"),
+    NEW_NAME("input.new_name"),
+    NEW_SURNAME("input.new_surname"),
+    NEW_PASSWORD("input.new_password"),
+    BAN("input.ban"),
+    COURSE_NAME("input.course_name"),
+    COURSE_DESC("input.course_desc"),
+    COURSE_CREDITS("input.course_credits"),
+    COURSE_TYPE("input.course_type"),
+    TEACHER_TYPE("input.teacher_type"),
+    STUDENT_ID("input.student_id"),
+    LECTURER_ID("input.lecturer_id"),
+    PRACTICE_ID("input.practice_id"),
+    COURSE_ID("input.course_id"),
+    RECEIVER_ID("input.receiver_id"),
+    MESSAGE_ID("input.message_id"),
+    MESSAGE_CONTENT("input.message_content"),
 
-    // =========================
-    // Auth Prompts
-    // =========================
-    AUTH_PROMPT_LOGIN("auth_prompt_login"),
-    AUTH_PROMPT_PASS("auth_prompt_pass"),
-    AUTH_PROMPT_NAME("auth_prompt_name"),
-    AUTH_PROMPT_SURNAME("auth_prompt_surname"),
+    UPDATE_USER("action.update_user"),
+    DELETE_USER("action.delete_user"),
+    CREATE_ADMIN("action.create_admin"),
+    CREATE_STUDENT("action.create_student"),
+    CREATE_TEACHER("action.create_teacher"),
+    CREATE_MANAGER("action.create_manager"),
+    CREATE_SUPPORT("action.create_support"),
+    CREATE_COURSE("action.create_course"),
+    ENROLL("action.enroll"),
+    DROP("action.drop"),
+    VIEW_ALL("action.view_all"),
+    VIEW_STUDENT("action.view_student"),
+    SEND_MSG("action.send_msg"),
+    INBOX("action.inbox"),
+    DELETE_MSG("action.delete_msg"),
 
-    // =========================
-    // Admin Prompts
-    // =========================
-    ADMIN_PROMPT_TARGET_LOGIN("admin_prompt_target_login"),
-    ADMIN_PROMPT_DELETE("admin_prompt_delete"),
+    INVALID_CHOICE("msg.invalid_choice"),
+    INPUT_EMPTY("msg.input_empty"),
+    INPUT_NUMBER("msg.input_number"),
+    INPUT_RANGE("msg.input_range"),
+    INPUT_YES_NO("msg.input_yes_no"),
+    REGISTERED("msg.registered"),
+    CREATED("msg.created"),
+    DELETED("msg.deleted"),
+    SENT("msg.sent");
 
-    ADMIN_NEW_NAME("admin_new_name"),
-    ADMIN_NEW_SURNAME("admin_new_surname"),
-    ADMIN_NEW_PASS("admin_new_pass"),
 
-    ADMIN_BAN_CHOICE("admin_ban_choice"),
 
-    // =========================
-    // Course
-    // =========================
-    ADMIN_COURSE_NAME_PROMPT("admin_course_name_prompt"),
-    ADMIN_COURSE_CREDITS_PROMPT("admin_course_credits_prompt"),
-    ADMIN_COURSE_TYPE_SELECTION("admin_course_type_selection"),
-    ADMIN_COURSE_DESCRIPTION_PROMPT("admin_course_description_prompt"),
-
-    // =========================
-    // Messages
-    // =========================
-    ADMIN_REG_SUCCESS("admin_reg_success"),
-    AUTH_ACCESS_GRANTED("auth_access_granted"),
-    AUTH_GOODBYE("auth_goodbye"),
-
-    // =========================
-    // Errors
-    // =========================
-    ERROR_APP_INTERNAL("error_app_internal"),
-    ERROR_FIELD_VALIDATION("error_field_validation"),
-
-    // =========================
-    // Exceptions
-    // =========================
-    EX_ALREADY_EXISTS("ex_already_exists"),
-    EX_DOES_NOT_EXIST("ex_does_not_exist"),
-    EX_INVALID_CREDENTIALS("ex_invalid_credentials"),
-    EX_FIELD_VALIDATION("ex_field_validation"),
-	
-	INPUT_EMPTY("input_empty"),
-	INPUT_NUMBER_EXPECTED("input_number_expected"),
-	INPUT_RANGE_ERROR("input_range_error"),
-	INPUT_YES_NO_EXPECTED("input_yes_no_expected");
-	
-	
-	
     private final String key;
 
     UIMessages(String key) {

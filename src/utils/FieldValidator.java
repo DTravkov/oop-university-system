@@ -1,36 +1,37 @@
 package utils;
 
 import exceptions.FieldValidationError;
+import exceptions.FieldValidationError.ValidationDetail;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FieldValidator {
-    private List<String> errors = new ArrayList<>();
+    private List<ValidationDetail> errors = new ArrayList<>();
 
     public FieldValidator requireNonBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            errors.add(fieldName + " is required");
+            errors.add(new ValidationDetail("field_required", fieldName));
         }
         return this;
     }
 
     public FieldValidator requirePositive(int value, String fieldName) {
         if (value <= 0) {
-            errors.add(fieldName + " must be positive");
+            errors.add(new ValidationDetail("field_positive", fieldName));
         }
         return this;
     }
 
     public FieldValidator requireNonNull(Object value, String fieldName) {
         if (value == null) {
-            errors.add(fieldName + " cannot be null");
+            errors.add(new ValidationDetail("field_non_null", fieldName));
         }
         return this;
     }
 
     public void validate() {
         if (!errors.isEmpty()) {
-            throw new FieldValidationError(errors.toArray(String[]::new));
+            throw new FieldValidationError(errors.toArray(ValidationDetail[]::new));
         }
     }
 }

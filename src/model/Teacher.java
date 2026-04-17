@@ -6,10 +6,18 @@ public class Teacher extends Employee {
 	
 	private static final long serialVersionUID = 1L;
 	private TeacherTypeEnum type;
+	private boolean isLecturer;
 	
 	public Teacher(String login, String password, String name, String surname, TeacherTypeEnum type) {
 		super(login, password, name, surname);
 		this.type = type;
+	}
+	
+	public boolean isLecturer() {
+		return this.type == TeacherTypeEnum.LECTURE || this.type == TeacherTypeEnum.BOTH;
+	}
+	public boolean isPractice() {
+		return this.type == TeacherTypeEnum.PRACTICE || this.type == TeacherTypeEnum.BOTH;
 	}
 	
 	public TeacherTypeEnum getType() {
@@ -38,6 +46,14 @@ public class Teacher extends Employee {
 		Teacher other = (Teacher) obj;
 		return type == other.type;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+
+	
+	
 	
 
 	

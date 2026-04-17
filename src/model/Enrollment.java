@@ -118,6 +118,16 @@ public class Enrollment implements Serializable, Indexed {
 		return courseId == other.courseId && Objects.equals(enrollmentDate, other.enrollmentDate) && id == other.id
 				&& lecturerId == other.lecturerId && practiceId == other.practiceId && studentId == other.studentId;
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "Enrollment [" + "studentId=" + studentId + ", lecturerId=" + lecturerId + ", practiceId="
+				+ practiceId + ", courseId=" + courseId + ", enrollmentDate=" + enrollmentDate + "]";
+	}
+	
+	
 	
 	
 	

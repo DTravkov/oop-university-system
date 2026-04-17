@@ -9,7 +9,7 @@ public abstract class MapRepository<T extends Serializable & Indexed> {
     
     protected HashMap<Integer, HashSet<T>> data = new HashMap<>();
     
-    protected static int globalId;
+    protected int globalId;
 
     public MapRepository() {
         load();

@@ -1,10 +1,12 @@
-package services;
+package utils;
 
+import model.TeacherTypeEnum;
 import model.UIMessages;
+import services.LanguageService;
 
 import java.util.Scanner;
 
-public class InputService {
+public class UIFields {
 
     public static String readNonEmpty(Scanner scanner, String context, UIMessages prompt) {
         while (true) {
@@ -33,7 +35,7 @@ public class InputService {
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER_EXPECTED)
+                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER)
                     + " [" + context + "]");
             }
         }
@@ -52,7 +54,7 @@ public class InputService {
             }
 
             System.out.println(
-                LanguageService.translate(UIMessages.INPUT_RANGE_ERROR)
+                LanguageService.translate(UIMessages.INPUT_RANGE)
                 + " [" + context + "]"
             );
         }
@@ -67,9 +69,27 @@ public class InputService {
             if (input.equals("n")) return false;
 
             System.out.println(
-                LanguageService.translate(UIMessages.INPUT_YES_NO_EXPECTED)
+                LanguageService.translate(UIMessages.INPUT_YES_NO)
                 + " [" + context + "]"
             );
+        }
+    }
+    
+    public static TeacherTypeEnum askTeacherType(Scanner scanner) {
+        while (true) {
+            System.out.print(LanguageService.translate(UIMessages.TEACHER_TYPE));
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    return TeacherTypeEnum.LECTURE;
+                case "2":
+                    return TeacherTypeEnum.PRACTICE;
+                case "3":
+                    return TeacherTypeEnum.BOTH;
+                default:
+                    System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+            }
         }
     }
 }
