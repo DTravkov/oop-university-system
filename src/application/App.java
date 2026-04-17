@@ -2,9 +2,11 @@ package application;
 
 import java.util.Scanner;
 
-import model.CourseRepository;
 import model.SessionData;
+import model.CourseRepository;
 import model.UserRepository;
+
+
 
 class App {
 	public static void main(String args[]) {
@@ -15,8 +17,8 @@ class App {
 		
 		
 //		UserRepository r1 = new UserRepository();
-//		CourseRepository r2 = new CourseRepository();
 //		System.out.println(r1.getAll());
+//		CourseRepository r2 = new CourseRepository();
 //		System.out.println(r2.getAll());
 		
 	}

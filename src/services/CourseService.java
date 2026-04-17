@@ -16,21 +16,28 @@ public class CourseService {
     }
 
     public void updateCourse(Course old, Course updated) {
-    	this.ensureNotExists(updated.getName());
+    	if(!old.getName().equalsIgnoreCase(updated.getName())) {
+    		this.ensureNotExists(updated.getName());
+    	}
         this.repo.update(old, updated);
     }
 
     public void deleteCourse(String name) {
-        Course course = this.getByName(name);
+        Course course = this.getCourse(name);
         this.repo.delete(course);
     }
 
-    public boolean ensureNotExists(String name) {
-        if (this.repo.getByName(name) != null) throw new AlreadyExists("Course with this title already exists.");
+    private boolean ensureNotExists(String name) {
+        if (this.repo.getByName(name) != null) 
+        	throw new AlreadyExists("Course with this title already exists.");
         return true;
     }
     
-    public Course getByName(String name) {
+    public Collection<Course> getAll() {
+    	return this.repo.getAll();
+    }
+    
+    public Course getCourse(String name) {
         Course course = this.repo.getByName(name);
 
         if (course == null) {
@@ -40,12 +47,13 @@ public class CourseService {
         return course;
     }
     
-    
-    public Collection<Course> getAll() {
-    	return this.repo.getAll();
-    }
+    public Course getCourse(int id) {
+        Course course = this.repo.getById(id);
 
-    public CourseRepository getRepository() {
-        return repo;
+        if (course == null) {
+            throw new DoesNotExist("Course with id " + id + " not found.");
+        }
+        
+        return course;
     }
 }

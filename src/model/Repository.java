@@ -9,7 +9,7 @@ public abstract class Repository<T extends Serializable & Indexed> {
     
     protected Set<T> data = new HashSet<>();
     
-    protected static int globalId;
+    protected int globalId;
 
     public Repository() {
         load();

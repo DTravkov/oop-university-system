@@ -9,7 +9,7 @@ public class CourseRepository extends Repository<Course> {
 
     public Course getByName(String name) {
         for(Course c : this.getAll()) {
-        	if(c.getName().equals(name)) return c;
+        	if(c.getName().equalsIgnoreCase(name)) return c;
         }
         return null;
     }

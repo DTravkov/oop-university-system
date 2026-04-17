@@ -10,8 +10,6 @@ public class AuthService {
    
     
     public void registerUser(User user) {
-    	userService.checkNotExist(user.getLogin());
-    	user.setPassword(PasswordUtils.hashPassword(user.getPassword()));
     	this.userService.createUser(user);
     }
     
