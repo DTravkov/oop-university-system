@@ -2,15 +2,22 @@ package application;
 
 import java.util.Scanner;
 
+import model.CourseRepository;
 import model.SessionData;
+import model.UserRepository;
 
 class App {
 	public static void main(String args[]) {
 		Scanner scanner = new Scanner(System.in);
 		AuthApp.startApp(scanner);
 		System.out.println(SessionData.getUser());
-		
 		AdminApp.startApp(scanner);
+		
+		
+//		UserRepository r1 = new UserRepository();
+//		CourseRepository r2 = new CourseRepository();
+//		System.out.println(r1.getAll());
+//		System.out.println(r2.getAll());
 		
 	}
 }

@@ -2,6 +2,8 @@ package model;
 
 import java.io.Serializable;
 
+import utils.FieldValidator;
+
 public class Course implements Serializable, Indexed{
 	
     private static final long serialVersionUID = 1L;
@@ -13,6 +15,12 @@ public class Course implements Serializable, Indexed{
     private CourseType type;
     
 	public Course(String name, String description, int credits, CourseType type) {
+		FieldValidator validator = new FieldValidator();
+		validator.requireNonBlank(name, "Course name");
+		validator.requirePositive(credits, "Credits");
+		validator.requireNonNull(type, "Course type");
+		validator.validate();
+	    
 		this.name = name;
 		this.description = description;
 		this.credits = credits;
@@ -59,6 +67,14 @@ public class Course implements Serializable, Indexed{
 	public int getId() {
 		return this.id;
 	}
+
+	@Override
+	public String toString() {
+		return "Course [id=" + id + ", name=" + name + ", description=" + description + ", credits=" + credits
+				+ ", type=" + type + "]";
+	}
+	
+	
 	
 	
 	

@@ -4,7 +4,12 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+import utils.FieldValidator;
+
 public class Enrollment implements Serializable, Indexed {
+
+	private static final long serialVersionUID = 1L;
+	
 	private int id;
 	private int studentId;
 	private int lecturerId;
@@ -15,11 +20,19 @@ public class Enrollment implements Serializable, Indexed {
 	
 
 	public Enrollment(int studentId, int lecturerId, int practiceId, int courseId) {
-		this.studentId = studentId;
-		this.lecturerId = lecturerId;
-		this.practiceId = practiceId;
-		this.courseId = courseId;
-		this.enrollmentDate = new Date();
+		FieldValidator validator = new FieldValidator();
+	    validator.requirePositive(studentId, "Student ID");
+	    validator.requirePositive(lecturerId, "Lecturer ID");
+	    validator.requirePositive(practiceId, "Practice ID");
+	    validator.requirePositive(courseId, "Course ID");
+	    validator.validate();
+
+	    this.studentId = studentId;
+	    this.lecturerId = lecturerId;
+	    this.practiceId = practiceId;
+	    this.courseId = courseId;
+	    
+	    this.enrollmentDate = new Date();
 	}
 	
 	

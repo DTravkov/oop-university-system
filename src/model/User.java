@@ -3,6 +3,8 @@ package model;
 import java.io.*;
 import java.util.*;
 
+import utils.FieldValidator;
+
 public class User implements Serializable, Indexed {
 	
     private static final long serialVersionUID = 1L;
@@ -14,23 +16,23 @@ public class User implements Serializable, Indexed {
     private String surname;
     private boolean isBanned = false;
 
-
+    public User(User user) {
+    	this(user.getLogin(),user.getPassword(),user.getName(), user.getPassword());
+    }
     public User(String login, String password, String name, String surname) {
+    	FieldValidator validator = new FieldValidator();
+    	validator.requireNonBlank(login, "Login");
+    	validator.requireNonBlank(password, "Password");
+    	validator.requireNonBlank(name, "Name");
+    	validator.requireNonBlank(surname, "Surname");
+		validator.validate();
+		
     	this.login = login;
     	this.password = password;
     	this.name = name;
     	this.surname = surname;
     	this.isBanned = false;
     }
-
-	public User(User user) {
-    	this.login = user.getLogin();
-    	this.password = user.getPassword();
-    	this.name = user.getName();
-    	this.surname = user.getSurname();
-    	this.isBanned = user.isBanned();
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -95,6 +97,13 @@ public class User implements Serializable, Indexed {
 				&& Objects.equals(name, other.name) && Objects.equals(password, other.password)
 				&& Objects.equals(surname, other.surname);
 	}
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", login=" + login + ", password=" + password + ", name=" + name + ", surname="
+				+ surname + ", isBanned=" + isBanned + "]";
+	}
+	
+	
 	
 	
 	

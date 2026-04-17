@@ -23,7 +23,8 @@ public class AdminApp {
             System.out.println("2. Delete User");
             System.out.println("3. Register a new admin");
             System.out.println("4. Register a new student");
-            System.out.println("5. Exit");
+            System.out.println("5. Register a new course");
+            System.out.println("6. Exit");
             System.out.println("--------------------");
             System.out.print("Pick an option: ");
 
@@ -77,6 +78,7 @@ public class AdminApp {
                         System.out.print("Enter surname: ");
                         String surname = scanner.nextLine();
                         authService.registerUser(new Admin(regLogin, regPass, name, surname));
+                        break;
 	                	
 	                case "4":
                         System.out.print("Enter login: ");
@@ -88,38 +90,38 @@ public class AdminApp {
                         System.out.print("Enter surname: ");
                         surname = scanner.nextLine();
                         authService.registerUser(new Student(regLogin, regPass, name, surname));
+                        System.out.println("User registered successfully");
+                        return;
 	                case "5":
-                        System.out.print("Enter course name: ");
-                        String cName = scanner.nextLine();
-                        System.out.print("Enter description: ");
-                        String descr = scanner.nextLine();
-                        System.out.print("Enter credits: ");
-                        int credits = scanner.nextInt();
-                        
-                        
-                        CourseType type = null;
-                        while(true) {
-                        	System.out.print("Enter type: 1(maj), 2(min), 3(ele)");
-                        	String typeChoice = scanner.nextLine();
-                            switch(typeChoice) {
-                            case "1":
-                            	type = CourseType.MAJOR;
-                            	return;
-                            case "2":
-                            	type = CourseType.MINOR;
-                            	return;
-                            case "3":
-                            	type = CourseType.ELECTIVE;
-                            	return;
-                            default:
-                            	continue;
-                            }
-                        }
-                        
-
-                        
-                        
+	                    System.out.print("Enter course name: ");
+	                    String cName = scanner.nextLine();
 	                    
+	                    System.out.print("Enter description(blank to skip): ");
+	                    String descr = scanner.nextLine();
+	                    
+	                    System.out.print("Enter credits: ");
+	                    int credits = Integer.parseInt(scanner.nextLine());
+	                    
+	                    CourseType type = null;
+	                    boolean typeSet = false;
+	                    while (!typeSet) {
+	                        System.out.print("Enter type: 1(maj), 2(min), 3(ele): ");
+	                        String typeChoice = scanner.nextLine();
+	                        switch (typeChoice) {
+	                            case "1": type = CourseType.MAJOR; typeSet = true; break;
+	                            case "2": type = CourseType.MINOR; typeSet = true; break;
+	                            case "3": type = CourseType.ELECTIVE; typeSet = true; break;
+	                            default: System.out.println("Invalid type choice.");
+	                        }
+	                    }
+	                    
+	                    Course newCourse = new Course(cName, descr, credits, type);
+	                    
+	                    courseService.createCourse(newCourse);
+	                    System.out.println(newCourse);
+	                    
+	                    System.out.println("Course registered successfully!");
+	                    break;
 	                case "6":
 	                    return;	
 	                default:
@@ -127,6 +129,9 @@ public class AdminApp {
 	            }
             }catch (DoesNotExist e) {
             	System.out.println(e.getMessage());
+            }
+            catch (IllegalArgumentException e) {
+                System.out.println("Registration Error: " + e.getMessage());
             }
             
         }
