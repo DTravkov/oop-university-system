@@ -1,0 +1,17 @@
+package model;
+
+public class CourseRepository extends Repository<Course> {
+    @Override
+    protected String getFilePath() {
+        return "coruses.ser";
+    }
+    
+
+    public Course getByName(String name) {
+        for(Course c : this.getAll()) {
+        	if(c.getName().equals(name)) return c;
+        }
+        return null;
+    }
+    
+}
