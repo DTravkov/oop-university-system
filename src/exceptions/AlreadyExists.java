@@ -1,13 +1,13 @@
 package exceptions;
 
-public class AlreadyExists extends RuntimeException {
+import model.UIMessages;
+
+public class AlreadyExists extends ApplicationException {
 
 	private static final long serialVersionUID = 1L;
 	
 	public AlreadyExists() {
-		super("This record already exist");
+		super(UIMessages.EX_ALREADY_EXISTS.getKey());
 	}
-	public AlreadyExists(String message) {
-		super(message);
-	}
+
 }

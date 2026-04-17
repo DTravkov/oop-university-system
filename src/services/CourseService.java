@@ -17,7 +17,7 @@ public class CourseService extends BaseService<Course, CourseRepository> {
 	}
 
 	public void createCourse(Course course) {
-    	this.findOrThrow(course.getName());
+    	this.throwIfExists(course.getName());
         this.repository.add(course);
     }
 
@@ -32,7 +32,7 @@ public class CourseService extends BaseService<Course, CourseRepository> {
     public Course findOrThrow(String name) {
         Course course = this.repository.getByName(name);
         if (course == null) {
-            throw new DoesNotExist("Course with name " + name + " not found.");
+            throw new DoesNotExist();
         }
         return course;
     }

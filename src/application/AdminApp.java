@@ -1,140 +1,139 @@
 package application;
 
-import model.Admin;
-import model.Course;
-import model.CourseType;
-import model.Student;
-import model.User;
-import services.AuthService;
-import services.CourseService;
-import services.UserService;
+import model.*;
+import services.*;
+
 import java.util.Scanner;
 
 import exceptions.DoesNotExist;
+import exceptions.FieldValidationError;
 
 public class AdminApp {
-	private static UserService userService = new UserService();
-	private static AuthService authService = new AuthService();
-	private static CourseService courseService = new CourseService();
+
+    private static final UserService userService = new UserService();
+    private static final AuthService authService = new AuthService();
+    private static final CourseService courseService = new CourseService();
+
     public static void startApp(Scanner scanner) {
         while (true) {
-            System.out.println("\n--- Admin Panel ---");
-            System.out.println("1. Update User");
-            System.out.println("2. Delete User");
-            System.out.println("3. Register a new admin");
-            System.out.println("4. Register a new student");
-            System.out.println("5. Register a new course");
-            System.out.println("6. Exit");
-            System.out.println("--------------------");
-            System.out.print("Pick an option: ");
+            printMenu();
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
+
+            if (!choice.matches("[1-6]")) {
+                System.out.println(LanguageService.translate(UIMessages.ERROR_APP_INTERNAL));
+                continue;
+            }
+
             try {
-	            switch (choice) {
-	                case "1":
-	                    System.out.print("Enter login of user to update: ");
-	                    String targetLogin = scanner.nextLine();
-	                    
-	                    User user = userService.findOrThrow(targetLogin);
-	                    
-	                    if (user != null) {
-	                    	
-	                        User updated = new User(user);
-	                        
-	                        System.out.print("New name (leave blank to skip): ");
-	                        String newName = scanner.nextLine();
-	                        if (!newName.isEmpty()) updated.setName(newName);
-	
-	                        System.out.print("New surname (leave blank to skip): ");
-	                        String newSurname = scanner.nextLine();
-	                        if (!newSurname.isEmpty()) updated.setSurname(newName);
-	
-	                        System.out.print("New password (leave blank to skip): ");
-	                        String newPass = scanner.nextLine();
-	                        if (!newPass.isEmpty()) updated.setPassword(newPass);
-	
-	                        System.out.print("Ban user? (y/n/skip): ");
-	                        String banChoice = scanner.nextLine();
-	                        if (banChoice.equalsIgnoreCase("y")) updated.setBanned(true);
-	                        else if (banChoice.equalsIgnoreCase("n")) updated.setBanned(false);
-	
-	                        userService.updateUser(user, updated);
-	                    }
-	                    break;
-	
-	                case "2":
-	                    System.out.print("Enter login to delete: ");
-	                    String delLogin = scanner.nextLine();
-	                    userService.deleteUser(delLogin);
-	                    break;
-	
-	                case "3":
-                        System.out.print("Enter login: ");
-                        String regLogin = scanner.nextLine();
-                        System.out.print("Enter password: ");
-                        String regPass = scanner.nextLine();
-                        System.out.print("Enter name: ");
-                        String name = scanner.nextLine();
-                        System.out.print("Enter surname: ");
-                        String surname = scanner.nextLine();
-                        authService.registerUser(new Admin(regLogin, regPass, name, surname));
+                switch (choice) {
+                    case "1":
+                        updateUser(scanner);
                         break;
-	                	
-	                case "4":
-                        System.out.print("Enter login: ");
-                        regLogin = scanner.nextLine();
-                        System.out.print("Enter password: ");
-                        regPass = scanner.nextLine();
-                        System.out.print("Enter name: ");
-                        name = scanner.nextLine();
-                        System.out.print("Enter surname: ");
-                        surname = scanner.nextLine();
-                        authService.registerUser(new Student(regLogin, regPass, name, surname));
-                        System.out.println("Student registered successfully");
+
+                    case "2":
+                        deleteUser(scanner);
+                        break;
+
+                    case "3":
+                        register(scanner, true);
+                        break;
+
+                    case "4":
+                        register(scanner, false);
+                        break;
+
+                    case "5":
+                        createCourse(scanner);
+                        break;
+
+                    case "6":
                         return;
-	                case "5":
-	                    System.out.print("Enter course name: ");
-	                    String cName = scanner.nextLine();
-	                    
-	                    System.out.print("Enter description(blank to skip): ");
-	                    String descr = scanner.nextLine();
-	                    
-	                    System.out.print("Enter credits: ");
-	                    int credits = Integer.parseInt(scanner.nextLine());
-	                    
-	                    CourseType type = null;
-	                    boolean typeSet = false;
-	                    while (!typeSet) {
-	                        System.out.print("Enter type: 1(maj), 2(min), 3(ele): ");
-	                        String typeChoice = scanner.nextLine();
-	                        switch (typeChoice) {
-	                            case "1": type = CourseType.MAJOR; typeSet = true; break;
-	                            case "2": type = CourseType.MINOR; typeSet = true; break;
-	                            case "3": type = CourseType.ELECTIVE; typeSet = true; break;
-	                            default: System.out.println("Invalid type choice.");
-	                        }
-	                    }
-	                    
-	                    Course newCourse = new Course(cName, descr, credits, type);
-	                    
-	                    courseService.createCourse(newCourse);
-	                    System.out.println(newCourse);
-	                    
-	                    System.out.println("Course registered successfully!");
-	                    break;
-	                case "6":
-	                    return;	
-	                default:
-	                    System.out.println("Invalid choice. Try again.");
-	            }
-            }catch (DoesNotExist e) {
-            	System.out.println(e.getMessage());
+                }
+            } catch (DoesNotExist e) {
+                System.out.println(e.getMessage());
+            } catch (FieldValidationError e) {
+                System.out.println(LanguageService.translate(UIMessages.ERROR_FIELD_VALIDATION));
             }
-            catch (IllegalArgumentException e) {
-                System.out.println("Registration Error: " + e.getMessage());
-            }
-            
         }
-	
+    }
+
+    private static void printMenu() {
+        System.out.println("\n--- " + LanguageService.translate(UIMessages.ADMIN_TITLE) + " ---");
+        System.out.println("1. " + LanguageService.translate(UIMessages.ADMIN_UPDATE));
+        System.out.println("2. " + LanguageService.translate(UIMessages.ADMIN_DELETE));
+        System.out.println("3. " + LanguageService.translate(UIMessages.ADMIN_REG_ADMIN));
+        System.out.println("4. " + LanguageService.translate(UIMessages.ADMIN_REG_STUDENT));
+        System.out.println("5. " + LanguageService.translate(UIMessages.ADMIN_REG_COURSE));
+        System.out.println("6. " + LanguageService.translate(UIMessages.ADMIN_EXIT));
+        System.out.println("--------------------");
+        System.out.print(LanguageService.translate(UIMessages.ADMIN_PICK_OPTION));
+    }
+
+    private static void updateUser(Scanner scanner) throws DoesNotExist {
+        String login = InputService.readNonEmpty(scanner, "ADMIN UPDATE", UIMessages.ADMIN_PROMPT_TARGET_LOGIN);
+
+        User user = userService.findOrThrow(login);
+        User updated = new User(user);
+
+        String name = InputService.readOptional(scanner, UIMessages.ADMIN_NEW_NAME);
+        if (!name.isBlank()) updated.setName(name);
+
+        String surname = InputService.readOptional(scanner, UIMessages.ADMIN_NEW_SURNAME);
+        if (!surname.isBlank()) updated.setSurname(surname);
+
+        String pass = InputService.readOptional(scanner, UIMessages.ADMIN_NEW_PASS);
+        if (!pass.isBlank()) updated.setPassword(pass);
+
+        boolean banned = InputService.readYesNo(scanner, "ADMIN UPDATE", UIMessages.ADMIN_BAN_CHOICE);
+        updated.setBanned(banned);
+
+        userService.updateUser(user, updated);
+    }
+
+    private static void deleteUser(Scanner scanner) {
+        String login = InputService.readNonEmpty(scanner, "ADMIN DELETE", UIMessages.ADMIN_PROMPT_DELETE);
+        userService.deleteUser(login);
+    }
+
+    private static void createCourse(Scanner scanner) {
+        String name = InputService.readNonEmpty(scanner, "COURSE CREATE", UIMessages.ADMIN_COURSE_NAME_PROMPT);
+        String description = InputService.readNonEmpty(scanner, "COURSE CREATE", UIMessages.ADMIN_COURSE_DESCRIPTION_PROMPT);
+        int credits = InputService.readInt(scanner, "COURSE CREATE", UIMessages.ADMIN_COURSE_CREDITS_PROMPT);
+
+        CourseType type = askCourseType(scanner);
+
+        courseService.createCourse(new Course(name, description, credits, type));
+
+        System.out.println(LanguageService.translate(UIMessages.ADMIN_REG_SUCCESS));
+    }
+
+    private static CourseType askCourseType(Scanner scanner) {
+        while (true) {
+            System.out.print(LanguageService.translate(UIMessages.ADMIN_COURSE_TYPE_SELECTION));
+            String t = scanner.nextLine().trim();
+
+            switch (t) {
+                case "1": return CourseType.MAJOR;
+                case "2": return CourseType.MINOR;
+                case "3": return CourseType.ELECTIVE;
+                default:
+                    System.out.println(LanguageService.translate(UIMessages.ERROR_APP_INTERNAL));
+            }
+        }
+    }
+
+    private static void register(Scanner scanner, boolean isAdmin) {
+        String login = InputService.readNonEmpty(scanner, "REGISTER", UIMessages.AUTH_PROMPT_LOGIN);
+        String pass = InputService.readNonEmpty(scanner, "REGISTER", UIMessages.AUTH_PROMPT_PASS);
+        String name = InputService.readNonEmpty(scanner, "REGISTER", UIMessages.AUTH_PROMPT_NAME);
+        String surname = InputService.readNonEmpty(scanner, "REGISTER", UIMessages.AUTH_PROMPT_SURNAME);
+
+        if (isAdmin)
+            authService.registerUser(new Admin(login, pass, name, surname));
+        else
+            authService.registerUser(new Student(login, pass, name, surname));
+
+        System.out.println(LanguageService.translate(UIMessages.ADMIN_REG_SUCCESS));
     }
 }

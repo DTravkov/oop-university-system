@@ -1,14 +1,12 @@
 package exceptions;
 
-public class InvalidCredentials extends RuntimeException {
+import model.UIMessages;
+
+public class InvalidCredentials extends ApplicationException {
 
 	private static final long serialVersionUID = 1L;
 	
 	public InvalidCredentials() {
-		super("Credentials doesn't match any record");
-	}
-
-	public InvalidCredentials(String message) {
-		super(message);
+		super(UIMessages.EX_INVALID_CREDENTIALS.getKey());
 	}
 }

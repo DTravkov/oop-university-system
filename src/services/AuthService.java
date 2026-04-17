@@ -26,7 +26,7 @@ public class AuthService extends BaseService<User, UserRepository> {
         User user = this.userService.findOrThrow(login);
         String incomingPassword = PasswordUtils.hashPassword(password);
         if (!user.getPassword().equals(incomingPassword)) {
-            throw new InvalidCredentials("Invalid credentials.");
+            throw new InvalidCredentials();
         }
         return user;
     }

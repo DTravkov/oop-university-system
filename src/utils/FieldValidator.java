@@ -30,7 +30,7 @@ public class FieldValidator {
 
     public void validate() {
         if (!errors.isEmpty()) {
-            throw new FieldValidationError(String.join(", ", errors));
+            throw new FieldValidationError(errors.toArray(String[]::new));
         }
     }
 }

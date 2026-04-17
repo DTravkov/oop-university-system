@@ -35,19 +35,19 @@ public class EnrollmentService {
 				return enr;
 			}
 		}
-		throw new DoesNotExist("This enrollment does not exist");
+		throw new DoesNotExist();
 	}
 	public Enrollment findOrThrow(int enrollmentId) {
 		Enrollment enr = this.repository.getValueById(enrollmentId);
 		if (enr == null) {
-			throw new DoesNotExist("This enrollment does not exist");
+			throw new DoesNotExist();
 		}
 		return enr;
 	}
 	
 	public Enrollment checkNotExist(int studentId, int courseId) {
 		Enrollment enr = this.findOrThrow(studentId, courseId);
-		if(enr != null) throw new AlreadyExists("This enrollment already exists");
+		if(enr != null) throw new AlreadyExists();
 		return enr;
 	}
 	

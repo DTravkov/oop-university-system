@@ -1,14 +1,20 @@
 package exceptions;
 
-public class FieldValidationError extends RuntimeException {
+import model.UIMessages;
+
+public class FieldValidationError extends ApplicationException {
 
 	private static final long serialVersionUID = 1L;
-	
-	public FieldValidationError() {
-		super("Required fields of the model are not provided");
+	String[] invalidFields = new String[0];
+	public FieldValidationError(String... invalidFields) {
+		super(UIMessages.EX_FIELD_VALIDATION.getKey());
+		this.invalidFields = invalidFields;
 	}
-	public FieldValidationError(String msg) {
-		super(msg);
+	
+	@Override
+	public String getMessage() {
+		String msg = super.getMessage();
+		return msg + " " + String.join(", ", invalidFields);
 	}
 
 	

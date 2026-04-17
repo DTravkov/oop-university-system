@@ -1,13 +1,13 @@
 package exceptions;
 
-public class DoesNotExist extends RuntimeException {
+import model.UIMessages;
+
+public class DoesNotExist extends ApplicationException {
 
 	private static final long serialVersionUID = 1L;
 	
 	public DoesNotExist() {
-		super("This record does not exist");
+		super(UIMessages.EX_DOES_NOT_EXIST.getKey());
 	}
-	public DoesNotExist(String message) {
-		super(message);
-	}
+	
 }

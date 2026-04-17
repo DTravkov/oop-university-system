@@ -34,7 +34,7 @@ public class UserService extends BaseService<User, UserRepository> {
     
     public User findOrThrow(String login) {
         User user = this.repository.getByLogin(login);
-        if (user == null) throw new DoesNotExist("User not found.");
+        if (user == null) throw new DoesNotExist();
         
         return user;
     }

@@ -2,73 +2,115 @@ package application;
 
 import model.SessionData;
 import model.User;
+import model.LanguagePreference;
+import model.UIMessages;
+
 import services.AuthService;
+import services.LanguageService;
+import services.InputService;
+
 import java.util.Scanner;
 
+import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
+import exceptions.FieldValidationError;
 import exceptions.InvalidCredentials;
 
 class AuthApp {
-	
-	private static AuthService authService = new AuthService();
-	
-	public static void startApp(Scanner scanner) {
-            while (true) {
-                System.out.println("\n---Authentication---");
-                System.out.println("1. Sign Up (Register)");
-                System.out.println("2. Log In");
-                System.out.println("3. Exit");
-                System.out.println("--------------------");
-                System.out.print("Pick an option: ");
 
-                String choice = scanner.nextLine();
-                try {
-	                switch (choice) {
-	                    case "1":
-	                        System.out.print("Enter login: ");
-	                        String regLogin = scanner.nextLine();
-	                        System.out.print("Enter password: ");
-	                        String regPass = scanner.nextLine();
-	                        System.out.print("Enter name: ");
-	                        String name = scanner.nextLine();
-	                        System.out.print("Enter surname: ");
-	                        String surname = scanner.nextLine();
-	                        
-	                        authService.registerUser(new User(regLogin, regPass, name, surname));
-	                        break;
-	
-	                    case "2":
-	                        System.out.print("Login: ");
-	                        String logLogin = scanner.nextLine();
-	                        System.out.print("Password: ");
-	                        String logPass = scanner.nextLine();
-	                        
-	                        User user = authService.authenticate(logLogin, logPass);
-	                        if (user != null) {
-	                            System.out.println("Access granted to " + user.getName());
-	                            
-	                            SessionData.setUser(user);
-	                            
-	                            return;
-	                        }else {
-	                        	System.out.println("Such user does not exist");
-	                        }
-	                        break;
-	
-	                    case "3":
-	                        System.out.println("Goodbye!");
-	                        return;
-	
-	                    default:
-	                        System.out.println("Invalid choice. Try again.");
-	                }
-                }catch (DoesNotExist e) {
-                	 System.out.println(e.getMessage());
-                }catch (InvalidCredentials e) {
-                	 System.out.println(e.getMessage());
+    private static final AuthService authService = new AuthService();
+
+    public static void startApp(Scanner scanner) {
+        while (true) {
+            printMenu();
+
+            String choice = scanner.nextLine().trim();
+
+            try {
+                switch (choice) {
+                    case "0":
+                        changeLanguage(scanner);
+                        break;
+
+                    case "1":
+                        register(scanner);
+                        break;
+
+                    case "2":
+                        login(scanner);
+                        return;
+
+                    case "3":
+                        System.out.println(LanguageService.translate(UIMessages.AUTH_GOODBYE));
+                        return;
+
+                    default:
+                        System.out.println(LanguageService.translate(UIMessages.ERROR_APP_INTERNAL));
                 }
+            } catch (DoesNotExist | InvalidCredentials | AlreadyExists | FieldValidationError e) {
+                System.out.println(e.getMessage());
             }
-        	
         }
+    }
 
+    private static void printMenu() {
+        System.out.println("\n--- " + LanguageService.translate(UIMessages.AUTH_TITLE) + " ---");
+        System.out.println("0. " + LanguageService.translate(UIMessages.AUTH_CHANGE_LANG));
+        System.out.println("1. " + LanguageService.translate(UIMessages.AUTH_SIGNUP));
+        System.out.println("2. " + LanguageService.translate(UIMessages.AUTH_LOGIN));
+        System.out.println("3. " + LanguageService.translate(UIMessages.AUTH_EXIT));
+        System.out.println("--------------------");
+        System.out.print(LanguageService.translate(UIMessages.ADMIN_PICK_OPTION));
+    }
+
+    private static void changeLanguage(Scanner scanner) {
+        while (true) {
+            System.out.println("1. English");
+            System.out.println("2. Русский");
+            System.out.println("3. Қазақша");
+
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    LanguageService.updateLanguage(LanguagePreference.EN);
+                    return;
+                case "2":
+                    LanguageService.updateLanguage(LanguagePreference.RU);
+                    return;
+                case "3":
+                    LanguageService.updateLanguage(LanguagePreference.KK);
+                    return;
+                default:
+                    System.out.println(LanguageService.translate(UIMessages.ERROR_APP_INTERNAL));
+            }
+        }
+    }
+
+    private static void register(Scanner scanner) {
+        String login = InputService.readNonEmpty(scanner, "AUTH REGISTER", UIMessages.AUTH_PROMPT_LOGIN);
+        String pass = InputService.readNonEmpty(scanner, "AUTH REGISTER", UIMessages.AUTH_PROMPT_PASS);
+        String name = InputService.readNonEmpty(scanner, "AUTH REGISTER", UIMessages.AUTH_PROMPT_NAME);
+        String surname = InputService.readNonEmpty(scanner, "AUTH REGISTER", UIMessages.AUTH_PROMPT_SURNAME);
+
+        authService.registerUser(new User(login, pass, name, surname));
+
+        System.out.println(LanguageService.translate(UIMessages.ADMIN_REG_SUCCESS));
+    }
+
+    private static void login(Scanner scanner) throws InvalidCredentials, DoesNotExist {
+        String login = InputService.readNonEmpty(scanner, "AUTH LOGIN", UIMessages.AUTH_PROMPT_LOGIN);
+        String pass = InputService.readNonEmpty(scanner, "AUTH LOGIN", UIMessages.AUTH_PROMPT_PASS);
+
+        User user = authService.authenticate(login, pass);
+
+        System.out.println(
+            String.format(
+                LanguageService.translate(UIMessages.AUTH_ACCESS_GRANTED),
+                user.getName()
+            )
+        );
+
+        SessionData.getInstance().setUser(user);
+    }
 }

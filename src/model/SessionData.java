@@ -1,21 +1,32 @@
 package model;
 
-public class SessionData{
-	private static SessionData instance = null;
-	private static User user = null;
-	
-	private SessionData() {};
-	
-	public static void setUser(User user) {
-		SessionData.user = user;
-	}
-	public static User getUser() {
-		return user;
-	}
-	
-	public SessionData getInstance() {
-		if(instance == null) instance = new SessionData();
-		return instance;
-	}
-	
+import java.util.Locale;
+
+public class SessionData {
+    private static SessionData instance = null;
+    private Locale language = Locale.of(LanguagePreference.RU.getCode());
+    private User user = null;
+
+    private SessionData() {}
+
+    public static SessionData getInstance() {
+        if (instance == null) instance = new SessionData();
+        return instance;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setLanguage(Locale language) {
+        this.language = language;
+    }
+
+    public Locale getLanguage() {
+        return language;
+    }
 }
