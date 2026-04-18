@@ -21,11 +21,11 @@ class TestApp {
 	public static void main(String args[]) {
 		Scanner scanner = new Scanner(System.in);
 
-//		UserApp.startApp(scanner);
-//		AuthApp.startApp(scanner);
-//		EnrollmentApp.startApp(scanner);
-//		AdminApp.startApp(scanner);
-//		scanner.close();
+		UserApp.startApp(scanner);
+		AuthApp.startApp(scanner);
+		EnrollmentApp.startApp(scanner);
+		AdminApp.startApp(scanner);
+		scanner.close();
 //
 //		UserRepository r1 = new UserRepository();
 //		System.out.println(r1.getAll());
