@@ -1,0 +1,51 @@
+package model.domain;
+
+import java.util.*;
+
+
+public class Student extends User {
+	
+	private static final long serialVersionUID = 1L;
+    private Date admissionDate;
+    private boolean isPhdStudent;
+
+    public Student(String login, String password, String name, String surname, Date admissionDate) {
+		super(login, password, name, surname);
+		this.admissionDate = admissionDate;
+	}
+
+
+	public Date getAdmissionDate() {
+		return admissionDate;
+	}
+
+	public void setAdmissionDate(Date admissionDate) {
+		this.admissionDate = admissionDate;
+	}
+
+	public boolean isPhdStudent() {
+		return isPhdStudent;
+	}
+
+	public void setPhdStudent(boolean phdStudent) {
+		isPhdStudent = phdStudent;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		Student student = (Student) o;
+		return isPhdStudent == student.isPhdStudent && Objects.equals(admissionDate, student.admissionDate);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), admissionDate, isPhdStudent);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+}

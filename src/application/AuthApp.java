@@ -1,9 +1,9 @@
 package application;
 
-import model.SessionData;
-import model.User;
-import model.LanguagePreference;
-import model.UIMessages;
+import model.domain.SessionData;
+import model.domain.User;
+import model.enumeration.LanguagePreference;
+import model.enumeration.UIMessages;
 
 import services.UserService;
 import utils.UIFields;

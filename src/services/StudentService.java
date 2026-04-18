@@ -1,6 +1,6 @@
 package services;
 
-import model.Student;
+import model.domain.Student;
 
 
 public class StudentService{

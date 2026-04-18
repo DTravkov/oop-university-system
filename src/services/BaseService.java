@@ -1,13 +1,12 @@
 package services;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import exceptions.DoesNotExist;
-import model.Indexed;
-import model.BaseRepository;
+import model.domain.SerializableModel;
+import model.repository.BaseRepository;
 
-public abstract class BaseService<T extends Serializable & Indexed, R extends BaseRepository<T>> {
+public abstract class BaseService<T extends SerializableModel, R extends BaseRepository<T>> {
     
     protected final R repository;
 

@@ -1,7 +1,7 @@
 package utils;
 
-import model.TeacherTypeEnum;
-import model.UIMessages;
+import model.enumeration.TeacherTypeEnum;
+import model.enumeration.UIMessages;
 import services.LanguageService;
 
 import java.util.Scanner;

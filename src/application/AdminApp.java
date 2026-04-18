@@ -1,9 +1,15 @@
 package application;
 
-import model.*;
+import model.domain.Admin;
+import model.domain.Course;
+import model.domain.Student;
+import model.domain.User;
+import model.enumeration.CourseType;
+import model.enumeration.UIMessages;
 import services.*;
 import utils.UIFields;
 
+import java.util.Date;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
@@ -125,7 +131,7 @@ public class AdminApp {
         if (isAdmin)
             userService.createUser(new Admin(login, pass, name, surname));
         else
-        	userService.createUser(new Student(login, pass, name, surname));
+        	userService.createUser(new Student(login, pass, name, surname, new Date()));
 
         System.out.println(LanguageService.translate(UIMessages.REGISTERED));
     }

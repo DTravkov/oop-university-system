@@ -5,12 +5,11 @@ import java.util.Collection;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
-import model.Course;
-import model.Enrollment;
-import model.EnrollmentRepository;
-import model.Student;
-import model.Teacher;
-import model.User;
+import model.domain.Course;
+import model.domain.Enrollment;
+import model.domain.Student;
+import model.domain.User;
+import model.repository.EnrollmentRepository;
 
 public class EnrollmentService {
 
@@ -29,33 +28,45 @@ public class EnrollmentService {
     }
 
     public void createEnrollment(Enrollment enr) {
-        User student = userService.findOrThrow(enr.getStudentId());
-        User lecturer = userService.findOrThrow(enr.getLecturerId());
-        User proctor = userService.findOrThrow(enr.getPracticeId());
-        
-        if(! (student instanceof Student)) throw new OperationNotAllowed("create enrollment for a User who is not a student");
-        if(! (lecturer instanceof Teacher) || ! ((Teacher) lecturer).isLecturer()) throw new OperationNotAllowed("create enrollment with invalid lecturer teacher");
-        if(! (proctor instanceof Teacher) || !((Teacher) proctor).isPractice()) throw new OperationNotAllowed("create enrollment with invalid practice teacher");
-        
-        
-        courseService.findOrThrow(enr.getCourseId());
-        ensureNotExists(enr.getStudentId(), enr.getCourseId());
+        if (enr.getStudent() == null) {
+            throw new OperationNotAllowed("create enrollment without student");
+        }
+        if (enr.getCourse() == null) {
+            throw new OperationNotAllowed("create enrollment without course");
+        }
 
-        repository.add(enr.getStudentId(), enr);
+        User student = userService.findOrThrow(enr.getStudent().getId());
+        if (!(student instanceof Student validStudent)) {
+            throw new OperationNotAllowed("create enrollment for a User who is not a student");
+        }
+
+        Course course = courseService.findOrThrow(enr.getCourse().getId());
+        enr.setStudent(validStudent);
+        enr.setCourse(course);
+
+        ensureNotExists(validStudent, course);
+        repository.add(validStudent.getId(), enr);
     }
 
-    public void deleteEnrollment(int studentId, int courseId) {
-        Enrollment enrollment = findOrThrow(studentId, courseId);
-        repository.delete(studentId, enrollment);
+    public void deleteEnrollment(Student student, Course course) {
+        Enrollment enrollment = findOrThrow(student, course);
+        repository.delete(student.getId(), enrollment);
     }
 
-    public Enrollment findOrThrow(int studentId, int courseId) {
-        for (Enrollment enr : repository.getAllByOwnerId(studentId)) {
-            if (enr.getCourseId() == courseId) {
+    public Enrollment findOrThrow(Student student, Course course) {
+        if (student == null) {
+            throw new DoesNotExist("Enrollment student");
+        }
+        if (course == null) {
+            throw new DoesNotExist("Enrollment course");
+        }
+
+        for (Enrollment enr : repository.getAllByOwnerId(student.getId())) {
+            if (student.equals(enr.getStudent()) && course.equals(enr.getCourse())) {
                 return enr;
             }
         }
-        throw new DoesNotExist("Enrollment (studentId=" + studentId + ", courseId=" + courseId + ")");
+        throw new DoesNotExist("Enrollment (student=" + student + ", course=" + course + ")");
     }
 
     public Enrollment findOrThrow(int enrollmentId) {
@@ -71,10 +82,10 @@ public class EnrollmentService {
     public Collection<Enrollment> getAll(){
     	return this.repository.getAll();
     }
-    private void ensureNotExists(int studentId, int courseId) {
-        for (Enrollment enr : repository.getAllByOwnerId(studentId)) {
-            if (enr.getCourseId() == courseId) {
-                throw new AlreadyExists("Enrollment (studentId=" + studentId + ", courseId=" + courseId + ")");
+    private void ensureNotExists(Student student, Course course) {
+        for (Enrollment enr : repository.getAllByOwnerId(student.getId())) {
+            if (student.equals(enr.getStudent()) && course.equals(enr.getCourse())) {
+                throw new AlreadyExists("Enrollment (student=" + student + ", course=" + course + ")");
             }
         }
     }

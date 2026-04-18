@@ -1,6 +1,6 @@
 package services;
 
-import model.TechSupportSpecialist;
+import model.domain.TechSupportSpecialist;
 
 public class TechSupportSpecialistService {
 

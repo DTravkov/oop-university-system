@@ -2,6 +2,9 @@ package utils;
 
 import exceptions.FieldValidationError;
 import exceptions.FieldValidationError.ValidationDetail;
+import model.domain.Student;
+import model.domain.User;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,4 +37,6 @@ public class FieldValidator {
             throw new FieldValidationError(errors.toArray(ValidationDetail[]::new));
         }
     }
+
+
 }

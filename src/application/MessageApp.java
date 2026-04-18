@@ -4,17 +4,19 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import exceptions.DoesNotExist;
-import model.Message;
-import model.SessionData;
-import model.UIMessages;
-import model.User;
+import model.domain.Message;
+import model.domain.SessionData;
+import model.enumeration.UIMessages;
+import model.domain.User;
 import services.LanguageService;
 import services.MessageService;
+import services.UserService;
 import utils.UIFields;
 
 public class MessageApp {
 
     private static final MessageService service = new MessageService();
+    private static final UserService userService = new UserService();
 
     public static void startApp(Scanner scanner) {
         while (true) {
@@ -58,8 +60,9 @@ public class MessageApp {
         User currentUser = requireCurrentUser();
         int receiverId = UIFields.readInt(scanner, "MESSAGE SEND", UIMessages.RECEIVER_ID);
         String content = UIFields.readNonEmpty(scanner, "MESSAGE SEND", UIMessages.MESSAGE_CONTENT);
+        User receiver = userService.findOrThrow(receiverId);
 
-        service.sendMessage(new Message(receiverId, currentUser.getId(), content));
+        service.sendMessage(new Message(currentUser, receiver, content));
 
         System.out.println(LanguageService.translate(UIMessages.SENT));
     }

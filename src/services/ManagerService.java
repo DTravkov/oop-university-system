@@ -1,6 +1,6 @@
 package services;
 
-import model.Manager;
+import model.domain.Manager;
 
 public class ManagerService {
 

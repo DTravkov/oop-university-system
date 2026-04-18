@@ -2,8 +2,8 @@ package services;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
-import model.Course;
-import model.CourseRepository;
+import model.domain.Course;
+import model.repository.CourseRepository;
 
 public class CourseService extends BaseService<Course, CourseRepository> {
 

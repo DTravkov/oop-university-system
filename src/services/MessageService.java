@@ -3,8 +3,8 @@ package services;
 import java.util.Collection;
 
 import exceptions.DoesNotExist;
-import model.Message;
-import model.MessageRepository;
+import model.domain.Message;
+import model.repository.MessageRepository;
 
 public class MessageService {
 
@@ -21,9 +21,13 @@ public class MessageService {
     }
 
     public void sendMessage(Message message) {
-        userService.findOrThrow(message.getSenderId());
-        userService.findOrThrow(message.getReceiverId());
-        repository.add(message.getReceiverId(), message);
+        if (message.getSender() == null || message.getReceiver() == null) {
+            throw new DoesNotExist("Message sender or receiver");
+        }
+
+        message.setSender(userService.findOrThrow(message.getSender().getId()));
+        message.setReceiver(userService.findOrThrow(message.getReceiver().getId()));
+        repository.add(message.getReceiver().getId(), message);
     }
 
     public void deleteMessage(int receiverId, int messageId) {

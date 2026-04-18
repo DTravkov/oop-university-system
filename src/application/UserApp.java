@@ -3,16 +3,18 @@ package application;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
-import model.Admin;
-import model.Manager;
-import model.Student;
-import model.Teacher;
-import model.TeacherTypeEnum;
-import model.TechSupportSpecialist;
-import model.UIMessages;
+import model.domain.Admin;
+import model.domain.Manager;
+import model.domain.Student;
+import model.domain.Teacher;
+import model.enumeration.TeacherTypeEnum;
+import model.domain.TechSupportSpecialist;
+import model.enumeration.UIMessages;
 import services.LanguageService;
 import services.UserService;
 import utils.UIFields;
+
+import java.util.Date;
 
 public class UserApp {
 
@@ -79,7 +81,8 @@ public class UserApp {
             readLogin(scanner),
             readPassword(scanner),
             readName(scanner),
-            readSurname(scanner)
+            readSurname(scanner),
+            new Date()
         ));
         printSuccess();
     }

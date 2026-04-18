@@ -3,8 +3,8 @@ package services;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
-import model.User;
-import model.UserRepository;
+import model.domain.User;
+import model.repository.UserRepository;
 import utils.PasswordUtils;
 
 public class UserService extends BaseService<User, UserRepository> {

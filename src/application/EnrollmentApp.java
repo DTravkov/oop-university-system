@@ -1,9 +1,13 @@
 package application;
 
-import model.Enrollment;
-import model.UIMessages;
+import model.domain.Course;
+import model.domain.Enrollment;
+import model.domain.Student;
+import model.enumeration.UIMessages;
+import services.CourseService;
 import services.EnrollmentService;
 import services.LanguageService;
+import services.UserService;
 import utils.UIFields;
 
 import java.util.Scanner;
@@ -13,6 +17,8 @@ import exceptions.ApplicationException;
 public class EnrollmentApp {
 
     private static final EnrollmentService service = new EnrollmentService();
+    private static final UserService userService = new UserService();
+    private static final CourseService courseService = new CourseService();
 
     public static void startApp(Scanner scanner) {
 
@@ -66,11 +72,12 @@ public class EnrollmentApp {
     private static void createEnrollment(Scanner scanner) {
 
         int studentId = UIFields.readInt(scanner, "createEnrollment", UIMessages.STUDENT_ID);
-        int lecturerId = UIFields.readInt(scanner, "createEnrollment", UIMessages.LECTURER_ID);
-        int practiceId = UIFields.readInt(scanner, "createEnrollment", UIMessages.PRACTICE_ID);
         int courseId = UIFields.readInt(scanner, "createEnrollment", UIMessages.COURSE_ID);
 
-        service.createEnrollment(new Enrollment(studentId, lecturerId, practiceId, courseId));
+        Student student = (Student) userService.findOrThrow(studentId);
+        Course course = courseService.findOrThrow(courseId);
+
+        service.createEnrollment(new Enrollment(course, student));
 
         System.out.println(LanguageService.translate(UIMessages.CREATED));
     }
@@ -84,7 +91,7 @@ public class EnrollmentApp {
 
         System.out.println(
             service.getAll().stream()
-                .filter(u -> u.getStudentId() == studentId)
+                .filter(u -> u.getStudent() != null && u.getStudent().getId() == studentId)
                 .toList()
         );
     }
@@ -93,8 +100,10 @@ public class EnrollmentApp {
 
         int studentId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.STUDENT_ID);
         int courseId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.COURSE_ID);
+        Student student = (Student) userService.findOrThrow(studentId);
+        Course course = courseService.findOrThrow(courseId);
 
-        service.deleteEnrollment(studentId, courseId);
+        service.deleteEnrollment(student, course);
 
         System.out.println(LanguageService.translate(UIMessages.DELETED));
     }

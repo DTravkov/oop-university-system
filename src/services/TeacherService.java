@@ -1,6 +1,6 @@
 package services;
 
-import model.Teacher;
+import model.domain.Teacher;
 
 public class TeacherService {
 
