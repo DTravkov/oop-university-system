@@ -4,7 +4,6 @@ import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import java.util.Collection;
 import model.domain.SerializableModel;
-import model.repository.IRepository;
 import model.repository.Repository;
 
 public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> {
@@ -24,7 +23,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
         return repository.getAll();
     }
 
-    public T save(T entity) {
+    public T create(T entity) {
         return repository.save(entity);
     }
 
