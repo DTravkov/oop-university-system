@@ -1,55 +1,49 @@
 package services;
 
-import java.util.Collection;
-
 import exceptions.DoesNotExist;
+import exceptions.OperationNotAllowed;
+import java.util.List;
+import java.util.stream.Collectors;
 import model.domain.Message;
+import model.domain.User;
 import model.repository.MessageRepository;
 
-public class MessageService {
+public class MessageService extends BaseService<Message, MessageRepository> {
 
-    protected final MessageRepository repository;
     private final UserService userService;
 
     public MessageService() {
-        this(new MessageRepository(), new UserService());
-    }
-
-    public MessageService(MessageRepository repository, UserService userService) {
-        this.repository = repository;
-        this.userService = userService;
+        super(new MessageRepository());
+        this.userService = new UserService();
     }
 
     public void sendMessage(Message message) {
-        if (message.getSender() == null || message.getReceiver() == null) {
-            throw new DoesNotExist("Message sender or receiver");
+        message.setSender(userService.get(message.getSender().getId()));
+        message.setReceiver(userService.get(message.getReceiver().getId()));
+        repository.save(message);
+    }
+
+    public void deleteMessage(int id) {
+        get(id);
+        repository.delete(id);
+    }
+
+    public void deleteMessage(int userId, int messageId) {
+        Message message = get(messageId);
+        if (message.getReceiver().getId() != userId && message.getSender().getId() != userId) {
+            throw new OperationNotAllowed("Cannot delete another user's message");
         }
-
-        message.setSender(userService.findOrThrow(message.getSender().getId()));
-        message.setReceiver(userService.findOrThrow(message.getReceiver().getId()));
-        repository.add(message.getReceiver().getId(), message);
+        repository.delete(messageId);
     }
 
-    public void deleteMessage(int receiverId, int messageId) {
-        Message message = findOrThrow(receiverId, messageId);
-        repository.delete(receiverId, message);
-    }
-
-    public Message findOrThrow(int receiverId, int messageId) {
-        for (Message message : repository.getAllByOwnerId(receiverId)) {
-            if (message.getId() == messageId) {
-                return message;
-            }
+    public List<Message> getAllByReceiverId(int receiverId) {
+        User receiver = userService.get(receiverId);
+        List<Message> messages = getAll().stream()
+                .filter(message -> message.getReceiver().getId() == receiver.getId())
+                .collect(Collectors.toList());
+        if (messages.isEmpty()) {
+            throw new DoesNotExist("Messages for receiver id " + receiverId);
         }
-        throw new DoesNotExist("Message with id : " + messageId);
-    }
-
-    public Collection<Message> getAll() {
-        return repository.getAll();
-    }
-
-    public Collection<Message> getAllByReceiverId(int receiverId) {
-        userService.findOrThrow(receiverId);
-        return repository.getAllByOwnerId(receiverId);
+        return messages;
     }
 }

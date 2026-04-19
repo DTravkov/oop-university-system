@@ -60,7 +60,7 @@ public class MessageApp {
         User currentUser = requireCurrentUser();
         int receiverId = UIFields.readInt(scanner, "MESSAGE SEND", UIMessages.RECEIVER_ID);
         String content = UIFields.readNonEmpty(scanner, "MESSAGE SEND", UIMessages.MESSAGE_CONTENT);
-        User receiver = userService.findOrThrow(receiverId);
+        User receiver = userService.get(receiverId);
 
         service.sendMessage(new Message(currentUser, receiver, content));
 

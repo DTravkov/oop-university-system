@@ -72,7 +72,7 @@ public class AdminApp {
     private static void updateUser(Scanner scanner) throws DoesNotExist {
         String login = UIFields.readNonEmpty(scanner, "ADMIN UPDATE", UIMessages.TARGET_LOGIN);
 
-        User user = userService.findOrThrow(login);
+        User user = userService.getByLogin(login);
         User updated = new User(user);
 
         String name = UIFields.readOptional(scanner, UIMessages.NEW_NAME);

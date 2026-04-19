@@ -3,6 +3,7 @@ package application;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.Student;
+import model.domain.User;
 import model.enumeration.UIMessages;
 import services.CourseService;
 import services.EnrollmentService;
@@ -74,8 +75,13 @@ public class EnrollmentApp {
         int studentId = UIFields.readInt(scanner, "createEnrollment", UIMessages.STUDENT_ID);
         int courseId = UIFields.readInt(scanner, "createEnrollment", UIMessages.COURSE_ID);
 
-        Student student = (Student) userService.findOrThrow(studentId);
-        Course course = courseService.findOrThrow(courseId);
+        User user = userService.get(studentId);
+        if(!(user instanceof Student)){
+            System.out.println("Impossible to enroll the person who is not a Student");
+            return;
+        }
+        Student student = (Student) userService.get(studentId);
+        Course course = courseService.get(courseId);
 
         service.createEnrollment(new Enrollment(course, student));
 
@@ -100,8 +106,8 @@ public class EnrollmentApp {
 
         int studentId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.STUDENT_ID);
         int courseId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.COURSE_ID);
-        Student student = (Student) userService.findOrThrow(studentId);
-        Course course = courseService.findOrThrow(courseId);
+        Student student = (Student) userService.get(studentId);
+        Course course = courseService.get(courseId);
 
         service.deleteEnrollment(student, course);
 

@@ -1,7 +1,5 @@
 package services;
 
-import exceptions.AlreadyExists;
-import exceptions.DoesNotExist;
 import model.domain.Course;
 import model.repository.CourseRepository;
 
@@ -11,42 +9,18 @@ public class CourseService extends BaseService<Course, CourseRepository> {
         super(new CourseRepository());
     }
 
-    public CourseService(CourseRepository repository) {
-        super(repository);
-    }
-
     public void createCourse(Course course) {
-        ensureNotExists(course.getName());
-        repository.add(course);
+        throwIfExist(course.getId());
+        repository.save(course);
     }
 
     public void updateCourse(Course oldCourse, Course updatedCourse) {
-
-        if (!oldCourse.getName().equalsIgnoreCase(updatedCourse.getName())) {
-            ensureNotExists(updatedCourse.getName());
+        get(oldCourse.getId());
+        if(updatedCourse.getId() != 0){
+            throwIfExist(updatedCourse.getId());
         }
-
-        repository.update(oldCourse, updatedCourse);
+        repository.save(updatedCourse);
     }
 
-    public Course findOrThrow(String name) {
-        Course course = repository.getByName(name);
 
-        if (course == null) {
-            throw new DoesNotExist("Course '" + name + "'");
-        }
-
-        return course;
-    }
-
-    public void deleteCourse(String name) {
-        Course course = findOrThrow(name);
-        repository.delete(course);
-    }
-
-    private void ensureNotExists(String name) {
-        if (repository.getByName(name) != null) {
-            throw new AlreadyExists("Course '" + name + "'");
-        }
-    }
 }

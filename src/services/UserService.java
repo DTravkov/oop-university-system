@@ -14,24 +14,38 @@ public class UserService extends BaseService<User, UserRepository> {
     }
 
     public void createUser(User user) {
-        ensureNotExists(user.getLogin());
+        throwIfLoginExists(user.getLogin());
         user.setPassword(hash(user.getPassword()));
-        repository.add(user);
+        repository.save(user);
     }
 
     public void updateUser(User oldUser, User updatedUser) {
-        findOrThrow(oldUser.getLogin());
+        get(oldUser.getId());
         updatedUser.setPassword(hash(updatedUser.getPassword()));
-        repository.update(oldUser, updatedUser);
+        repository.save(updatedUser);
+    }
+
+    public void deleteUser(int id) {
+        get(id);
+        repository.delete(id);
+    }
+
+    public User getByLogin(String login) {
+        User user = repository.getByLogin(login);
+        if (user == null) {
+            throw new DoesNotExist("User with login '" + login + "'");
+        }
+        return user;
     }
 
     public void deleteUser(String login) {
-        User user = findOrThrow(login);
+        User user = getByLogin(login);
         repository.delete(user);
     }
 
     public User authenticate(String login, String password) {
-        User user = this.findOrThrow(login);
+        User user = getByLogin(login);
+
         String incomingPassword = PasswordUtils.hashPassword(password);
         if (!user.getPassword().equals(incomingPassword)) {
             throw new InvalidCredentials(" for login '" + login + "'");
@@ -39,17 +53,13 @@ public class UserService extends BaseService<User, UserRepository> {
         return user;
     }
 
-    public User findOrThrow(String login) {
-        User user = repository.getByLogin(login);
-        if (user == null) {
-            throw new DoesNotExist("User with login '" + login + "'");
-        }
-        return user;
+    public boolean existsByLogin(String login) {
+        return repository.getByLogin(login) != null;
     }
-    
-    private void ensureNotExists(String login) {
-        if (repository.getByLogin(login) != null) {
-            throw new AlreadyExists("User with login '" + login + "'");
+
+    public void throwIfLoginExists(String login) {
+        if (existsByLogin(login)) {
+            throw new AlreadyExists("User with login '" + login + "' already exists");
         }
     }
 
