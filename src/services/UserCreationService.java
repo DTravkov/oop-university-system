@@ -27,7 +27,7 @@ public class UserCreationService {
                 request.getTeacherType()
         );
 
-        userService.createUser(user);
+        userService.create(user);
         return user;
     }
 

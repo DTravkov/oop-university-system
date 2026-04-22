@@ -14,14 +14,14 @@ public class UserService extends BaseService<User, UserRepository> {
         super(UserRepository.getInstance());
     }
 
-    public void createUser(User user) {
+    public void create(User user) {
         if(repository.existsByLogin(user.getLogin())){
             throw new AlreadyExists("user with login " + user.getLogin());
         }
         repository.save(user);
     }
 
-    public void deleteUser(int id) {
+    public void delete(int id) {
         if(!repository.exists(id)){
             throw new AlreadyExists("user with login " + id);
         }

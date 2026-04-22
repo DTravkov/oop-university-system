@@ -58,17 +58,13 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
     }
 
     @Override
-    public Optional<T> get(int id) {
+    public Optional<T> find(int id) {
         return Optional.ofNullable(data.get(id));
     }
 
     
-    public T find(int id) {
-        return data.get(id);
-    }
-    
-
-    public List<T> getAll() {
+    @Override
+    public List<T> findAll() {
         return new ArrayList<>(data.values());
     }
 

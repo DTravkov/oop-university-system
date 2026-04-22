@@ -11,9 +11,9 @@ public interface IRepository<T extends SerializableModel> {
 
     void load();
 
-    Optional<T> get(int id);
+    Optional<T> find(int id);
 
-    List<T> getAll();
+    List<T> findAll();
 
     void update(T entity, T newEntity);
 

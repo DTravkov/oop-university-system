@@ -22,14 +22,12 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
     }
 
     public T get(int id){
-        if(!repository.exists(id)){
-            throw new DoesNotExist("user with id " + id);
-        }
-        return repository.find(id);
+        return repository.find(id)
+                .orElseThrow(() -> new DoesNotExist("Object with id " + id));
     }
 
     public Collection<T> getAll() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     public void delete(int id){

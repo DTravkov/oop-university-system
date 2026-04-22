@@ -18,8 +18,8 @@ import utils.UIFields;
 
 public class UserApp {
 
-    private static final UserService service = new UserService();
-    private static final UserCreationService userCreationService = new UserCreationService(service);
+    private static final UserService userService = new UserService();
+    private static final UserCreationService userCreationService = new UserCreationService(userService);
 
     public static void startApp(Scanner scanner) {
         while (true) {
@@ -77,7 +77,7 @@ public class UserApp {
         catch (IllegalArgumentException e){
             throw new OperationNotAllowed(" find role : " + role);
         }
-        System.out.println(service.getAllByRole(UserRole.valueOf(role)));
+        System.out.println(userService.getAllByRole(UserRole.valueOf(role)));
     }
 
     private static void createUser(Scanner scanner) {
@@ -86,7 +86,7 @@ public class UserApp {
 
         System.out.println(LanguageService.translate(UIMessages.CREATED));
         System.out.println(user);
-        System.out.println(service.getAll());
+        System.out.println(userService.getAll());
     }
 
     private static CreateUserRequest readCreateUserRequest(Scanner scanner) {
@@ -110,24 +110,24 @@ public class UserApp {
 
     private static void getUserById(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.STUDENT_ID);
-        System.out.println(service.get(id));
+        System.out.println(userService.get(id));
     }
 
     private static void getAllUsers() {
-        System.out.println(service.getAll());
+        System.out.println(userService.getAll());
     }
 
     private static void deleteUser(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.STUDENT_ID);
-        service.deleteUser(id);
+        userService.delete(id);
         System.out.println(LanguageService.translate(UIMessages.DELETED));
-        System.out.println(service.getAll());
+        System.out.println(userService.getAll());
     }
 
     private static void authenticate(Scanner scanner) {
         String login = UIFields.readNonEmpty(scanner, UIMessages.LOGIN);
         String password = UIFields.readNonEmpty(scanner, UIMessages.PASSWORD);
-        User user = service.authenticate(login, password);
+        User user = userService.authenticate(login, password);
         System.out.println("Authenticated: " + user);
     }
 }
