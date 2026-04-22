@@ -1,11 +1,8 @@
 package model.domain;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 
 import model.enumeration.CourseType;
-import utils.FieldValidator;
 
 public class Course extends SerializableModel{
 	

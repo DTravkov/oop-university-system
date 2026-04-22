@@ -1,15 +1,13 @@
 package model.domain;
 
-import java.util.Objects;
-
 public class EmployeeRequest extends Message {
 
     private static final long serialVersionUID = 1L;
 
     private boolean isApprovedByDean;
 
-    public EmployeeRequest(User sender, User receiver, String content) {
-        super(sender, receiver, content);
+    public EmployeeRequest(int senderId, int receiverId, String content) {
+        super(senderId, receiverId, content);
         this.isApprovedByDean = false;
     }
 
@@ -32,7 +30,7 @@ public class EmployeeRequest extends Message {
     @Override
     public String toString() {
         return "EmployeeRequest{" +
-                "sender=" + getSender() +
+                "senderId=" + getSenderId() +
                 "content=" + getContent() +
                 '}';
     }

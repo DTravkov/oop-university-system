@@ -17,8 +17,6 @@ public interface IRepository<T extends SerializableModel> {
 
     void update(T entity, T newEntity);
 
-    void delete(T entity);
-
     void delete(int id);
 
 }

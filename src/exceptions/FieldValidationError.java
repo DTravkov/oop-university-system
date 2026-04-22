@@ -1,7 +1,5 @@
 package exceptions;
 
-import java.util.Arrays;
-
 import services.LanguageService;
 
 public class FieldValidationError extends ApplicationException {
@@ -24,10 +22,11 @@ public class FieldValidationError extends ApplicationException {
             return "";
         }
 
-        return Arrays.stream(details)
-            .map(detail -> LanguageService.translate(detail.getMessageKey(), detail.getArgs()))
-            .reduce((left, right) -> left + "; " + right)
-            .orElse("");
+        String detailString  = "";
+        for(ValidationDetail detail : details){
+            detailString += LanguageService.translate(detail.getMessageKey(), detail.getArgs());
+        }
+        return detailString;
     }
 
     public static class ValidationDetail {

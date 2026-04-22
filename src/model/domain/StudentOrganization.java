@@ -10,17 +10,17 @@ public class StudentOrganization extends SerializableModel {
 
     private String name;
     private String description;
-    private Student president;
+    private int presidentId;
 
-    public StudentOrganization(String name, String description, Student president) {
+    public StudentOrganization(String name, String description, int presidentId) {
         FieldValidator validator = new FieldValidator();
         validator.requireNonBlank(name, "Organization name");
-        validator.requireNonNull(president, "Organization president");
+        validator.requirePositive(presidentId, "Organization president id");
         validator.validate();
 
         this.name = name;
         this.description = description;
-        this.president = president;
+        this.presidentId = presidentId;
     }
 
     public String getName() {
@@ -39,12 +39,12 @@ public class StudentOrganization extends SerializableModel {
         this.description = description;
     }
 
-    public Student getPresident() {
-        return president;
+    public int getPresidentId() {
+        return presidentId;
     }
 
-    public void setPresident(Student president) {
-        this.president = president;
+    public void setPresidentId(int presidentId) {
+        this.presidentId = presidentId;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class StudentOrganization extends SerializableModel {
         return "StudentOrganization{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", president=" + president +
+                ", presidentId=" + presidentId +
                 '}';
     }
 }

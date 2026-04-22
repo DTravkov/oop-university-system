@@ -1,69 +1,46 @@
 package services;
 
 import exceptions.AlreadyExists;
-import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
+import java.util.Collection;
 import model.domain.User;
+import model.enumeration.UserRole;
 import model.repository.UserRepository;
-import utils.PasswordUtils;
+
 
 public class UserService extends BaseService<User, UserRepository> {
 
     public UserService() {
-        super(new UserRepository());
+        super(UserRepository.getInstance());
     }
 
     public void createUser(User user) {
-        throwIfLoginExists(user.getLogin());
-        user.setPassword(hash(user.getPassword()));
+        if(repository.existsByLogin(user.getLogin())){
+            throw new AlreadyExists("user with login " + user.getLogin());
+        }
         repository.save(user);
     }
 
-    public void updateUser(User oldUser, User updatedUser) {
-        get(oldUser.getId());
-        updatedUser.setPassword(hash(updatedUser.getPassword()));
-        repository.save(updatedUser);
-    }
-
     public void deleteUser(int id) {
-        get(id);
+        if(!repository.exists(id)){
+            throw new AlreadyExists("user with login " + id);
+        }
         repository.delete(id);
     }
 
-    public User getByLogin(String login) {
-        User user = repository.getByLogin(login);
-        if (user == null) {
-            throw new DoesNotExist("User with login '" + login + "'");
-        }
-        return user;
-    }
-
-    public void deleteUser(String login) {
-        User user = getByLogin(login);
-        repository.delete(user);
-    }
 
     public User authenticate(String login, String password) {
-        User user = getByLogin(login);
+        User user = repository.findByLogin(login);
 
-        String incomingPassword = PasswordUtils.hashPassword(password);
-        if (!user.getPassword().equals(incomingPassword)) {
+        if (!user.getPassword().equals(password)) {
             throw new InvalidCredentials(" for login '" + login + "'");
         }
+
         return user;
     }
 
-    public boolean existsByLogin(String login) {
-        return repository.getByLogin(login) != null;
+    public Collection<User> getAllByRole(UserRole role) {
+        return repository.findAllByRole(role);
     }
 
-    public void throwIfLoginExists(String login) {
-        if (existsByLogin(login)) {
-            throw new AlreadyExists("User with login '" + login + "' already exists");
-        }
-    }
-
-    private String hash(String password) {
-        return PasswordUtils.hashPassword(password);
-    }
 }

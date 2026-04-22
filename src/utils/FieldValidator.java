@@ -2,8 +2,6 @@ package utils;
 
 import exceptions.FieldValidationError;
 import exceptions.FieldValidationError.ValidationDetail;
-import model.domain.Student;
-import model.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +26,13 @@ public class FieldValidator {
     public FieldValidator requireNonNull(Object value, String fieldName) {
         if (value == null) {
             errors.add(new ValidationDetail("field_non_null", fieldName));
+        }
+        return this;
+    }
+
+    public FieldValidator requireInRange(double value, double min, double max, String fieldName) {
+        if(Double.compare(value, min) < 0 || Double.compare(value, max) > 0){
+            errors.add(new ValidationDetail("field_in_range", fieldName));
         }
         return this;
     }

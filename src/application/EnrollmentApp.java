@@ -1,59 +1,53 @@
 package application;
 
+import java.util.Scanner;
+
+import exceptions.ApplicationException;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.Student;
 import model.domain.User;
 import model.enumeration.UIMessages;
+import model.enumeration.UserRole;
 import services.CourseService;
 import services.EnrollmentService;
 import services.LanguageService;
 import services.UserService;
 import utils.UIFields;
 
-import java.util.Scanner;
-
-import exceptions.ApplicationException;
-
 public class EnrollmentApp {
 
-    private static final EnrollmentService service = new EnrollmentService();
+    private static final EnrollmentService enrollmentService = new EnrollmentService();
     private static final UserService userService = new UserService();
     private static final CourseService courseService = new CourseService();
 
     public static void startApp(Scanner scanner) {
-
         while (true) {
             printMenu();
-
-            String choice = scanner.nextLine().trim();
+            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
-
                     case "1":
                         createEnrollment(scanner);
                         break;
-
                     case "2":
                         deleteEnrollment(scanner);
                         break;
-
                     case "3":
-                        getAllEnrollments(scanner);
+                        getEnrollmentsOfStudent(scanner);
                         break;
-
                     case "4":
-                        getAllEnrollmentsOfStudent(scanner);
+                        getEnrollmentsOfCourse(scanner);
                         break;
-
                     case "5":
+                        getAllEnrollments();
+                        break;
+                    case "6":
                         return;
-
                     default:
                         System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
                 }
-
             } catch (ApplicationException e) {
                 System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
             }
@@ -64,53 +58,60 @@ public class EnrollmentApp {
         System.out.println("\n--- " + LanguageService.translate(UIMessages.TITLE_ENROLL) + " ---");
         System.out.println("1. " + LanguageService.translate(UIMessages.ENROLL));
         System.out.println("2. " + LanguageService.translate(UIMessages.DROP));
-        System.out.println("3. " + LanguageService.translate(UIMessages.VIEW_ALL));
-        System.out.println("4. " + LanguageService.translate(UIMessages.VIEW_STUDENT));
-        System.out.println("5. " + LanguageService.translate(UIMessages.EXIT));
-        System.out.println("--------------------");
+        System.out.println("3. " + LanguageService.translate(UIMessages.VIEW_STUDENT));
+        System.out.println("4. Get enrollments by course");
+        System.out.println("5. " + LanguageService.translate(UIMessages.VIEW_ALL));
+        System.out.println("6. " + LanguageService.translate(UIMessages.EXIT));
     }
 
     private static void createEnrollment(Scanner scanner) {
+        printStudents();
+        printCourses();
+        int studentId = UIFields.readInt(scanner, UIMessages.STUDENT_ID);
+        int courseId = UIFields.readInt(scanner, UIMessages.COURSE_ID);
 
-        int studentId = UIFields.readInt(scanner, "createEnrollment", UIMessages.STUDENT_ID);
-        int courseId = UIFields.readInt(scanner, "createEnrollment", UIMessages.COURSE_ID);
-
-        User user = userService.get(studentId);
-        if(!(user instanceof Student)){
-            System.out.println("Impossible to enroll the person who is not a Student");
-            return;
-        }
-        Student student = (Student) userService.get(studentId);
-        Course course = courseService.get(courseId);
-
-        service.createEnrollment(new Enrollment(course, student));
+        Enrollment enrollment = new Enrollment(courseId, studentId);
+        enrollmentService.create(enrollment);
 
         System.out.println(LanguageService.translate(UIMessages.CREATED));
+        System.out.println(enrollment);
+        System.out.println(enrollmentService.getAll());
     }
 
-    private static void getAllEnrollments(Scanner scanner) {
-        System.out.println(service.getAll());
-    }
-
-    private static void getAllEnrollmentsOfStudent(Scanner scanner) {
-        int studentId = UIFields.readInt(scanner, "createEnrollment", UIMessages.STUDENT_ID);
-
-        System.out.println(
-            service.getAll().stream()
-                .filter(u -> u.getStudent() != null && u.getStudent().getId() == studentId)
-                .toList()
-        );
+    private static void getEnrollmentsOfStudent(Scanner scanner) {
+        printStudents();
+        int studentId = UIFields.readInt(scanner, UIMessages.STUDENT_ID);
+        System.out.println(enrollmentService.getAllByStudentId(studentId));
     }
 
     private static void deleteEnrollment(Scanner scanner) {
-
-        int studentId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.STUDENT_ID);
-        int courseId = UIFields.readInt(scanner, "ENROLL_DROP", UIMessages.COURSE_ID);
-        Student student = (Student) userService.get(studentId);
-        Course course = courseService.get(courseId);
-
-        service.deleteEnrollment(student, course);
+        int enrollmentId = UIFields.readInt(scanner, UIMessages.MESSAGE_ID);
+        enrollmentService.delete(enrollmentId);
 
         System.out.println(LanguageService.translate(UIMessages.DELETED));
+    }
+
+    private static void getEnrollmentsOfCourse(Scanner scanner) {
+        int courseId = UIFields.readInt(scanner, UIMessages.COURSE_ID);
+        System.out.println(enrollmentService.getAllByCourseId(courseId));
+    }
+
+    private static void getAllEnrollments() {
+        System.out.println(enrollmentService.getAll());
+    }
+
+    private static void printStudents() {
+        System.out.println("--- Students ---");
+        for (User user : userService.getAllByRole(UserRole.STUDENT)) {
+            Student student = (Student) user;
+            System.out.println("ID: " + student.getId() + ", Name: " + student.getName() + ", Surname: " + student.getSurname());
+        }
+    }
+
+    private static void printCourses() {
+        System.out.println("--- Courses ---");
+        for (Course course : courseService.getAll()) {
+            System.out.println("ID: " + course.getId() + ", Name: " + course.getName());
+        }
     }
 }

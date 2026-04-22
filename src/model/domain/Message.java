@@ -1,6 +1,5 @@
 package model.domain;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
@@ -10,38 +9,40 @@ public class Message extends SerializableModel {
 
     private static final long serialVersionUID = 1L;
 
-    private User receiver;
-    private User sender;
+    private int receiverId;
+    private int senderId;
     private String content;
     private Date sentDate;
 
 
-    public Message(User sender, User receiver, String content) {
+    public Message(int senderId, int receiverId, String content) {
         FieldValidator validator = new FieldValidator()
+                .requirePositive(senderId, "Sender id")
+                .requirePositive(receiverId, "Receiver id")
                 .requireNonBlank(content, "Content");
         validator.validate();
 
-        this.sender = sender;
-        this.receiver = receiver;
+        this.senderId = senderId;
+        this.receiverId = receiverId;
 
         this.content = content;
         this.sentDate = new Date();
     }
 
-    public User getReceiver() {
-        return receiver;
+    public int getReceiverId() {
+        return receiverId;
     }
 
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
+    public void setReceiverId(int receiverId) {
+        this.receiverId = receiverId;
     }
 
-    public User getSender() {
-        return sender;
+    public int getSenderId() {
+        return senderId;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
     }
 
     public String getContent() {
@@ -65,18 +66,19 @@ public class Message extends SerializableModel {
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
         if(this.id != 0 && message.getId() != 0) return this.id == message.getId();
-        return Objects.equals(receiver, message.receiver) && Objects.equals(sender, message.sender) && Objects.equals(content, message.content) && Objects.equals(sentDate, message.sentDate);
+        return receiverId == message.receiverId && senderId == message.senderId && Objects.equals(content, message.content) && Objects.equals(sentDate, message.sentDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(receiver, sender, content, sentDate);
+        return Objects.hash(receiverId, senderId, content, sentDate);
     }
 
     @Override
     public String toString() {
         return "Message{" +
-                "sender=" + sender +
+                "id=" + id +
+                "senderId=" + senderId +
                 ", content='" + content + '\'' +
                 '}';
     }

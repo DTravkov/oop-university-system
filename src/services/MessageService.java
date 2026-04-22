@@ -2,8 +2,8 @@ package services;
 
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import model.domain.Message;
 import model.domain.User;
 import model.repository.MessageRepository;
@@ -13,37 +13,27 @@ public class MessageService extends BaseService<Message, MessageRepository> {
     private final UserService userService;
 
     public MessageService() {
-        super(new MessageRepository());
+        super(MessageRepository.getInstance());
         this.userService = new UserService();
     }
 
     public void sendMessage(Message message) {
-        message.setSender(userService.get(message.getSender().getId()));
-        message.setReceiver(userService.get(message.getReceiver().getId()));
+        User sender = userService.get(message.getSenderId());
+        User receiver = userService.get(message.getReceiverId());
+        message.setSenderId(sender.getId());
+        message.setReceiverId(receiver.getId());
         repository.save(message);
-    }
-
-    public void deleteMessage(int id) {
-        get(id);
-        repository.delete(id);
-    }
-
-    public void deleteMessage(int userId, int messageId) {
-        Message message = get(messageId);
-        if (message.getReceiver().getId() != userId && message.getSender().getId() != userId) {
-            throw new OperationNotAllowed("Cannot delete another user's message");
-        }
-        repository.delete(messageId);
     }
 
     public List<Message> getAllByReceiverId(int receiverId) {
         User receiver = userService.get(receiverId);
-        List<Message> messages = getAll().stream()
-                .filter(message -> message.getReceiver().getId() == receiver.getId())
-                .collect(Collectors.toList());
-        if (messages.isEmpty()) {
-            throw new DoesNotExist("Messages for receiver id " + receiverId);
-        }
+        List<Message> messages = new ArrayList<>(repository.findAllByReceiverId(receiver.getId()));
+        return messages;
+    }
+
+    public List<Message> getAllBySenderId(int senderId) {
+        User sender = userService.get(senderId);
+        List<Message> messages = new ArrayList<>(repository.findAllBySenderId(sender.getId()));
         return messages;
     }
 }

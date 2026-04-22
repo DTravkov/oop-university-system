@@ -30,6 +30,6 @@ public class LanguageService {
     }
 
     public static void updateLanguage(LanguagePreference pref) {
-        SessionData.getInstance().setLanguage(Locale.of(pref.getCode()));
+        SessionData.getInstance().setLanguage(pref);
     }
 }

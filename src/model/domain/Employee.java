@@ -2,7 +2,7 @@ package model.domain;
 
 import java.util.*;
 
-public class Employee extends User {
+public abstract class Employee extends User {
 	private static final long serialVersionUID = 1L;
 	private int salary = 0;
 	

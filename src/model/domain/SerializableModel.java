@@ -1,5 +1,7 @@
 package model.domain;
 
+import exceptions.ImmutableFieldChanged;
+
 import java.io.Serializable;
 
 public abstract class SerializableModel implements Serializable {
@@ -9,7 +11,12 @@ public abstract class SerializableModel implements Serializable {
 		return this.id;
 	}
 	public void setId(int id){
-		this.id = id;
+		if(this.id == 0) {
+			this.id = id;
+			return;
+		}
+		throw new ImmutableFieldChanged("Cannot change id of a serialized object");
+
 	}
 	
 }

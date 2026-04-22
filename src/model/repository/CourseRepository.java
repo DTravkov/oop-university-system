@@ -4,11 +4,17 @@ import model.domain.Course;
 
 public class CourseRepository extends Repository<Course> {
 
-    public CourseRepository() {
-        super("courses.ser");
+    private static final CourseRepository INSTANCE = new CourseRepository();
+
+    private CourseRepository() {
+        super();
     }
 
-    public Course getByName(String name) {
+    public static CourseRepository getInstance() {
+        return INSTANCE;
+    }
+
+    public Course findByName(String name) {
         return this.data.values().stream()
                 .filter(entity -> entity.getName()
                 .equals(name))

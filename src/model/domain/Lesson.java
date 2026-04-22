@@ -8,14 +8,14 @@ import java.util.Objects;
 public class Lesson extends SerializableModel{
 
     private LessonType lessonType;
-    private Course course;
-    private Teacher teacher;
+    private int courseId;
+    private int teacherId;
     private Date startTime;
     
-    public Lesson(LessonType lessonType, Course course, Teacher teacher, Date startTime) {
+    public Lesson(LessonType lessonType, int courseId, int teacherId, Date startTime) {
         this.lessonType = lessonType;
-        this.course = course;
-        this.teacher = teacher;
+        this.courseId = courseId;
+        this.teacherId = teacherId;
         this.startTime = startTime;
     }
 
@@ -27,20 +27,20 @@ public class Lesson extends SerializableModel{
         this.lessonType = lessonType;
     }
 
-    public Course getCourse() {
-        return course;
+    public int getCourseId() {
+        return courseId;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public int getTeacherId() {
+        return teacherId;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setTeacherId(int teacherId) {
+        this.teacherId = teacherId;
     }
 
     public Date getStartTime() {
@@ -62,13 +62,13 @@ public class Lesson extends SerializableModel{
         }
 
         return lessonType == lesson.lessonType &&
-                Objects.equals(course, lesson.course) &&
-                Objects.equals(teacher, lesson.teacher) &&
+                courseId == lesson.courseId &&
+                teacherId == lesson.teacherId &&
                 Objects.equals(startTime, lesson.startTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lessonType, course, teacher, startTime);
+        return Objects.hash(id, lessonType, courseId, teacherId, startTime);
     }
 }

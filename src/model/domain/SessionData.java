@@ -25,8 +25,8 @@ public class SessionData {
         return user;
     }
 
-    public void setLanguage(Locale language) {
-        this.language = language;
+    public void setLanguage(LanguagePreference languagePreference) {
+        this.language = Locale.of(languagePreference.getCode());
     }
 
     public Locale getLanguage() {

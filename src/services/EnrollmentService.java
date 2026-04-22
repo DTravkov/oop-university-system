@@ -1,11 +1,13 @@
 package services;
 
+import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
+import java.util.Collection;
 import model.domain.Course;
 import model.domain.Enrollment;
-import model.domain.Student;
 import model.domain.User;
+import model.enumeration.UserRole;
 import model.repository.EnrollmentRepository;
 
 public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository> {
@@ -14,34 +16,44 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     private final CourseService courseService;
 
     public EnrollmentService() {
-        super(new EnrollmentRepository());
+        super(EnrollmentRepository.getInstance());
         this.userService = new UserService();
         this.courseService = new CourseService();
     }
 
-    public void createEnrollment(Enrollment enrollment) {
-        User student = userService.get(enrollment.getStudent().getId());
-        if (!(student instanceof Student validStudent)) {
-            throw new OperationNotAllowed("Cannot enroll a non-student user");
+    @Override
+    public void create(Enrollment enrollment) {
+        User student = userService.get(enrollment.getStudentId());
+        Course course = courseService.get(enrollment.getCourseId());
+
+        if(repository.exists(student.getId(), course.getId())){
+            throw new AlreadyExists(" enrollment for student id " + student.getId() + " and course id " + course.getId());
         }
 
-        Course course = courseService.get(enrollment.getCourse().getId());
-        enrollment.setStudent(validStudent);
-        enrollment.setCourse(course);
+        if(UserRole.fromUser(student) != UserRole.STUDENT){
+            throw new OperationNotAllowed(" enrolling the user, who is not a student. user id : "+ student.getId());
+        }
+
+        enrollment.setStudentId(student.getId());
+        enrollment.setCourseId(course.getId());
 
         repository.save(enrollment);
     }
 
-    public void deleteEnrollment(Student student, Course course) {
-        Enrollment enrollment = getByStudentAndCourse(student, course);
-        repository.delete(enrollment);
+    public Enrollment getByStudentIdAndCourseId(int studentId, int courseId) {
+        Enrollment enrollment = repository.findByStudentIdAndCourseId(studentId, courseId);
+        if (enrollment == null) {
+            throw new DoesNotExist("Enrollment for student id " + studentId + " and course id " + courseId);
+        }
+        return enrollment;
     }
 
-    public Enrollment getByStudentAndCourse(Student student, Course course) {
-        return getAll().stream()
-                .filter(enrollment -> enrollment.getStudent().getId() == student.getId())
-                .filter(enrollment -> enrollment.getCourse().getId() == course.getId())
-                .findFirst()
-                .orElseThrow(() -> new DoesNotExist("Enrollment for student id " + student.getId() + " and course id " + course.getId()));
+    public Collection<Enrollment> getAllByStudentId(int studentId) {
+        return repository.findAllByStudentId(studentId);
     }
+
+    public Collection<Enrollment> getAllByCourseId(int courseId) {
+        return repository.findAllByCourseId(courseId);
+    }
+
 }

@@ -1,9 +1,9 @@
 package model.domain;
 
-import java.io.*;
 import java.util.*;
 
 import utils.FieldValidator;
+import utils.PasswordUtils;
 
 public class User extends SerializableModel{
 	
@@ -91,7 +91,7 @@ public class User extends SerializableModel{
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "[id=" + this.getId() + ", login=" + this.getLogin() + ", banned=" + this.isBanned() +"]";
+		return this.getClass().getSimpleName() + "[id=" + this.getId() + ", name=" + this.getName() + ", surname=" + this.getSurname() +"]";
 	}
 	
 	

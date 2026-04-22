@@ -2,13 +2,14 @@ package utils;
 
 import model.enumeration.TeacherTypeEnum;
 import model.enumeration.UIMessages;
+import model.enumeration.UserRole;
 import services.LanguageService;
 
 import java.util.Scanner;
 
 public class UIFields {
 
-    public static String readNonEmpty(Scanner scanner, String context, UIMessages prompt) {
+    public static String readNonEmpty(Scanner scanner, UIMessages prompt) {
         while (true) {
             System.out.print(LanguageService.translate(prompt));
             String input = scanner.nextLine().trim();
@@ -17,8 +18,7 @@ public class UIFields {
                 return input;
             }
 
-            System.out.println(LanguageService.translate(UIMessages.INPUT_EMPTY)
-                + " [" + context + "]");
+            System.out.println(LanguageService.translate(UIMessages.INPUT_EMPTY));
         }
     }
 
@@ -27,7 +27,7 @@ public class UIFields {
         return scanner.nextLine().trim();
     }
 
-    public static int readInt(Scanner scanner, String context, UIMessages prompt) {
+    public static int readInt(Scanner scanner, UIMessages prompt) {
         while (true) {
             System.out.print(LanguageService.translate(prompt));
             String input = scanner.nextLine().trim();
@@ -35,32 +35,27 @@ public class UIFields {
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER)
-                    + " [" + context + "]");
+                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER));
             }
         }
     }
 
-    public static String readChoice(Scanner scanner, String context, int min, int max) {
+    public static String readChoice(Scanner scanner, UIMessages prompt, int min, int max) {
         while (true) {
+            System.out.print(LanguageService.translate(prompt));
             String input = scanner.nextLine().trim();
-
-            if (input.matches("\\d+")) {
+            try {
                 int value = Integer.parseInt(input);
-
                 if (value >= min && value <= max) {
                     return input;
                 }
+            } catch (NumberFormatException ignored) {
             }
-
-            System.out.println(
-                LanguageService.translate(UIMessages.INPUT_RANGE)
-                + " [" + context + "]"
-            );
+            System.out.println(LanguageService.translate(UIMessages.INPUT_RANGE));
         }
     }
 
-    public static boolean readYesNo(Scanner scanner, String context, UIMessages prompt) {
+    public static boolean readYesNo(Scanner scanner, UIMessages prompt) {
         while (true) {
             System.out.print(LanguageService.translate(prompt));
             String input = scanner.nextLine().trim().toLowerCase();
@@ -68,10 +63,7 @@ public class UIFields {
             if (input.equals("y")) return true;
             if (input.equals("n")) return false;
 
-            System.out.println(
-                LanguageService.translate(UIMessages.INPUT_YES_NO)
-                + " [" + context + "]"
-            );
+            System.out.println(LanguageService.translate(UIMessages.INPUT_YES_NO));
         }
     }
     
@@ -90,6 +82,18 @@ public class UIFields {
                 default:
                     System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
             }
+        }
+    }
+
+    public static UserRole readUserRole(Scanner scanner) {
+        while (true) {
+            System.out.print(LanguageService.translate(UIMessages.USER_ROLE));
+            String choice = scanner.nextLine().trim();
+            if(UserRole.isValidRole(choice)){
+                return UserRole.valueOf(choice.toUpperCase());
+            }
+            System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+
         }
     }
 }

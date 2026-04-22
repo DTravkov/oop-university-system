@@ -1,23 +1,43 @@
 package model.repository;
 
+import java.util.Collection;
 import model.domain.Enrollment;
-import model.domain.Student;
 
 public class EnrollmentRepository extends Repository<Enrollment> {
 
-    public EnrollmentRepository() {
-        super("enrollments.ser");
+    private static final EnrollmentRepository INSTANCE = new EnrollmentRepository();
+
+    private EnrollmentRepository() {
+        super();
     }
 
-    public Enrollment getStudentEnrollments(Student student) {
-        return this.getStudentEnrollments(student.getId());
+    public static EnrollmentRepository getInstance() {
+        return INSTANCE;
     }
 
-    public Enrollment getStudentEnrollments(int studentId) {
+
+    public Enrollment findByStudentIdAndCourseId(int studentId, int courseId) {
         return this.data.values().stream()
-                .filter(entity -> entity.getStudent().getId() == studentId)
+                .filter(entity -> entity.getStudentId() == studentId)
+                .filter(entity -> entity.getCourseId() == courseId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public boolean exists(int studentId, int courseId) {
+        return this.findByStudentIdAndCourseId(studentId, courseId) != null;        
+    }
+
+    public Collection<Enrollment> findAllByStudentId(int studentId) {
+        return this.data.values().stream()
+                .filter(entity -> entity.getStudentId() == studentId)
+                .toList();
+    }
+
+    public Collection<Enrollment> findAllByCourseId(int courseId) {
+        return this.data.values().stream()
+                .filter(entity -> entity.getCourseId() == courseId)
+                .toList();
     }
 
 }

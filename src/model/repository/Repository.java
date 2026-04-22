@@ -15,8 +15,8 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
     private IDGenerator idGenerator;
     protected Map<Integer, T> data = new HashMap<>();
 
-    public Repository(String dataPath) {
-        this.PATH = "serialized/" + dataPath;
+    public Repository() {
+        this.PATH = "serialized/" + this.getClass().getSimpleName() + ".ser";
         ensureFileExists();
         this.idGenerator = new IDGenerator(PATH);
         load();
@@ -62,12 +62,14 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         return Optional.ofNullable(data.get(id));
     }
 
+    
+    public T find(int id) {
+        return data.get(id);
+    }
+    
+
     public List<T> getAll() {
         return new ArrayList<>(data.values());
-    }
-
-    public void delete(T entity) {
-        this.delete(entity.getId());
     }
 
     @Override
@@ -77,10 +79,6 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         }
         data.remove(id);
         writeToFile();
-    }
-
-    public boolean exists(T entity) {
-        return exists(entity.getId());
     }
 
     public boolean exists(int id) {
