@@ -4,13 +4,17 @@ import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import java.util.Collection;
+
+import services.events.Event;
 import model.domain.Course;
 import model.domain.Enrollment;
+import model.domain.Student;
 import model.domain.User;
 import model.enumeration.UserRole;
 import model.repository.EnrollmentRepository;
+import services.events.UserDeletedEvent;
 
-public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository> {
+public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository>{
 
     private final UserService userService;
     private final CourseService courseService;
@@ -20,6 +24,8 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         this.userService = new UserService();
         this.courseService = new CourseService();
     }
+
+   
 
     @Override
     public void create(Enrollment enrollment) {
@@ -55,5 +61,19 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     public Collection<Enrollment> getAllByCourseId(int courseId) {
         return repository.findAllByCourseId(courseId);
     }
+
+
+
+    @Override
+    public void update(Event e) {
+        if(e instanceof UserDeletedEvent event){
+            if(event.getUserClass().equals(Student.class)){
+                for(Enrollment enr : repository.findAllByStudentId(event.getUserId())){
+                    repository.delete(enr.getId());
+                }
+            }
+        }
+    }
+
 
 }

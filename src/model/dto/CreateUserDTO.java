@@ -5,7 +5,7 @@ import java.util.Date;
 import model.enumeration.TeacherTypeEnum;
 import model.enumeration.UserRole;
 
-public class CreateUserRequest {
+public class CreateUserDTO {
 
     private final UserRole role;
     private final String login;
@@ -15,7 +15,7 @@ public class CreateUserRequest {
     private final Date admissionDate;
     private final TeacherTypeEnum teacherType;
 
-    public CreateUserRequest(
+    public CreateUserDTO(
             UserRole role,
             String login,
             String password,

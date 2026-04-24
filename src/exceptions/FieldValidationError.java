@@ -1,5 +1,6 @@
 package exceptions;
 
+import model.enumeration.UIMessages;
 import services.LanguageService;
 
 public class FieldValidationError extends ApplicationException {
@@ -9,7 +10,7 @@ public class FieldValidationError extends ApplicationException {
     private final ValidationDetail[] details;
 
     public FieldValidationError(ValidationDetail... details) {
-        super("field_validation", formatDetails(details));
+        super(UIMessages.ERR_FIELD_VALIDATION, formatDetails(details));
         this.details = details != null ? details.clone() : new ValidationDetail[0];
     }
 
@@ -30,15 +31,15 @@ public class FieldValidationError extends ApplicationException {
     }
 
     public static class ValidationDetail {
-        private final String messageKey;
+        private final UIMessages messageKey;
         private final Object[] args;
 
-        public ValidationDetail(String messageKey, Object... args) {
+        public ValidationDetail(UIMessages messageKey, Object... args) {
             this.messageKey = messageKey;
             this.args = args != null ? args.clone() : new Object[0];
         }
 
-        public String getMessageKey() {
+        public UIMessages getMessageKey() {
             return messageKey;
         }
 

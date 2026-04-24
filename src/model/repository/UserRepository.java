@@ -2,6 +2,8 @@ package model.repository;
 
 
 import java.util.Collection;
+import java.util.Optional;
+
 import model.domain.*;
 import model.enumeration.UserRole;
 
@@ -33,6 +35,7 @@ public class UserRepository extends Repository<User> {
                 .filter(role::matches)
                 .toList();
     }
+
 
 
 }

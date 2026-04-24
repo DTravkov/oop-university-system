@@ -67,9 +67,18 @@ public enum UIMessages {
     REGISTERED("msg.registered"),
     CREATED("msg.created"),
     DELETED("msg.deleted"),
-    SENT("msg.sent");
+    SENT("msg.sent"),
 
-
+    ERR_OPERATION_NOT_ALLOWED("operation_not_allowed"),
+    ERR_ALREADY_EXISTS("already_exists"),
+    ERR_DOES_NOT_EXIST("does_not_exist"),
+    ERR_INVALID_CREDENTIALS("invalid_credentials"),
+    ERR_FIELD_VALIDATION("field_validation"),
+    ERR_FIELD_REQUIRED("field_required"),
+    ERR_FIELD_POSITIVE("field_positive"),
+    ERR_FIELD_NON_NULL("field_non_null"),
+    ERR_FIELD_IN_RANGE("field_in_range"),
+    ERR_IMMUTABLE_ID("err.immutable_id");
 
     private final String key;
 

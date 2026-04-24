@@ -1,6 +1,7 @@
 package model.enumeration;
 
 import model.domain.Admin;
+import model.domain.Employee;
 import model.domain.Manager;
 import model.domain.Student;
 import model.domain.Teacher;
@@ -59,4 +60,5 @@ public enum UserRole {
             return false;
         }
     }
+
 }

@@ -3,7 +3,6 @@ package model.domain;
 import java.util.*;
 
 import utils.FieldValidator;
-import utils.PasswordUtils;
 
 public class User extends SerializableModel{
 	

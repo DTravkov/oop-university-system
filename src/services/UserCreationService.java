@@ -1,7 +1,7 @@
 package services;
 
 import model.domain.User;
-import model.dto.CreateUserRequest;
+import model.dto.CreateUserDTO;
 import model.enumeration.UserRole;
 import model.factory.UserFactory;
 import utils.FieldValidator;
@@ -14,7 +14,7 @@ public class UserCreationService {
         this.userService = userService;
     }
 
-    public User create(CreateUserRequest request) {
+    public User create(CreateUserDTO request) {
         validateRequest(request);
 
         User user = UserFactory.create(
@@ -31,7 +31,7 @@ public class UserCreationService {
         return user;
     }
 
-    private void validateRequest(CreateUserRequest request) {
+    private void validateRequest(CreateUserDTO request) {
         FieldValidator validator = new FieldValidator()
                 .requireNonNull(request.getRole(), "Role")
                 .requireNonBlank(request.getLogin(), "Login")

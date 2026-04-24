@@ -15,7 +15,7 @@ public abstract class SerializableModel implements Serializable {
 			this.id = id;
 			return;
 		}
-		throw new ImmutableFieldChanged("Cannot change id of a serialized object");
+		throw new ImmutableFieldChanged();
 
 	}
 	

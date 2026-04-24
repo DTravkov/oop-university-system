@@ -5,13 +5,24 @@ import exceptions.DoesNotExist;
 import java.util.Collection;
 import model.domain.SerializableModel;
 import model.repository.Repository;
+import services.events.Event;
+import services.events.EventSystem;
+import services.events.IObserver;
 
-public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> {
+public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> implements IService, IObserver {
 
     protected final R repository;
+    protected final EventSystem eventSystem;
 
     protected BaseService(R repository) {
         this.repository = repository;
+        this.eventSystem = EventSystem.getInstance();
+        EventSystem.getInstance().subscribe(this);
+    }
+
+    @Override
+    public void update(Event event){
+        // override me in other services
     }
 
     public void create(T entity){
@@ -23,7 +34,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
 
     public T get(int id){
         return repository.find(id)
-                .orElseThrow(() -> new DoesNotExist("Object with id " + id));
+                .orElseThrow(() -> new DoesNotExist(" object with id " + id));
     }
 
     public Collection<T> getAll() {
@@ -32,7 +43,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
 
     public void delete(int id){
         if(!repository.exists(id)){
-            throw new DoesNotExist("Object with id " + id);
+            throw new DoesNotExist(" object with id " + id);
         }
         repository.delete(id);
     }

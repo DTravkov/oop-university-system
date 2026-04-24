@@ -4,10 +4,9 @@ import java.util.Date;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
-import exceptions.FieldValidationError;
 import exceptions.OperationNotAllowed;
 import model.domain.User;
-import model.dto.CreateUserRequest;
+import model.dto.CreateUserDTO;
 import model.enumeration.TeacherTypeEnum;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
@@ -81,7 +80,7 @@ public class UserApp {
     }
 
     private static void createUser(Scanner scanner) {
-        CreateUserRequest request = readCreateUserRequest(scanner);
+        CreateUserDTO request = readCreateUserRequest(scanner);
         User user = userCreationService.create(request);
 
         System.out.println(LanguageService.translate(UIMessages.CREATED));
@@ -89,7 +88,7 @@ public class UserApp {
         System.out.println(userService.getAll());
     }
 
-    private static CreateUserRequest readCreateUserRequest(Scanner scanner) {
+    private static CreateUserDTO readCreateUserRequest(Scanner scanner) {
         UserRole role = UIFields.readUserRole(scanner);
         String login = UIFields.readNonEmpty(scanner, UIMessages.LOGIN);
         String password = UIFields.readNonEmpty(scanner, UIMessages.PASSWORD);
@@ -105,7 +104,7 @@ public class UserApp {
             teacherType = UIFields.askTeacherType(scanner);
         }
 
-        return new CreateUserRequest(role, login, password, name, surname, admissionDate, teacherType);
+        return new CreateUserDTO(role, login, password, name, surname, admissionDate, teacherType);
     }
 
     private static void getUserById(Scanner scanner) {

@@ -1,5 +1,6 @@
 package exceptions;
 
+import model.enumeration.UIMessages;
 import services.LanguageService;
 
 public abstract class ApplicationException extends RuntimeException {
@@ -8,6 +9,10 @@ public abstract class ApplicationException extends RuntimeException {
 
     private final String messageKey;
     private final Object[] args;
+
+    protected ApplicationException(UIMessages messageKey, Object... args) {
+        this(messageKey.getKey(), args);
+    }
 
     protected ApplicationException(String messageKey, Object... args) {
         super(messageKey);

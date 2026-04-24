@@ -78,7 +78,7 @@ public class Message extends SerializableModel {
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                "senderId=" + senderId +
+                ", senderId=" + senderId +
                 ", content='" + content + '\'' +
                 '}';
     }
