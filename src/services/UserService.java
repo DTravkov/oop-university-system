@@ -6,8 +6,8 @@ import exceptions.InvalidCredentials;
 import java.util.Collection;
 import java.util.Date;
 
-import model.domain.users.DeletedUser;
-import model.domain.users.User;
+import model.domain.DeletedUser;
+import model.domain.User;
 import model.enumeration.TeacherType;
 import model.enumeration.UserRole;
 import model.factories.UserFactory;

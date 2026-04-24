@@ -3,13 +3,13 @@ package model.factories;
 import java.util.Date;
 
 import exceptions.FieldNullException;
+import model.domain.Admin;
+import model.domain.Dean;
+import model.domain.Manager;
+import model.domain.Student;
+import model.domain.Teacher;
 import model.domain.TechSupportSpecialist;
-import model.domain.users.Admin;
-import model.domain.users.Dean;
-import model.domain.users.Manager;
-import model.domain.users.Student;
-import model.domain.users.Teacher;
-import model.domain.users.User;
+import model.domain.User;
 import model.enumeration.TeacherType;
 import model.enumeration.UserRole;
 

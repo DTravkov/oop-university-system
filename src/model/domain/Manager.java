@@ -1,4 +1,4 @@
-package model.domain.users;
+package model.domain;
 
 public class Manager extends Employee {
 

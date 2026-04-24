@@ -1,8 +1,7 @@
-package model.domain.users;
+package model.domain;
 
 import java.util.*;
 
-import model.domain.SerializableModel;
 import utils.FieldValidator;
 
 public class User extends SerializableModel{

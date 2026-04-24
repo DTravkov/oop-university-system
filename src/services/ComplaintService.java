@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
+import model.domain.Dean;
+import model.domain.DeletedUser;
+import model.domain.Teacher;
 import model.domain.TeacherComplaint;
-import model.domain.users.Dean;
-import model.domain.users.DeletedUser;
-import model.domain.users.Teacher;
-import model.domain.users.User;
+import model.domain.User;
 import model.repository.ComplaintRepository;
 import services.events.Event;
 import services.events.UserDeletedEvent;

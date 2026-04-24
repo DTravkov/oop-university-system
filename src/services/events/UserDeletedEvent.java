@@ -1,6 +1,6 @@
 package services.events;
 
-import model.domain.users.User;
+import model.domain.User;
 
 public record UserDeletedEvent(User user) implements Event{
 

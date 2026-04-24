@@ -1,13 +1,13 @@
 package model.enumeration;
 
+import model.domain.Admin;
+import model.domain.Dean;
+import model.domain.Employee;
+import model.domain.Manager;
+import model.domain.Student;
+import model.domain.Teacher;
 import model.domain.TechSupportSpecialist;
-import model.domain.users.Admin;
-import model.domain.users.Dean;
-import model.domain.users.Employee;
-import model.domain.users.Manager;
-import model.domain.users.Student;
-import model.domain.users.Teacher;
-import model.domain.users.User;
+import model.domain.User;
 
 public enum UserRole {
     USER(User.class),

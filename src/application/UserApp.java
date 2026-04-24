@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import exceptions.OperationNotAllowed;
-import model.domain.users.User;
+import model.domain.User;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;

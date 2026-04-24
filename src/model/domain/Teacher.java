@@ -1,4 +1,4 @@
-package model.domain.users;
+package model.domain;
 
 import model.enumeration.TeacherType;
 import utils.FieldValidator;

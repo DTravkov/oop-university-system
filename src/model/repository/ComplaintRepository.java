@@ -1,8 +1,8 @@
 package model.repository;
 
+import model.domain.Employee;
 import model.domain.Message;
 import model.domain.TeacherComplaint;
-import model.domain.users.Employee;
 
 import java.util.Collection;
 
