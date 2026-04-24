@@ -1,4 +1,4 @@
-package model.domain;
+package model.domain.users;
 
 public class DeletedUser extends User{
 	// placeholder for deleted users' data.

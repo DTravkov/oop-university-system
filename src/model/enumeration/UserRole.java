@@ -1,17 +1,20 @@
 package model.enumeration;
 
-import model.domain.Admin;
-import model.domain.Employee;
-import model.domain.Manager;
-import model.domain.Student;
-import model.domain.Teacher;
 import model.domain.TechSupportSpecialist;
-import model.domain.User;
+import model.domain.users.Admin;
+import model.domain.users.Dean;
+import model.domain.users.Employee;
+import model.domain.users.Manager;
+import model.domain.users.Student;
+import model.domain.users.Teacher;
+import model.domain.users.User;
 
 public enum UserRole {
     USER(User.class),
     STUDENT(Student.class),
+    EMPLOYEE(Employee.class),
     TEACHER(Teacher.class),
+    DEAN(Dean.class),
     ADMIN(Admin.class),
     MANAGER(Manager.class),
     TECH_SUPPORT_SPECIALIST(TechSupportSpecialist.class);
@@ -33,6 +36,9 @@ public enum UserRole {
         if (user.getClass().equals(User.class)) {
             return USER;
         }
+        if(user.getClass().equals(Employee.class)){
+            return EMPLOYEE;
+        }
         if (user instanceof Student) {
             return STUDENT;
         }
@@ -45,18 +51,22 @@ public enum UserRole {
         if (user instanceof Manager) {
             return MANAGER;
         }
+        if (user instanceof Dean) {
+            return DEAN;
+        }
         if (user instanceof TechSupportSpecialist) {
             return TECH_SUPPORT_SPECIALIST;
         }
-        throw new IllegalArgumentException("Unsupported user type: " + user.getClass().getSimpleName());
+        throw new IllegalArgumentException("Unknown user type " + user.getClass().getSimpleName());
     }
 
     public static boolean isValidRole(String raw) {
-        if (raw == null) return false;
+        if (raw == null || raw.isBlank()) throw new IllegalArgumentException("Blank or null role string is provided");
         try {
             UserRole.valueOf(raw.trim().toUpperCase());
             return true;
         } catch (IllegalArgumentException e) {
+            // if no enumeration for 'raw' string exist
             return false;
         }
     }

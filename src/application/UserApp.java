@@ -5,20 +5,17 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import exceptions.OperationNotAllowed;
-import model.domain.User;
-import model.dto.CreateUserDTO;
-import model.enumeration.TeacherTypeEnum;
+import model.domain.users.User;
+import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
 import services.LanguageService;
-import services.UserCreationService;
 import services.UserService;
 import utils.UIFields;
 
 public class UserApp {
 
     private static final UserService userService = new UserService();
-    private static final UserCreationService userCreationService = new UserCreationService(userService);
 
     public static void startApp(Scanner scanner) {
         while (true) {
@@ -80,15 +77,6 @@ public class UserApp {
     }
 
     private static void createUser(Scanner scanner) {
-        CreateUserDTO request = readCreateUserRequest(scanner);
-        User user = userCreationService.create(request);
-
-        System.out.println(LanguageService.translate(UIMessages.CREATED));
-        System.out.println(user);
-        System.out.println(userService.getAll());
-    }
-
-    private static CreateUserDTO readCreateUserRequest(Scanner scanner) {
         UserRole role = UIFields.readUserRole(scanner);
         String login = UIFields.readNonEmpty(scanner, UIMessages.LOGIN);
         String password = UIFields.readNonEmpty(scanner, UIMessages.PASSWORD);
@@ -96,7 +84,7 @@ public class UserApp {
         String surname = UIFields.readNonEmpty(scanner, UIMessages.SURNAME);
 
         Date admissionDate = null;
-        TeacherTypeEnum teacherType = null;
+        TeacherType teacherType = null;
 
         if (role == UserRole.STUDENT) {
             admissionDate = new Date();
@@ -104,7 +92,11 @@ public class UserApp {
             teacherType = UIFields.askTeacherType(scanner);
         }
 
-        return new CreateUserDTO(role, login, password, name, surname, admissionDate, teacherType);
+        User user = userService.create(role, login, password, name, surname, admissionDate, teacherType);
+
+        System.out.println(LanguageService.translate(UIMessages.CREATED));
+        System.out.println(user);
+        System.out.println(userService.getAll());
     }
 
     private static void getUserById(Scanner scanner) {

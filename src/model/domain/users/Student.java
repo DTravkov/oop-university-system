@@ -1,6 +1,8 @@
-package model.domain;
+package model.domain.users;
 
 import java.util.*;
+
+import utils.FieldValidator;
 
 
 public class Student extends User {
@@ -10,6 +12,7 @@ public class Student extends User {
     private boolean isPhdStudent;
 
     public Student(String login, String password, String name, String surname, Date admissionDate) {
+		FieldValidator.requireNonNull(admissionDate, "Date of admission");
 		super(login, password, name, surname);
 		this.admissionDate = admissionDate;
 	}

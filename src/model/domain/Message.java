@@ -16,11 +16,9 @@ public class Message extends SerializableModel {
 
 
     public Message(int senderId, int receiverId, String content) {
-        FieldValidator validator = new FieldValidator()
-                .requirePositive(senderId, "Sender id")
-                .requirePositive(receiverId, "Receiver id")
-                .requireNonBlank(content, "Content");
-        validator.validate();
+        FieldValidator.requirePositive(senderId, "Sender id");
+        FieldValidator.requirePositive(receiverId, "Receiver id");
+        FieldValidator.requireNonBlank(content, "Content");
 
         this.senderId = senderId;
         this.receiverId = receiverId;
@@ -78,7 +76,8 @@ public class Message extends SerializableModel {
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                ", senderId=" + senderId +
+                ", from=" + senderId +
+                ", to=" + receiverId +
                 ", content='" + content + '\'' +
                 '}';
     }

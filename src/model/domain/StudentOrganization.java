@@ -13,10 +13,8 @@ public class StudentOrganization extends SerializableModel {
     private int presidentId;
 
     public StudentOrganization(String name, String description, int presidentId) {
-        FieldValidator validator = new FieldValidator();
-        validator.requireNonBlank(name, "Organization name");
-        validator.requirePositive(presidentId, "Organization president id");
-        validator.validate();
+        FieldValidator.requireNonBlank(name, "Organization name");
+        FieldValidator.requirePositive(presidentId, "Organization president id");
 
         this.name = name;
         this.description = description;

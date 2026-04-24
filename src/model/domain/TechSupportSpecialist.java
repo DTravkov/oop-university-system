@@ -1,5 +1,7 @@
 package model.domain;
 
+import model.domain.users.Employee;
+
 public class TechSupportSpecialist extends Employee {
 
     private static final long serialVersionUID = 1L;

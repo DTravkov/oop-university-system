@@ -4,10 +4,13 @@ import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
 import java.util.Collection;
+import java.util.Date;
 
-import model.domain.DeletedUser;
-import model.domain.User;
+import model.domain.users.DeletedUser;
+import model.domain.users.User;
+import model.enumeration.TeacherType;
 import model.enumeration.UserRole;
+import model.factories.UserFactory;
 import model.repository.UserRepository;
 import services.events.UserDeletedEvent;
 
@@ -17,13 +20,16 @@ public class UserService extends BaseService<User, UserRepository> {
     public UserService() {
         super(UserRepository.getInstance());
         registerDeletedUser();
+        // we need to register the deleted user as a placholder for deleted users.
     }
 
-    public void create(User user) {
-        if(repository.existsByLogin(user.getLogin())){
-            throw new AlreadyExists(" user with login " + user.getLogin());
+
+    public User create(UserRole role, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
+        if(repository.existsByLogin(login)){
+            throw new AlreadyExists(" user with login " + login);
         }
-        repository.save(user);
+        User user = UserFactory.create(role, login, password, name, surname, admissionDate, teacherType);
+        return repository.save(user);
     }
 
     public void delete(int id) {

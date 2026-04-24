@@ -24,6 +24,9 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
 
     @Override
     public T save(T entity) {
+        // if entity's id == 0, it means that the enitity is new,.
+        // therefore, it needs unique id, that generator provides
+        // only negative id that should appera in code is -1, it is reserved for deleted user.
         if (entity.getId() == 0) {
             entity.setId(idGenerator.nextId());
         }

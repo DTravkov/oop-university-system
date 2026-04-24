@@ -1,14 +1,16 @@
-package model.factory;
+package model.factories;
 
 import java.util.Date;
 
-import model.domain.Admin;
-import model.domain.Manager;
-import model.domain.Student;
-import model.domain.Teacher;
+import exceptions.FieldNullException;
 import model.domain.TechSupportSpecialist;
-import model.domain.User;
-import model.enumeration.TeacherTypeEnum;
+import model.domain.users.Admin;
+import model.domain.users.Dean;
+import model.domain.users.Manager;
+import model.domain.users.Student;
+import model.domain.users.Teacher;
+import model.domain.users.User;
+import model.enumeration.TeacherType;
 import model.enumeration.UserRole;
 
 public class UserFactory {
@@ -35,7 +37,7 @@ public class UserFactory {
             String password,
             String name,
             String surname,
-            TeacherTypeEnum teacherType
+            TeacherType teacherType
     ) {
         return create(UserRole.TEACHER, login, password, name, surname, null, teacherType);
     }
@@ -47,19 +49,19 @@ public class UserFactory {
             String name,
             String surname,
             Date admissionDate,
-            TeacherTypeEnum teacherType
+            TeacherType teacherType
     ) {
         switch (role) {
             case USER:
                 return new User(login, password, name, surname);
             case STUDENT:
                 if (admissionDate == null) {
-                    throw new IllegalArgumentException("Admission date is required for STUDENT");
+                    throw new FieldNullException("Date of admission");
                 }
                 return new Student(login, password, name, surname, admissionDate);
             case TEACHER:
                 if (teacherType == null) {
-                    throw new IllegalArgumentException("Teacher type is required for TEACHER");
+                    throw new FieldNullException("Teacher type");
                 }
                 return new Teacher(login, password, name, surname, teacherType);
             case ADMIN:
@@ -68,6 +70,8 @@ public class UserFactory {
                 return new Manager(login, password, name, surname);
             case TECH_SUPPORT_SPECIALIST:
                 return new TechSupportSpecialist(login, password, name, surname);
+            case DEAN:
+                return new Dean(login, password, name, surname);
             default:
                 throw new IllegalArgumentException("Unsupported role: " + role);
         }

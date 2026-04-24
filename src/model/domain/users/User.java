@@ -1,7 +1,8 @@
-package model.domain;
+package model.domain.users;
 
 import java.util.*;
 
+import model.domain.SerializableModel;
 import utils.FieldValidator;
 
 public class User extends SerializableModel{
@@ -18,12 +19,10 @@ public class User extends SerializableModel{
 		this(user.getLogin(),user.getPassword(),user.getName(), user.getSurname());
     }
     public User(String login, String password, String name, String surname) {
-    	FieldValidator validator = new FieldValidator();
-    	validator.requireNonBlank(login, "Login");
-    	validator.requireNonBlank(password, "Password");
-    	validator.requireNonBlank(name, "Name");
-    	validator.requireNonBlank(surname, "Surname");
-		validator.validate();
+    	FieldValidator.requireNonBlank(login, "Login");
+    	FieldValidator.requireNonBlank(password, "Password");
+    	FieldValidator.requireNonBlank(name, "Name");
+    	FieldValidator.requireNonBlank(surname, "Surname");
 		
     	this.login = login;
     	this.password = password;

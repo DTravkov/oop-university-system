@@ -54,9 +54,7 @@ public class Enrollment extends SerializableModel{
 	}
 
 	public void setFirstAttestationPoint(int firstAttestationPoint) {
-		new FieldValidator()
-			.requireInRange(secondAttestationPoint, 0, 40, "Final exam point")
-			.validate();
+		FieldValidator.requireInRange(firstAttestationPoint, 0, 40, "First attestation point");
 		this.firstAttestationPoint = firstAttestationPoint;
 	}
 
@@ -65,9 +63,7 @@ public class Enrollment extends SerializableModel{
 	}
 
 	public void setSecondAttestationPoint(int secondAttestationPoint) {
-		new FieldValidator()
-			.requireInRange(secondAttestationPoint, 0, 40, "Final exam point")
-			.validate();
+		FieldValidator.requireInRange(secondAttestationPoint, 0, 40, "Second attestation point");
 		this.secondAttestationPoint = secondAttestationPoint;
 	}
 
@@ -76,9 +72,7 @@ public class Enrollment extends SerializableModel{
 	}
 
 	public void setFinalExamPoint(int finalExamPoint) {
-		new FieldValidator()
-			.requireInRange(finalExamPoint, 0, 40, "Final exam point")
-			.validate();
+		FieldValidator.requireInRange(finalExamPoint, 0, 40, "Final exam point");
 		this.finalExamPoint = finalExamPoint;
 	}
 

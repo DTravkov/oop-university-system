@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import model.domain.*;
+import model.domain.users.User;
 import model.enumeration.UserRole;
 
 public class UserRepository extends Repository<User> {

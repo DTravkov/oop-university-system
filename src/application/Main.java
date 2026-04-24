@@ -16,7 +16,7 @@ public class Main {
 
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 5);
+            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 6);
 
             switch (choice) {
                 case "1":
@@ -32,6 +32,9 @@ public class Main {
                     MessageApp.startApp(scanner);
                     break;
                 case "5":
+                    ComplaintApp.startApp(scanner);
+                    break;
+                case "6":
                     System.out.println(LanguageService.translate(UIMessages.GOODBYE));
                     scanner.close();
                     return;
@@ -47,8 +50,8 @@ public class Main {
         System.out.println("2. Course App");
         System.out.println("3. Enrollment App");
         System.out.println("4. Message App");
-        System.out.println("5. " + LanguageService.translate(UIMessages.EXIT));
-        System.out.print(LanguageService.translate(UIMessages.CHOOSE));
+        System.out.println("5. Teacher Complaint App");
+        System.out.println("6. " + LanguageService.translate(UIMessages.EXIT));
     }
 
     private static void askLanguage(Scanner scanner){

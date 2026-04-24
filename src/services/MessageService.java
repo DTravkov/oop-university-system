@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
-import model.domain.DeletedUser;
 import model.domain.Message;
-import model.domain.User;
+import model.domain.users.DeletedUser;
+import model.domain.users.User;
 import model.repository.MessageRepository;
 import services.events.Event;
 import services.events.UserDeletedEvent;

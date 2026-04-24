@@ -1,5 +1,6 @@
 package model.domain;
 
+import model.domain.users.User;
 import model.enumeration.LanguagePreference;
 
 import java.util.Locale;

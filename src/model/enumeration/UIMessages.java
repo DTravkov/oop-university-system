@@ -43,6 +43,8 @@ public enum UIMessages {
     MESSAGE_ID("input.message_id"),
     MESSAGE_CONTENT("input.message_content"),
 
+    COMPLAINT_LEVEL("input.complaint_level"),
+
     UPDATE_USER("action.update_user"),
     DELETE_USER("action.delete_user"),
     CREATE_ADMIN("action.create_admin"),
@@ -73,7 +75,6 @@ public enum UIMessages {
     ERR_ALREADY_EXISTS("already_exists"),
     ERR_DOES_NOT_EXIST("does_not_exist"),
     ERR_INVALID_CREDENTIALS("invalid_credentials"),
-    ERR_FIELD_VALIDATION("field_validation"),
     ERR_FIELD_REQUIRED("field_required"),
     ERR_FIELD_POSITIVE("field_positive"),
     ERR_FIELD_NON_NULL("field_non_null"),

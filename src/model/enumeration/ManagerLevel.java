@@ -1,6 +1,6 @@
 package model.enumeration;
 
-public enum ManagerLevelEnum {
+public enum ManagerLevel {
     OFFICE_REGISTRAR,
     IT_SCHOOL,
     ENGINEERING_SCHOOL,

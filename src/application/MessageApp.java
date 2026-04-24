@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.Message;
-import model.domain.User;
+import model.domain.users.User;
 import model.enumeration.UIMessages;
 import services.LanguageService;
 import services.MessageService;

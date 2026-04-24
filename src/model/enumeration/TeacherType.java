@@ -1,6 +1,6 @@
 package model.enumeration;
 
-public enum TeacherTypeEnum {
+public enum TeacherType {
 	LECTURE,
 	PRACTICE,
 	BOTH

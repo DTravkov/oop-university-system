@@ -1,6 +1,6 @@
 package utils;
 
-import model.enumeration.TeacherTypeEnum;
+import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
 import services.LanguageService;
@@ -67,18 +67,18 @@ public class UIFields {
         }
     }
     
-    public static TeacherTypeEnum askTeacherType(Scanner scanner) {
+    public static TeacherType askTeacherType(Scanner scanner) {
         while (true) {
             System.out.print(LanguageService.translate(UIMessages.TEACHER_TYPE));
             String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
-                    return TeacherTypeEnum.LECTURE;
+                    return TeacherType.LECTURE;
                 case "2":
-                    return TeacherTypeEnum.PRACTICE;
+                    return TeacherType.PRACTICE;
                 case "3":
-                    return TeacherTypeEnum.BOTH;
+                    return TeacherType.BOTH;
                 default:
                     System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
             }

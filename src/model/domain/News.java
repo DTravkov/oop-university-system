@@ -3,7 +3,7 @@ package model.domain;
 import java.util.Date;
 import java.util.Objects;
 
-import model.enumeration.UrgencyLevelEnum;
+import model.enumeration.NewsUrgencyLevel;
 import utils.FieldValidator;
 
 public class News extends SerializableModel {
@@ -12,15 +12,13 @@ public class News extends SerializableModel {
 
     private String title;
     private String content;
-    private UrgencyLevelEnum urgencyLevel;
+    private NewsUrgencyLevel urgencyLevel;
     private Date publishedDate;
 
-    public News(String title, String content, UrgencyLevelEnum urgencyLevel) {
-        FieldValidator validator = new FieldValidator();
-        validator.requireNonBlank(title, "News title");
-        validator.requireNonBlank(content, "News content");
-        validator.requireNonNull(urgencyLevel, "Urgency level");
-        validator.validate();
+    public News(String title, String content, NewsUrgencyLevel urgencyLevel) {
+        FieldValidator.requireNonBlank(title, "News title");
+        FieldValidator.requireNonBlank(content, "News content");
+        FieldValidator.requireNonNull(urgencyLevel, "Urgency level");
 
         this.title = title;
         this.content = content;
@@ -44,11 +42,11 @@ public class News extends SerializableModel {
         this.content = content;
     }
 
-    public UrgencyLevelEnum getUrgencyLevel() {
+    public NewsUrgencyLevel getUrgencyLevel() {
         return urgencyLevel;
     }
 
-    public void setUrgencyLevel(UrgencyLevelEnum urgencyLevel) {
+    public void setUrgencyLevel(NewsUrgencyLevel urgencyLevel) {
         this.urgencyLevel = urgencyLevel;
     }
 
