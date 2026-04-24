@@ -4,8 +4,6 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import exceptions.OperationNotAllowed;
-import model.domain.Dean;
-import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
 import model.enumeration.ComplaintUrgencyLevel;

@@ -1,6 +1,5 @@
 package model.domain;
 
-import java.util.*;
 
 public abstract class Employee extends User {
 	private static final long serialVersionUID = 1L;
