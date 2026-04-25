@@ -1,7 +1,6 @@
 package model.repository;
 
 import java.util.List;
-import java.util.Map;
 
 import model.domain.*;
 import model.enumeration.UserRole;
