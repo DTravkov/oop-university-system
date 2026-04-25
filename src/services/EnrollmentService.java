@@ -9,7 +9,6 @@ import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.User;
 import model.enumeration.UserRole;
-import model.factories.ServiceFactory;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
 
@@ -18,10 +17,10 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     private final UserService userService;
     private final CourseService courseService;
 
-    public EnrollmentService() {
+    public EnrollmentService(UserService userService, CourseService courseService) {
         super(EnrollmentRepository.getInstance());
-        this.userService = ServiceFactory.getInstance().getService(UserService.class);
-        this.courseService = ServiceFactory.getInstance().getService(CourseService.class);
+        this.userService = userService;
+        this.courseService = courseService;
         subscribeToEvents();
     }
 

@@ -8,7 +8,6 @@ import model.domain.DeletedUser;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
-import model.factories.ServiceFactory;
 import model.repository.ComplaintRepository;
 import services.events.UserDeleteEvent;
 
@@ -16,16 +15,16 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     private final UserService userService;
 
-    public ComplaintService() {
+    public ComplaintService(UserService userService) {
         super(ComplaintRepository.getInstance());
-        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        this.userService = userService;
         subscribeToEvents();
     }
 
     public void sendComplaint(TeacherComplaint complaint) {
         User teacher = userService.get(complaint.getSenderId());
         User dean = userService.get(complaint.getReceiverId());
-        User student = userService.get(complaint.getStudentId());
+        userService.get(complaint.getStudentId());
         if(teacher.getId() == DeletedUser.ID || dean.getId() == DeletedUser.ID){
             throw new OperationNotAllowed(" sending complaints to/from deleted account");
         }
@@ -49,9 +48,7 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     @Override
     public void subscribeToEvents(){
-        System.out.println("REGISTERED THE EVENT IN COMPLAINTS");
         eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
-                System.out.println("HIT THE EVENT IN COMPLAINTS");
                 int deletedId = eventData.getUserId();
                 List<TeacherComplaint> list = repository.findAll();
                 for(TeacherComplaint comp : list){

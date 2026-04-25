@@ -6,7 +6,6 @@ import exceptions.OperationNotAllowed;
 import model.domain.DeletedUser;
 import model.domain.Message;
 import model.domain.User;
-import model.factories.ServiceFactory;
 import model.repository.MessageRepository;
 import services.events.UserDeleteEvent;
 
@@ -14,9 +13,9 @@ public class MessageService extends BaseService<Message, MessageRepository>{
 
     private final UserService userService;
 
-    public MessageService() {
+    public MessageService(UserService userService) {
         super(MessageRepository.getInstance());
-        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        this.userService = userService;
         subscribeToEvents();
     }
 

@@ -33,7 +33,8 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.save(user);
     }
 
-    public void deleteUser(int id) {
+    @Override
+    public void delete(int id) {
         User userToDelete = this.get(id);
         this.eventSystem.publish(new UserDeleteEvent(userToDelete));
         repository.delete(id);
@@ -62,7 +63,6 @@ public class UserService extends BaseService<User, UserRepository> {
     @Override
     public void subscribeToEvents() {
         // leave it for now, needed to put it here beacuse every service implements IObserver
-        throw new UnsupportedOperationException("Unimplemented method 'subscribeToEvents'");
     }
 
 }

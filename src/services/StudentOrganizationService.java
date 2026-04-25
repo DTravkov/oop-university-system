@@ -7,7 +7,6 @@ import model.domain.DeletedUser;
 import model.domain.Student;
 import model.domain.StudentOrganization;
 import model.domain.User;
-import model.factories.ServiceFactory;
 import model.repository.StudentOrganizationRepository;
 import services.events.UserDeleteEvent;
 
@@ -15,9 +14,9 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
 
     private final UserService userService;
 
-    public StudentOrganizationService() {
+    public StudentOrganizationService(UserService userService) {
         super(StudentOrganizationRepository.getInstance());
-        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        this.userService = userService;
         subscribeToEvents();
     }
 

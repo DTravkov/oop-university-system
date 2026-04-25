@@ -103,7 +103,7 @@ public class UserApp {
     private static void deleteUser(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
         System.out.println(userService.getAll().stream().map(user -> user.getId()).toList());
-        userService.deleteUser(id);
+        userService.delete(id);
         System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
         System.out.println(userService.getAll());
     }

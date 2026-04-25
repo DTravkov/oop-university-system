@@ -6,16 +6,15 @@ import model.domain.Course;
 import model.domain.Teacher;
 import model.domain.User;
 import model.enumeration.TeacherType;
-import model.factories.ServiceFactory;
 import model.repository.CourseRepository;
 import services.events.UserDeleteEvent;
 
 public class CourseService extends BaseService<Course, CourseRepository>  {
 
     private final UserService userService;
-    public CourseService() {
+    public CourseService(UserService userService) {
         super(CourseRepository.getInstance());
-        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        this.userService = userService;
         subscribeToEvents();
     }
 

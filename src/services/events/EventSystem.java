@@ -35,8 +35,15 @@ public class EventSystem {
 
     public void publish(Event event) {
         FieldValidator.requireNonNull(event, "Event is required");
-        for(Consumer<Event> consumer : handlers.get(event.getClass())){
-            consumer.accept(event);
+        List<Consumer<Event>> list = handlers.get(event.getClass());
+        if(list == null || list.isEmpty()){
+            return;
+        }
+        for(Consumer<Event> handler : handlers.get(event.getClass())){
+            if(handler != null){
+                handler.accept(event);
+            }
+            
         }
         
     }
