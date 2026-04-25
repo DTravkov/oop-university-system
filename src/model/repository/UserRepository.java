@@ -35,10 +35,4 @@ public class UserRepository extends Repository<User> {
                 .toList();
     }
 
-    public Map<Integer, User> getData(){
-        return data;
-    }
-
-
-
 }
