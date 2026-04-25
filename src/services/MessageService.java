@@ -42,10 +42,16 @@ public class MessageService extends BaseService<Message, MessageRepository>{
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            this.getAllBySenderId(event.getUserId()).forEach(msg -> {
-                msg.setSenderId(DeletedUser.ID);
-                repository.save(msg);
-            });
+            int deletedUserId = event.getUserId();
+            List<Message> list = this.getAll();
+            for(Message msg : list){
+                if(msg.getSenderId() == deletedUserId){
+                    msg.setSenderId(DeletedUser.ID);
+                }
+                if(msg.getReceiverId() == deletedUserId){
+                    msg.setReceiverId(DeletedUser.ID);
+                }
+            }
         });
     }
 }
