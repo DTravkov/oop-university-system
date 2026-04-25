@@ -24,8 +24,14 @@ public class Teacher extends Employee {
 	public TeacherType getType() {
 		return type;
 	}
+
 	public void setType(TeacherType type) {
 		this.type = type;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString().replace("]", ", type="+getType()+"]");
 	}
 
 }

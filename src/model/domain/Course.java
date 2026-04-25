@@ -1,5 +1,7 @@
 package model.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import model.enumeration.CourseType;
@@ -12,6 +14,8 @@ public class Course extends SerializableModel{
     private String description;
     private int credits;
     private CourseType type;
+	private List<Integer> lectureTeachers = new ArrayList<>();
+	private List<Integer> practiceTeachers = new ArrayList<>();
 
 	public Course(String name, String description, int credits, CourseType type) {
 		this.name = name;
@@ -52,11 +56,39 @@ public class Course extends SerializableModel{
 		this.type = type;
 	}
 
+	
+
+	public List<Integer> getLectureTeachers() {
+		return lectureTeachers;
+	}
+
+	public void addLectureTeacher(int lectureTeacherId) {
+		this.lectureTeachers.add(lectureTeacherId);
+	}
+
+	public List<Integer> getPracticeTeachers() {
+		return practiceTeachers;
+	}
+
+	public void addPracticeTeacher(int practiceTeacherId) {
+		this.practiceTeachers.add(practiceTeacherId);
+	}
+
+	public void removeLectureTeacher(int lectureTeacherId) {
+		this.lectureTeachers.remove(this.lectureTeachers.indexOf(lectureTeacherId));
+	}
+
+	public void removePracticeTeacher(int practiceTeacherId) {
+		this.practiceTeachers.remove(this.practiceTeachers.indexOf(practiceTeacherId));
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
 		Course course = (Course) o;
-		if(this.id != 0 && course.getId() != 0) return this.id == course.getId();
+		if (this.id != 0 && course.getId() != 0) {
+			return this.id == course.getId();
+		}
 		return Objects.equals(name, course.name);
 	}
 

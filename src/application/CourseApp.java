@@ -1,23 +1,31 @@
 package application;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.Course;
+import model.domain.Teacher;
+import model.domain.User;
 import model.enumeration.CourseType;
+import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
+import model.enumeration.UserRole;
 import services.CourseService;
 import services.LanguageService;
+import services.UserService;
 import utils.UIFields;
 
 public class CourseApp {
 
     private static final CourseService courseService = new CourseService();
+    private static final UserService userService = new UserService();
 
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 5);
+            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 7);
 
             try {
                 switch (choice) {
@@ -28,12 +36,18 @@ public class CourseApp {
                         getCourseById(scanner);
                         break;
                     case "3":
-                        getAllCourses();
+                        printCourses();
                         break;
                     case "4":
                         deleteCourse(scanner);
                         break;
                     case "5":
+                        addTeacherToCourse(scanner);
+                        break;
+                    case "6":
+                        getCourseTeacherList(scanner);
+                        break;
+                    case "7":
                         return;
                     default:
                         System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
@@ -50,7 +64,9 @@ public class CourseApp {
         System.out.println("2. Get course by id");
         System.out.println("3. " + LanguageService.translate(UIMessages.VIEW_ALL));
         System.out.println("4. Delete course");
-        System.out.println("5. " + LanguageService.translate(UIMessages.EXIT));
+        System.out.println("5. " + "Add teacher to a course");
+        System.out.println("6. " + "Get list of teachers for a course");
+        System.out.println("7. " + LanguageService.translate(UIMessages.EXIT));
     }
 
     private static void createCourse(Scanner scanner) {
@@ -88,14 +104,64 @@ public class CourseApp {
         }
     }
 
+    private static void addTeacherToCourse(Scanner scanner) {
+        printCourses();
+        int courseId = UIFields.readInt(scanner, UIMessages.COURSE_ID);
+        printTeachers();
+        int teacherId = UIFields.readInt(scanner, UIMessages.TEACHER_ID);
+        String teacherTypeId = UIFields.readChoice(scanner, UIMessages.COURSE_TEACHER_TYPE, 1, 2);
+
+        TeacherType type = teacherTypeId.equals("1")  ? TeacherType.LECTURE : TeacherType.PRACTICE;
+
+        System.out.println(type);
+
+        courseService.addTeacher(courseId, teacherId, type);
+
+        System.out.println(courseService.get(courseId));
+        System.out.println(courseService.get(courseId).getLectureTeachers());
+        System.out.println(courseService.get(courseId).getPracticeTeachers());
+    }
+
     private static void getCourseById(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.COURSE_ID);
         System.out.println(courseService.get(id));
     }
 
-    private static void getAllCourses() {
+    private static void getCourseTeacherList(Scanner scanner) {
+        int courseId = UIFields.readInt(scanner, UIMessages.COURSE_ID);
+        Course course = courseService.get(courseId);
+        System.out.println("Lecturer IDs : " + course.getLectureTeachers());
+        System.out.println("Practice Teacher IDs : " + course.getPracticeTeachers());
+    }
+
+    private static void printCourses() {
         System.out.println(courseService.getAll());
     }
+
+    private static void printTeachers() {
+        System.out.println("--- Lecturers ---");
+        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+            Teacher t = (Teacher) u;
+            if(t.isLecturer()){
+                System.out.println(t);
+            }
+        }
+        System.out.println("--- Practice teachers ---");
+        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+            Teacher t = (Teacher) u;
+            if(t.isPractice()){
+                System.out.println(t);
+            }
+        }
+        System.out.println("--- Both ---");
+        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+            Teacher t = (Teacher) u;
+            if(t.isLecturer() && t.isPractice()){
+                System.out.println(t);
+            }
+        }
+    }
+
 
     private static void deleteCourse(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.COURSE_ID);
