@@ -39,6 +39,8 @@ public enum UIMessages {
     LECTURER_ID("input.lecturer_id"),
     TEACHER_ID("input.teacher_id"),
     PRACTICE_ID("input.practice_id"),
+    ENROLLMENT_ID("input.enrollment_id"),
+    POINTS_TO_ADD("input.points_to_add"),
     COURSE_ID("input.course_id"),
     SENDER_ID("input.sender_id"),
     RECEIVER_ID("input.receiver_id"),
@@ -80,6 +82,7 @@ public enum UIMessages {
     ERR_FIELD_REQUIRED("field_required"),
     ERR_FIELD_POSITIVE("field_positive"),
     ERR_FIELD_NON_NULL("field_non_null"),
+    ERR_FIELD_SINGLE_WORD("field_single_word"),
     ERR_FIELD_IN_RANGE("field_in_range"),
     ERR_IMMUTABLE_ID("err.immutable_id");
 

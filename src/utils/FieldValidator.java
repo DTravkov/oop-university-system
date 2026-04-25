@@ -4,6 +4,7 @@ import exceptions.FieldNotPositiveException;
 import exceptions.FieldNullException;
 import exceptions.FieldOutOfRangeException;
 import exceptions.FieldRequiredException;
+import exceptions.FieldSingleWordException;
 
 public final class FieldValidator {
 
@@ -31,6 +32,14 @@ public final class FieldValidator {
     public static void requireInRange(double value, double min, double max, String fieldName) {
         if (Double.compare(value, min) < 0 || Double.compare(value, max) > 0) {
             throw new FieldOutOfRangeException(fieldName);
+        }
+    }
+
+    public static void requireSingleWord(String value, String fieldName) {
+        requireNonBlank(value, fieldName);
+        String trimmed = value.trim();
+        if (trimmed.contains(" ") || trimmed.contains("\t")) {
+            throw new FieldSingleWordException(fieldName);
         }
     }
 }

@@ -40,6 +40,20 @@ public class UIFields {
         }
     }
 
+    public static double readDouble(Scanner scanner, UIMessages prompt) {
+        while (true) {
+            System.out.print(LanguageService.translate(prompt));
+            String input = scanner.nextLine().trim();
+
+            try {
+                double value = Double.parseDouble(input);
+                return Math.round(value * 100.0) / 100.0;
+            } catch (NumberFormatException e) {
+                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER));
+            }
+        }
+    }
+
     public static String readChoice(Scanner scanner, UIMessages prompt, int min, int max) {
         while (true) {
             System.out.print(LanguageService.translate(prompt));
@@ -86,14 +100,12 @@ public class UIFields {
     }
 
     public static UserRole readUserRole(Scanner scanner) {
-        while (true) {
-            System.out.print(LanguageService.translate(UIMessages.USER_ROLE));
-            String choice = scanner.nextLine().trim();
-            if(UserRole.isValidRole(choice)){
-                return UserRole.valueOf(choice.toUpperCase());
-            }
-            System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
-
+        UserRole[] roles = UserRole.values();
+        System.out.println(LanguageService.translate(UIMessages.USER_ROLE));
+        for (int i = 0; i < roles.length; i++) {
+            System.out.println((i + 1) + ". " + roles[i].name());
         }
+        String choice = readChoice(scanner, UIMessages.CHOOSE, 1, roles.length);
+        return roles[Integer.parseInt(choice) - 1];
     }
 }

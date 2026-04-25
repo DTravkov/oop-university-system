@@ -4,20 +4,19 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import exceptions.OperationNotAllowed;
-import model.domain.TeacherComplaint;
-import model.domain.User;
+import model.domain.*;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
-import services.ComplaintService;
-import services.LanguageService;
-import services.UserService;
+import model.factories.ServiceFactory;
+import services.*;
 import utils.UIFields;
 
 public class ComplaintApp {
 
-    private static final ComplaintService complaintService = new ComplaintService();
-    private static final UserService userService = new UserService();
+    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
+    private static final ComplaintService complaintService = serviceFactory.getService(ComplaintService.class);
+    private static final UserService userService = serviceFactory.getService(UserService.class);
 
     public static void startApp(Scanner scanner) {
         while (true) {

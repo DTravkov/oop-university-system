@@ -62,6 +62,30 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         return repository.findAllByCourseId(courseId);
     }
 
+    public void increasePoints(int enrollmentId, int pointTypeChoice, double pointsToAdd) {
+        if (pointsToAdd <= 0) {
+            throw new OperationNotAllowed(" increasing enrollment points with non-positive value");
+        }
+
+        Enrollment enrollment = this.get(enrollmentId);
+
+        switch (pointTypeChoice) {
+            case 1:
+                enrollment.setFirstAttestationPoint(enrollment.getFirstAttestationPoint() + pointsToAdd);
+                break;
+            case 2:
+                enrollment.setSecondAttestationPoint(enrollment.getSecondAttestationPoint() + pointsToAdd);
+                break;
+            case 3:
+                enrollment.setFinalExamPoint(enrollment.getFinalExamPoint() + pointsToAdd);
+                break;
+            default:
+                throw new OperationNotAllowed(" choosing invalid point type");
+        }
+
+        repository.save(enrollment);
+    }
+
 
 
     @Override

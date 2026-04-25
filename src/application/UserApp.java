@@ -4,18 +4,18 @@ import java.util.Date;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
-import exceptions.OperationNotAllowed;
-import model.domain.User;
+import model.domain.*;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
-import services.LanguageService;
-import services.UserService;
+import model.factories.ServiceFactory;
+import services.*;
 import utils.UIFields;
 
 public class UserApp {
 
-    private static final UserService userService = new UserService();
+    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
+    private static final UserService userService = serviceFactory.getService(UserService.class);
 
     public static void startApp(Scanner scanner) {
         while (true) {
@@ -65,15 +65,8 @@ public class UserApp {
     }
 
     private static void getAllUsersByRole(Scanner scanner) {
-        String role = UIFields.readNonEmpty(scanner, UIMessages.USER_ROLE);
-        role = role.toUpperCase();
-        try{
-            UserRole.valueOf(role);
-        }
-        catch (IllegalArgumentException e){
-            throw new OperationNotAllowed(" find role : " + role);
-        }
-        System.out.println(userService.getAllByRole(UserRole.valueOf(role)));
+        UserRole role = UIFields.readUserRole(scanner);
+        System.out.println(userService.getAllByRole(role));
     }
 
     private static void createUser(Scanner scanner) {
@@ -96,7 +89,6 @@ public class UserApp {
 
         System.out.println(LanguageService.translate(UIMessages.CREATED));
         System.out.println(user);
-        System.out.println(userService.getAll());
     }
 
     private static void getUserById(Scanner scanner) {

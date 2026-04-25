@@ -1,9 +1,5 @@
 package model.repository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-
 import model.domain.Course;
 
 public class CourseRepository extends Repository<Course> {

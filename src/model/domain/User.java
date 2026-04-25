@@ -3,6 +3,7 @@ package model.domain;
 import java.util.*;
 
 import utils.FieldValidator;
+import utils.StringUtils;
 
 public class User extends SerializableModel{
 	
@@ -22,11 +23,13 @@ public class User extends SerializableModel{
     	FieldValidator.requireNonBlank(password, "Password");
     	FieldValidator.requireNonBlank(name, "Name");
     	FieldValidator.requireNonBlank(surname, "Surname");
+		FieldValidator.requireSingleWord(name, "Name");
+		FieldValidator.requireSingleWord(surname, "Surname");
 		
     	this.login = login;
     	this.password = password;
-    	this.name = name;
-    	this.surname = surname;
+    	this.name = StringUtils.capitalize(name);
+    	this.surname = StringUtils.capitalize(surname);
     	this.isBanned = false;
     }
 
@@ -35,6 +38,8 @@ public class User extends SerializableModel{
 	}
 
 	public void setLogin(String login) {
+		FieldValidator.requireNonBlank(login, "Login");
+		FieldValidator.requireSingleWord(login, "Login");
 		this.login = login;
 	}
 
@@ -43,6 +48,8 @@ public class User extends SerializableModel{
 	}
 
 	public void setPassword(String password) {
+		FieldValidator.requireNonBlank(password, "Password");
+		FieldValidator.requireSingleWord(password, "Password");
 		this.password = password;
 	}
 
@@ -51,7 +58,9 @@ public class User extends SerializableModel{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		FieldValidator.requireNonBlank(name, "Name");
+		FieldValidator.requireSingleWord(name, "Name");
+		this.name = StringUtils.capitalize(name);
 	}
 
 	public String getSurname() {

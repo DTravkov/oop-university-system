@@ -3,18 +3,17 @@ package application;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
-import model.domain.Message;
-import model.domain.User;
+import model.domain.*;
 import model.enumeration.UIMessages;
-import services.LanguageService;
-import services.MessageService;
-import services.UserService;
+import model.factories.ServiceFactory;
+import services.*;
 import utils.UIFields;
 
 public class MessageApp {
 
-    private static final MessageService messageService = new MessageService();
-    private static final UserService userService = new UserService();
+    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
+    private static final MessageService messageService = serviceFactory.getService(MessageService.class);
+    private static final UserService userService = serviceFactory.getService(UserService.class);
 
     public static void startApp(Scanner scanner) {
         while (true) {

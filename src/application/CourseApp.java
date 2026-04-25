@@ -1,26 +1,22 @@
 package application;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
-import model.domain.Course;
-import model.domain.Teacher;
-import model.domain.User;
+import model.domain.*;
 import model.enumeration.CourseType;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
 import model.enumeration.UserRole;
-import services.CourseService;
-import services.LanguageService;
-import services.UserService;
+import model.factories.ServiceFactory;
+import services.*;
 import utils.UIFields;
 
 public class CourseApp {
 
-    private static final CourseService courseService = new CourseService();
-    private static final UserService userService = new UserService();
+    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
+    private static final CourseService courseService = serviceFactory.getService(CourseService.class);
+    private static final UserService userService = serviceFactory.getService(UserService.class);
 
     public static void startApp(Scanner scanner) {
         while (true) {
