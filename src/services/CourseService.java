@@ -6,16 +6,17 @@ import model.domain.Course;
 import model.domain.Teacher;
 import model.domain.User;
 import model.enumeration.TeacherType;
+import model.factories.ServiceFactory;
 import model.repository.CourseRepository;
-import services.events.Event;
-import services.events.UserDeletedEvent;
+import services.events.UserDeleteEvent;
 
 public class CourseService extends BaseService<Course, CourseRepository>  {
 
     private final UserService userService;
     public CourseService() {
         super(CourseRepository.getInstance());
-        this.userService = new UserService();
+        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        subscribeToEvents();
     }
 
     public void addTeacher(int courseId, int teacherId, TeacherType type){
@@ -57,24 +58,21 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
         repository.save(course);
 
     }
-
+    
     @Override
-    public void update(Event event){
-        if(event instanceof UserDeletedEvent e){
-            int deletedUserId = e.getUserId();
-            for(Course c : this.getAll()){
-                if(c.getPracticeTeachers().contains(deletedUserId)){
-                    c.removePracticeTeacher(deletedUserId);
-                    repository.save(c);
-                }
-                if(c.getLectureTeachers().contains(deletedUserId)){
-                    c.removeLectureTeacher(deletedUserId);
-                    repository.save(c);
-                }
-            }
-            
-        }
+    public void subscribeToEvents(){
+        eventSystem.subscribe(UserDeleteEvent.class, event -> {
+            int deletedUserId = event.getUserId();
+            this.getAll().forEach(course -> {
+                course.removePracticeTeacher(deletedUserId);
+                course.removeLectureTeacher(deletedUserId);
+                repository.save(course);
+            });
+        });
     }
+
+        
+    
 
 
 

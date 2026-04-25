@@ -3,16 +3,15 @@ package services;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
-import java.util.Collection;
+import java.util.List;
 
-import services.events.Event;
 import model.domain.Course;
 import model.domain.Enrollment;
-import model.domain.Student;
 import model.domain.User;
 import model.enumeration.UserRole;
+import model.factories.ServiceFactory;
 import model.repository.EnrollmentRepository;
-import services.events.UserDeletedEvent;
+import services.events.UserDeleteEvent;
 
 public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository>{
 
@@ -21,8 +20,9 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
 
     public EnrollmentService() {
         super(EnrollmentRepository.getInstance());
-        this.userService = new UserService();
-        this.courseService = new CourseService();
+        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        this.courseService = ServiceFactory.getInstance().getService(CourseService.class);
+        subscribeToEvents();
     }
 
    
@@ -54,11 +54,11 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         return enrollment;
     }
 
-    public Collection<Enrollment> getAllByStudentId(int studentId) {
+    public List<Enrollment> getAllByStudentId(int studentId) {
         return repository.findAllByStudentId(studentId);
     }
 
-    public Collection<Enrollment> getAllByCourseId(int courseId) {
+    public List<Enrollment> getAllByCourseId(int courseId) {
         return repository.findAllByCourseId(courseId);
     }
 
@@ -87,16 +87,14 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     }
 
 
-
     @Override
-    public void update(Event e) {
-        if(e instanceof UserDeletedEvent event){
-            if(event.getUserClass().equals(Student.class)){
-                for(Enrollment enr : repository.findAllByStudentId(event.getUserId())){
-                    repository.delete(enr.getId());
-                }
-            }
-        }
+    public void subscribeToEvents(){
+        eventSystem.subscribe(UserDeleteEvent.class, event -> {
+            int deletedUserId = event.getUserId();
+            this.getAllByStudentId(deletedUserId).forEach(enr -> {
+                repository.delete(enr.getId());
+            });
+        });
     }
 
 

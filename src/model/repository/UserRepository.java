@@ -1,7 +1,7 @@
 package model.repository;
 
-
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import model.domain.*;
 import model.enumeration.UserRole;
@@ -29,10 +29,14 @@ public class UserRepository extends Repository<User> {
         return findByLogin(login) != null;
     }
 
-    public Collection<User> findAllByRole(UserRole role) {
+    public List<User> findAllByRole(UserRole role) {
         return this.data.values().stream()
                 .filter(role::matches)
                 .toList();
+    }
+
+    public Map<Integer, User> getData(){
+        return data;
     }
 
 

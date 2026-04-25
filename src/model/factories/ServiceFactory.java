@@ -4,19 +4,22 @@ package model.factories;
 import services.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ServiceFactory {
 
-    private HashMap<Class<? extends IService>, IService> services = new HashMap<>();
+    private final Map<Class<? extends IService>, IService> services = new HashMap<>();
 
-    private static final ServiceFactory INSTANCE = new ServiceFactory();
+    private static ServiceFactory instance;
 
     private ServiceFactory() {
+        instance = this;
         services.put(UserService.class, new UserService());
         services.put(CourseService.class, new CourseService());
         services.put(EnrollmentService.class, new EnrollmentService());
         services.put(ComplaintService.class, new ComplaintService());
         services.put(MessageService.class, new MessageService());
+        services.put(StudentOrganizationService.class, new StudentOrganizationService());
     }
 
     public <T extends IService> T getService(Class<T> serviceClass){
@@ -24,6 +27,7 @@ public class ServiceFactory {
     }
 
     public static ServiceFactory getInstance(){
-        return INSTANCE;
+        if(instance == null) new ServiceFactory();
+        return instance;
     }
 }

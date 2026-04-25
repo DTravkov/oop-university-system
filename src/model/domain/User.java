@@ -68,6 +68,8 @@ public class User extends SerializableModel{
 	}
 
 	public void setSurname(String surname) {
+		FieldValidator.requireNonBlank(name, "Surname");
+		FieldValidator.requireSingleWord(name, "Surname");
 		this.surname = surname;
 	}
 

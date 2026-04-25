@@ -18,7 +18,7 @@ public class UIFields {
                 return input;
             }
 
-            System.out.println(LanguageService.translate(UIMessages.INPUT_EMPTY));
+            System.out.println(LanguageService.translate(UIMessages.MSG_INPUT_EMPTY));
         }
     }
 
@@ -35,7 +35,7 @@ public class UIFields {
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER));
+                System.out.println(LanguageService.translate(UIMessages.MSG_INPUT_NUMBER));
             }
         }
     }
@@ -49,7 +49,7 @@ public class UIFields {
                 double value = Double.parseDouble(input);
                 return Math.round(value * 100.0) / 100.0;
             } catch (NumberFormatException e) {
-                System.out.println(LanguageService.translate(UIMessages.INPUT_NUMBER));
+                System.out.println(LanguageService.translate(UIMessages.MSG_INPUT_NUMBER));
             }
         }
     }
@@ -65,7 +65,7 @@ public class UIFields {
                 }
             } catch (NumberFormatException ignored) {
             }
-            System.out.println(LanguageService.translate(UIMessages.INPUT_RANGE));
+            System.out.println(LanguageService.translate(UIMessages.MSG_INPUT_RANGE));
         }
     }
 
@@ -77,13 +77,13 @@ public class UIFields {
             if (input.equals("y")) return true;
             if (input.equals("n")) return false;
 
-            System.out.println(LanguageService.translate(UIMessages.INPUT_YES_NO));
+            System.out.println(LanguageService.translate(UIMessages.MSG_INPUT_YES_NO));
         }
     }
     
     public static TeacherType askTeacherType(Scanner scanner) {
         while (true) {
-            System.out.print(LanguageService.translate(UIMessages.TEACHER_TYPE));
+            System.out.print(LanguageService.translate(UIMessages.INPUT_TEACHER_TYPE));
             String choice = scanner.nextLine().trim();
 
             switch (choice) {
@@ -94,18 +94,18 @@ public class UIFields {
                 case "3":
                     return TeacherType.BOTH;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
             }
         }
     }
 
     public static UserRole readUserRole(Scanner scanner) {
         UserRole[] roles = UserRole.values();
-        System.out.println(LanguageService.translate(UIMessages.USER_ROLE));
+        System.out.println(LanguageService.translate(UIMessages.INPUT_USER_ROLE));
         for (int i = 0; i < roles.length; i++) {
             System.out.println((i + 1) + ". " + roles[i].name());
         }
-        String choice = readChoice(scanner, UIMessages.CHOOSE, 1, roles.length);
+        String choice = readChoice(scanner, UIMessages.MENU_CHOOSE, 1, roles.length);
         return roles[Integer.parseInt(choice) - 1];
     }
 }

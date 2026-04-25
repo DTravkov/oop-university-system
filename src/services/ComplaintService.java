@@ -1,6 +1,5 @@
 package services;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
@@ -9,9 +8,9 @@ import model.domain.DeletedUser;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
+import model.factories.ServiceFactory;
 import model.repository.ComplaintRepository;
-import services.events.Event;
-import services.events.UserDeletedEvent;
+import services.events.UserDeleteEvent;
 
 public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRepository>{
 
@@ -19,12 +18,14 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     public ComplaintService() {
         super(ComplaintRepository.getInstance());
-        this.userService = new UserService();
+        this.userService = ServiceFactory.getInstance().getService(UserService.class);
+        subscribeToEvents();
     }
 
     public void sendComplaint(TeacherComplaint complaint) {
         User teacher = userService.get(complaint.getSenderId());
         User dean = userService.get(complaint.getReceiverId());
+        User student = userService.get(complaint.getStudentId());
         if(teacher.getId() == DeletedUser.ID || dean.getId() == DeletedUser.ID){
             throw new OperationNotAllowed(" sending complaints to/from deleted account");
         }
@@ -34,30 +35,43 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
         if(!dean.getClass().equals(Dean.class)){
             throw new OperationNotAllowed(" sending complaints to non-dean account");
         }
-        complaint.setSenderId(teacher.getId());
-        complaint.setReceiverId(dean.getId());
+
         repository.save(complaint);
     }
 
     public List<TeacherComplaint> getAllByTeacherId(int teacherId) {
-        User teacher = userService.get(teacherId);
-        List<TeacherComplaint> complaints = new ArrayList<>(repository.findAllByTeacherId(teacher.getId()));
-        return complaints;
+        return repository.findAllByTeacherId(teacherId);
     }
 
     public List<TeacherComplaint> getAllByDeanId(int deanId) {
-        User dean = userService.get(deanId);
-        List<TeacherComplaint> complaints = new ArrayList<>(repository.findAllByDeanId(dean.getId()));
-        return complaints;
+        return repository.findAllByDeanId(deanId);
     }
 
     @Override
-    public void update(Event e) {
-        if(e instanceof UserDeletedEvent event){
-            for(TeacherComplaint c: repository.findAllByDeanId(event.getUserId())){
-                c.setSenderId(DeletedUser.ID);
-                repository.save(c);
-            }
+    public void subscribeToEvents(){
+        System.out.println("REGISTERED THE EVENT IN COMPLAINTS");
+        eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
+                System.out.println("HIT THE EVENT IN COMPLAINTS");
+                int deletedId = eventData.getUserId();
+                List<TeacherComplaint> list = repository.findAll();
+                for(TeacherComplaint comp : list){
+                    if(comp.getSenderId() == deletedId){
+                        this.delete(comp.getId());
+                        continue;
+                    }
+                    if(comp.getReceiverId() == deletedId){
+                        this.delete(comp.getId());
+                        continue;
+                    }
+                    if(comp.getStudentId() == deletedId){
+                        this.delete(comp.getId());
+                        continue;
+                    }
+                }
+
         }
+    );
+
     }
+
 }

@@ -1,10 +1,9 @@
 package services;
 
 import exceptions.AlreadyExists;
-import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import model.domain.DeletedUser;
 import model.domain.User;
@@ -12,15 +11,17 @@ import model.enumeration.TeacherType;
 import model.enumeration.UserRole;
 import model.factories.UserFactory;
 import model.repository.UserRepository;
-import services.events.UserDeletedEvent;
+import services.events.UserDeleteEvent;
 
 
 public class UserService extends BaseService<User, UserRepository> {
 
     public UserService() {
         super(UserRepository.getInstance());
-        registerDeletedUser();
-        // we need to register the deleted user as a placholder for deleted users.
+        // we need to register the deleted user object as a placholder for deleted users.
+        if(!repository.exists(DeletedUser.ID)){
+            registerDeletedUser();
+        }
     }
 
 
@@ -32,11 +33,9 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.save(user);
     }
 
-    public void delete(int id) {
-        if(!repository.exists(id)){
-            throw new DoesNotExist(" user with id " + id);
-        }
-        this.eventSystem.publish(new UserDeletedEvent(this.get(id)));
+    public void deleteUser(int id) {
+        User userToDelete = this.get(id);
+        this.eventSystem.publish(new UserDeleteEvent(userToDelete));
         repository.delete(id);
     }
 
@@ -51,12 +50,19 @@ public class UserService extends BaseService<User, UserRepository> {
         return user;
     }
 
-    public Collection<User> getAllByRole(UserRole role) {
+    public List<User> getAllByRole(UserRole role) {
         return repository.findAllByRole(role);
     }
 
     private void registerDeletedUser(){
         repository.save(new DeletedUser());
+    }
+
+
+    @Override
+    public void subscribeToEvents() {
+        // leave it for now, needed to put it here beacuse every service implements IObserver
+        throw new UnsupportedOperationException("Unimplemented method 'subscribeToEvents'");
     }
 
 }

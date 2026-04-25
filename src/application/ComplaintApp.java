@@ -21,7 +21,7 @@ public class ComplaintApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 6);
+            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
@@ -43,7 +43,7 @@ public class ComplaintApp {
                     case "6":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
                 System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
@@ -57,22 +57,22 @@ public class ComplaintApp {
         System.out.println("2. Delete complaint by id");
         System.out.println("3. List complaints by teacher id");
         System.out.println("4. List complaints by dean id");
-        System.out.println("5. " + LanguageService.translate(UIMessages.VIEW_ALL));
-        System.out.println("6. " + LanguageService.translate(UIMessages.EXIT));
+        System.out.println("5. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
+        System.out.println("6. " + LanguageService.translate(UIMessages.MENU_EXIT));
     }
 
     private static void sendComplaint(Scanner scanner) {
         printTeachers();
         printDeans();
 
-        int teacherId = UIFields.readInt(scanner, UIMessages.SENDER_ID);
-        int deanId = UIFields.readInt(scanner, UIMessages.RECEIVER_ID);
-        int urgencyChoice = UIFields.readInt(scanner, UIMessages.COMPLAINT_LEVEL);
+        int teacherId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
+        int deanId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
+        int urgencyChoice = UIFields.readInt(scanner, UIMessages.INPUT_COMPLAINT_LEVEL);
 
         printStudents();
 
-        int studentId = UIFields.readInt(scanner, UIMessages.STUDENT_ID);
-        String content = UIFields.readNonEmpty(scanner, UIMessages.MESSAGE_CONTENT);
+        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        String content = UIFields.readNonEmpty(scanner, UIMessages.INPUT_MESSAGE_CONTENT);
 
         userService.get(teacherId);
         userService.get(deanId);
@@ -97,25 +97,25 @@ public class ComplaintApp {
         TeacherComplaint complaint = new TeacherComplaint(urgencyLevel,teacherId, deanId, studentId, content);
         complaintService.sendComplaint(complaint);
 
-        System.out.println(LanguageService.translate(UIMessages.SENT));
+        System.out.println(LanguageService.translate(UIMessages.MSG_SENT));
         System.out.println("Created: " + complaint);
         System.out.println("Dean addressed complaints: " + complaintService.getAllByDeanId(deanId));
     }
 
     private static void deleteComplaint(Scanner scanner) {
-        int complaintId = UIFields.readInt(scanner, UIMessages.MESSAGE_ID);
+        int complaintId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
         complaintService.delete(complaintId);
 
-        System.out.println(LanguageService.translate(UIMessages.DELETED));
+        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
     }
 
     private static void getAllComplaintsByTeacher(Scanner scanner) {
-        int teacherId = UIFields.readInt(scanner, UIMessages.SENDER_ID);
+        int teacherId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
         System.out.println(complaintService.getAllByTeacherId(teacherId));
     }
 
     private static void getAllComplaintsByDean(Scanner scanner) {
-        int deanId = UIFields.readInt(scanner, UIMessages.RECEIVER_ID);
+        int deanId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
         System.out.println(complaintService.getAllByDeanId(deanId));
     }
 

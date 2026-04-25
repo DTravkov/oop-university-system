@@ -59,27 +59,31 @@ public class Course extends SerializableModel{
 	
 
 	public List<Integer> getLectureTeachers() {
-		return lectureTeachers;
+		return List.copyOf(lectureTeachers);
 	}
 
 	public void addLectureTeacher(int lectureTeacherId) {
-		this.lectureTeachers.add(lectureTeacherId);
+		if (!this.lectureTeachers.contains(lectureTeacherId)) {
+			this.lectureTeachers.add(lectureTeacherId);
+		}
 	}
 
 	public List<Integer> getPracticeTeachers() {
-		return practiceTeachers;
+		return List.copyOf(practiceTeachers);
 	}
 
 	public void addPracticeTeacher(int practiceTeacherId) {
-		this.practiceTeachers.add(practiceTeacherId);
+		if (!this.practiceTeachers.contains(practiceTeacherId)) {
+			this.practiceTeachers.add(practiceTeacherId);
+		}
 	}
 
 	public void removeLectureTeacher(int lectureTeacherId) {
-		this.lectureTeachers.remove(this.lectureTeachers.indexOf(lectureTeacherId));
+		this.lectureTeachers.remove(Integer.valueOf(lectureTeacherId));
 	}
 
 	public void removePracticeTeacher(int practiceTeacherId) {
-		this.practiceTeachers.remove(this.practiceTeachers.indexOf(practiceTeacherId));
+		this.practiceTeachers.remove(Integer.valueOf(practiceTeacherId));
 	}
 
 	@Override

@@ -19,4 +19,6 @@ public interface IRepository<T extends SerializableModel> {
 
     void delete(int id);
 
+    boolean exists(int id);
+
 }

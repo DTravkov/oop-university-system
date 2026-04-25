@@ -1,54 +1,47 @@
 package services.events;
 
-import exceptions.AlreadyExists;
-import exceptions.DoesNotExist;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import utils.FieldValidator;
 
 
-public class EventSystem implements ISubject{
+public class EventSystem {
+
+    private static final EventSystem INSTANCE = new EventSystem();
+    private final Map<Class<? extends Event>, List<Consumer<Event>>> handlers = new HashMap<>();
+
+    private EventSystem() {}
+
+    public <T extends Event> void subscribe(Class<T> eventType, Consumer<T> handler) {
+        FieldValidator.requireNonNull(eventType, "Event type is required");
+        FieldValidator.requireNonNull(handler, "Handler is required");
 
 
-    private static List<IObserver> subscribers = new ArrayList<>();
-    private static EventSystem instance = new EventSystem();
-    
-    private EventSystem(){}
-
-    @Override
-    public void subscribe(IObserver observer) {
-        if(observer == null) 
-            throw new NullPointerException("Cannot subscribe null observer");
-        if(subscribers.contains(observer))
-            throw new AlreadyExists(" subscriber in EventSystem");
-        subscribers.add(observer);
-    }
-
-    @Override
-    public void unsubscribe(IObserver observer) {
-        if(observer == null) 
-            throw new NullPointerException("Cannot unsubscribe null observer");
-        if(!subscribers.contains(observer))
-            throw new DoesNotExist(" subscriber in EventSystem");
-        subscribers.remove(observer);
-    }
-
-    @Override
-    public void publish(Event updateData) {
-        for(IObserver subscriber : subscribers){
-            try{
-                subscriber.update(updateData);
-            }
-            catch (Exception e){
-                System.err.println(e.getMessage());
-            }
+        @SuppressWarnings("unchecked")
+        Consumer<Event> eventHandler = (Consumer<Event>) handler;
+        
+        if(handlers.get(eventType) == null){
+            handlers.put(eventType, new ArrayList<>());
         }
-            
+        List<Consumer<Event>> list = handlers.get(eventType);
+        list.add(eventHandler);
+
+
+    }
+
+    public void publish(Event event) {
+        FieldValidator.requireNonNull(event, "Event is required");
+        for(Consumer<Event> consumer : handlers.get(event.getClass())){
+            consumer.accept(event);
+        }
+        
     }
 
     public static EventSystem getInstance() {
-        if(instance == null) instance = new EventSystem();
-        return instance;
+        return INSTANCE;
     }
-
 }

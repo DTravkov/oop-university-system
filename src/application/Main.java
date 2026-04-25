@@ -16,7 +16,7 @@ public class Main {
 
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.CHOOSE, 1, 6);
+            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 7);
 
             switch (choice) {
                 case "1":
@@ -35,11 +35,14 @@ public class Main {
                     ComplaintApp.startApp(scanner);
                     break;
                 case "6":
-                    System.out.println(LanguageService.translate(UIMessages.GOODBYE));
+                    StudentOrganizationApp.startApp(scanner);
+                    break;
+                case "7":
+                    System.out.println(LanguageService.translate(UIMessages.AUTH_GOODBYE));
                     scanner.close();
                     return;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
             }
         }
     }
@@ -51,7 +54,8 @@ public class Main {
         System.out.println("3. Enrollment App");
         System.out.println("4. Message App");
         System.out.println("5. Teacher Complaint App");
-        System.out.println("6. " + LanguageService.translate(UIMessages.EXIT));
+        System.out.println("6. Student Org. App");
+        System.out.println("7. " + LanguageService.translate(UIMessages.MENU_EXIT));
     }
 
     private static void askLanguage(Scanner scanner){
@@ -60,7 +64,7 @@ public class Main {
         System.out.println("2. Қазақ тілі");
         System.out.println("3. Русский язык");
         while(true){
-            String choice = UIFields.readChoice(scanner, UIMessages.CHANGE_LANG, 1, 3);
+            String choice = UIFields.readChoice(scanner, UIMessages.AUTH_CHANGE_LANG, 1, 3);
             switch (choice) {
                 case "1":
                     LanguageService.updateLanguage(LanguagePreference.EN);
@@ -72,7 +76,7 @@ public class Main {
                     LanguageService.updateLanguage(LanguagePreference.RU);
                     return;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.INVALID_CHOICE));
+                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
                     break;
             }
         }

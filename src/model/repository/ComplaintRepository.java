@@ -3,7 +3,7 @@ package model.repository;
 
 import model.domain.TeacherComplaint;
 
-import java.util.Collection;
+import java.util.List;
 
 
 public class ComplaintRepository extends Repository<TeacherComplaint> {
@@ -18,13 +18,13 @@ public class ComplaintRepository extends Repository<TeacherComplaint> {
         return INSTANCE;
     }
 
-    public Collection<TeacherComplaint> findAllByTeacherId(int teacherId){
+    public List<TeacherComplaint> findAllByTeacherId(int teacherId){
         return this.data.values().stream()
                 .filter(entity -> entity.getSenderId() == teacherId)
                 .toList();
     }
 
-    public Collection<TeacherComplaint> findAllByDeanId(int deanId){
+    public List<TeacherComplaint> findAllByDeanId(int deanId){
         return this.data.values().stream()
                 .filter(entity -> entity.getReceiverId() == deanId)
                 .toList();

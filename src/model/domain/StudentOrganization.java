@@ -1,5 +1,7 @@
 package model.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import utils.FieldValidator;
@@ -11,6 +13,7 @@ public class StudentOrganization extends SerializableModel {
     private String name;
     private String description;
     private int presidentId;
+    private final List<Integer> members;
 
     public StudentOrganization(String name, String description, int presidentId) {
         FieldValidator.requireNonBlank(name, "Organization name");
@@ -19,6 +22,7 @@ public class StudentOrganization extends SerializableModel {
         this.name = name;
         this.description = description;
         this.presidentId = presidentId;
+        this.members = new ArrayList<>();
     }
 
     public String getName() {
@@ -45,6 +49,21 @@ public class StudentOrganization extends SerializableModel {
         this.presidentId = presidentId;
     }
 
+    public List<Integer> getMembers() {
+        return List.copyOf(members);
+    }
+
+    public void addMember(int studentId) {
+        if (!this.members.contains(studentId)) {
+            this.members.add(studentId);
+        }
+    }
+
+    public void removeMember(int studentId) {
+        this.members.remove(Integer.valueOf(studentId));
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -64,6 +83,7 @@ public class StudentOrganization extends SerializableModel {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", presidentId=" + presidentId +
+                ", members=" + members +
                 '}';
     }
 }
