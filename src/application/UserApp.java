@@ -25,16 +25,16 @@ public class UserApp {
             try {
                 switch (choice) {
                     case "1":
-                        createUser(scanner);
+                        registerUser(scanner);
                         break;
                     case "2":
-                        getUserById(scanner);
+                        printUserById(scanner);
                         break;
                     case "3":
                         getAllUsersByRole(scanner);
                         break;
                     case "4":
-                        getAllUsers();
+                        printAllUsers();
                         break;
                     case "5":
                         deleteUser(scanner);
@@ -69,7 +69,7 @@ public class UserApp {
         System.out.println(userService.getAllByRole(role));
     }
 
-    private static void createUser(Scanner scanner) {
+    private static void registerUser(Scanner scanner) {
         UserRole role = UIFields.readUserRole(scanner);
         String login = UIFields.readNonEmpty(scanner, UIMessages.INPUT_LOGIN);
         String password = UIFields.readNonEmpty(scanner, UIMessages.INPUT_PASSWORD);
@@ -85,24 +85,24 @@ public class UserApp {
             teacherType = UIFields.askTeacherType(scanner);
         }
 
-        User user = userService.create(role, login, password, name, surname, admissionDate, teacherType);
+        User user = userService.registerUser(role, login, password, name, surname, admissionDate, teacherType);
 
         System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
         System.out.println(user);
     }
 
-    private static void getUserById(Scanner scanner) {
+    private static void printUserById(Scanner scanner) {
         int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
         System.out.println(userService.get(id));
     }
 
-    private static void getAllUsers() {
+    private static void printAllUsers() {
         System.out.println(userService.getAll());
     }
 
     private static void deleteUser(Scanner scanner) {
+        printAllUsers();
         int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
-        System.out.println(userService.getAll().stream().map(user -> user.getId()).toList());
         userService.delete(id);
         System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
         System.out.println(userService.getAll());

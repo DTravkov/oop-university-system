@@ -41,8 +41,10 @@ public class MessageService extends BaseService<Message, MessageRepository>{
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
+
             int deletedUserId = event.getUserId();
             List<Message> list = this.getAll();
+
             for(Message msg : list){
                 if(msg.getSenderId() == deletedUserId){
                     msg.setSenderId(DeletedUser.ID);
@@ -51,6 +53,7 @@ public class MessageService extends BaseService<Message, MessageRepository>{
                     msg.setReceiverId(DeletedUser.ID);
                 }
             }
+            
         });
     }
 }

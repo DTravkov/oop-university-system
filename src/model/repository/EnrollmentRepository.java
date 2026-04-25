@@ -17,27 +17,20 @@ public class EnrollmentRepository extends Repository<Enrollment> {
 
 
     public Enrollment findByStudentIdAndCourseId(int studentId, int courseId) {
-        return this.data.values().stream()
-                .filter(entity -> entity.getStudentId() == studentId)
-                .filter(entity -> entity.getCourseId() == courseId)
-                .findFirst()
+        return this.findFirst(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId)
                 .orElse(null);
     }
 
-    public boolean exists(int studentId, int courseId) {
-        return this.findByStudentIdAndCourseId(studentId, courseId) != null;        
-    }
-
     public List<Enrollment> findAllByStudentId(int studentId) {
-        return this.data.values().stream()
-                .filter(entity -> entity.getStudentId() == studentId)
-                .toList();
+        return this.findAll(entity -> entity.getStudentId() == studentId);
     }
 
     public List<Enrollment> findAllByCourseId(int courseId) {
-        return this.data.values().stream()
-                .filter(entity -> entity.getCourseId() == courseId)
-                .toList();
+        return this.findAll(entity -> entity.getCourseId() == courseId);
+    }
+
+    public boolean exists(int studentId, int courseId) {
+        return this.exists(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId);
     }
 
 }

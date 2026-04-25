@@ -22,6 +22,8 @@ public class LanguageService {
 
     public static String translate(UIMessages msg, Object... args) {
         String pattern = getBundle().getString(msg.getKey());
+
+        
         if (args == null || args.length == 0) {
             return pattern;
         }
@@ -29,6 +31,7 @@ public class LanguageService {
     }
 
     public static String translate(String key) {
+        
         return getBundle().getString(key);
     }
 

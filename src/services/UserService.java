@@ -25,7 +25,7 @@ public class UserService extends BaseService<User, UserRepository> {
     }
 
 
-    public User create(UserRole role, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
+    public User registerUser(UserRole role, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
         if(repository.existsByLogin(login)){
             throw new AlreadyExists(" user with login " + login);
         }
@@ -57,12 +57,6 @@ public class UserService extends BaseService<User, UserRepository> {
 
     private void registerDeletedUser(){
         repository.save(new DeletedUser());
-    }
-
-
-    @Override
-    public void subscribeToEvents() {
-        // leave it for now, needed to put it here beacuse every service implements IObserver
     }
 
 }

@@ -23,6 +23,12 @@ public final class FieldValidator {
         }
     }
 
+    public static void requirePositive(double value, String fieldName) {
+        if (Double.compare(value, 0) <= 0) {
+            throw new FieldNotPositiveException(fieldName);
+        }
+    }
+
     public static void requireNonNull(Object value, String fieldName) {
         if (value == null) {
             throw new FieldNullException(fieldName);

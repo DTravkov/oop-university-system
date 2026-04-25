@@ -18,8 +18,19 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
         subscribeToEvents();
     }
 
-    public void addTeacher(int courseId, int teacherId, TeacherType type){
 
+    @Override
+    public Course create(Course course) {
+        if(repository.existsByName(course.getName())){
+            throw new AlreadyExists("course with the '" +  course.getName() + "' name");
+        }
+        return super.create(course);
+    }
+
+    public void addTeacher(int courseId, int teacherId, TeacherType type){
+        if(type == TeacherType.BOTH)
+            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
+        
         Course course = this.get(courseId);
         User teacher = userService.get(teacherId);
 
@@ -34,24 +45,16 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
         }
 
         if(type == TeacherType.LECTURE){
-            if(!checkedTeacher.isLecturer()){
-                throw new OperationNotAllowed("adding non-lecturer as a lecture teacher to a course");
-            }
             if(course.getLectureTeachers().contains(teacherId)){
                 throw new AlreadyExists(" teacher " + teacherId + " as a lecturer");
             }
             course.addLectureTeacher(teacherId);
         }
         else if(type == TeacherType.PRACTICE){
-            if(!checkedTeacher.isPractice()){
-                throw new OperationNotAllowed("adding non-practice as a practice teacher to a course");
-            }
             if(course.getPracticeTeachers().contains(teacherId)){
                 throw new AlreadyExists(" teacher " + teacherId + " as a practice teacher");
             }
             course.addPracticeTeacher(teacherId);
-        }else if(type == TeacherType.BOTH){
-            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
         }
 
         repository.save(course);

@@ -12,6 +12,7 @@ import model.domain.User;
 import model.enumeration.UserRole;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
+import utils.FieldValidator;
 
 public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository>{
 
@@ -28,7 +29,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
    
 
     @Override
-    public void create(Enrollment enrollment) {
+    public Enrollment create(Enrollment enrollment) {
         User student = userService.get(enrollment.getStudentId());
         Course course = courseService.get(enrollment.getCourseId());
 
@@ -40,10 +41,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new OperationNotAllowed(" enrolling the user, who is not a student. user id : "+ student.getId());
         }
 
-        enrollment.setStudentId(student.getId());
-        enrollment.setCourseId(course.getId());
-
-        repository.save(enrollment);
+        return repository.save(enrollment);
     }
 
     public Enrollment getByStudentIdAndCourseId(int studentId, int courseId) {
@@ -63,9 +61,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     }
 
     public void increasePoints(int enrollmentId, int pointTypeChoice, double pointsToAdd) {
-        if (pointsToAdd <= 0) {
-            throw new OperationNotAllowed(" increasing enrollment points with non-positive value");
-        }
+        FieldValidator.requirePositive(pointsToAdd, "Points increment");
 
         Enrollment enrollment = this.get(enrollmentId);
 

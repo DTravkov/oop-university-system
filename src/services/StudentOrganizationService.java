@@ -1,5 +1,7 @@
 package services;
 
+import java.util.List;
+
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
@@ -21,13 +23,13 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     }
 
     @Override
-    public void create(StudentOrganization org) {
+    public StudentOrganization create(StudentOrganization org) {
         if(repository.existsByName(org.getName())){
             throw new AlreadyExists("organization with name : "+ org.getName());
         }
         userService.get(org.getPresidentId());
         org.addMember(org.getPresidentId());
-        repository.save(org);
+        return repository.save(org);
     }
 
     public void addMember(int organizationId, int studentId) {
@@ -83,15 +85,23 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
+
             int deletedUserId = event.getUserId();
-            this.getAll().forEach(organization -> {
+            List<StudentOrganization> list = repository.findAll();
+            
+            for(StudentOrganization organization : list){
                 if(organization.getPresidentId() == deletedUserId){
                     this.removePresident(organization.getId());
+                    repository.save(organization);
                 }
                 else if(organization.getMembers().contains(deletedUserId)){
                     organization.removeMember(deletedUserId);
+                    repository.save(organization);
                 }
-            });
+            }
+
+            
+
         });
     }
 

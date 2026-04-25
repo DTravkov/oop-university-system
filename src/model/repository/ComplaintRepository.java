@@ -19,15 +19,11 @@ public class ComplaintRepository extends Repository<TeacherComplaint> {
     }
 
     public List<TeacherComplaint> findAllByTeacherId(int teacherId){
-        return this.data.values().stream()
-                .filter(entity -> entity.getSenderId() == teacherId)
-                .toList();
+        return this.findAll(entity -> entity.getSenderId() == teacherId);
     }
 
     public List<TeacherComplaint> findAllByDeanId(int deanId){
-        return this.data.values().stream()
-                .filter(entity -> entity.getReceiverId() == deanId)
-                .toList();
+        return this.findAll(entity -> entity.getReceiverId() == deanId);
     }
 
 }

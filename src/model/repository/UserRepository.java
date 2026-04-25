@@ -18,20 +18,16 @@ public class UserRepository extends Repository<User> {
     }
 
     public User findByLogin(String login){
-        return this.data.values().stream()
-                .filter(entity -> entity.getLogin().equals(login))
-                .findFirst()
-                .orElse(null);
+        return this.findFirst(user -> user.getLogin().equals(login))
+                                                     .orElse(null);
     }
 
     public boolean existsByLogin(String login) {
-        return findByLogin(login) != null;
+        return this.exists(user -> user.getLogin().equals(login));
     }
 
     public List<User> findAllByRole(UserRole role) {
-        return this.data.values().stream()
-                .filter(role::matches)
-                .toList();
+        return this.findAll(user -> UserRole.fromUser(user).equals(role));
     }
 
 }

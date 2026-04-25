@@ -2,6 +2,7 @@ package model.enumeration;
 
 import model.domain.Admin;
 import model.domain.Dean;
+import model.domain.DeletedUser;
 import model.domain.Employee;
 import model.domain.Manager;
 import model.domain.Student;
@@ -11,6 +12,7 @@ import model.domain.User;
 
 public enum UserRole {
     USER(User.class),
+    DELETED_USER(DeletedUser.class),
     STUDENT(Student.class),
     EMPLOYEE(Employee.class),
     TEACHER(Teacher.class),
@@ -38,6 +40,9 @@ public enum UserRole {
         }
         if(user.getClass().equals(Employee.class)){
             return EMPLOYEE;
+        }
+        if (user instanceof DeletedUser) {
+            return DELETED_USER;
         }
         if (user instanceof Student) {
             return STUDENT;

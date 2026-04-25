@@ -114,8 +114,8 @@ public class CourseApp {
         courseService.addTeacher(courseId, teacherId, type);
 
         System.out.println(courseService.get(courseId));
-        System.out.println(courseService.get(courseId).getLectureTeachers());
-        System.out.println(courseService.get(courseId).getPracticeTeachers());
+        System.out.println("Lecturer IDs : " + courseService.get(courseId).getLectureTeachers());
+        System.out.println("Practice Teacher IDs : " + courseService.get(courseId).getPracticeTeachers());
     }
 
     private static void getCourseById(Scanner scanner) {

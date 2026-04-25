@@ -18,15 +18,11 @@ public class MessageRepository extends Repository<Message> {
     }
 
     public List<Message> findAllBySenderId(int senderId){
-        return this.data.values().stream()
-                .filter(entity -> entity.getSenderId() == senderId)
-                .toList();
+        return this.findAll(entity -> entity.getSenderId() == senderId);
     }
 
     public List<Message> findAllByReceiverId(int receiverId){
-        return this.data.values().stream()
-                .filter(entity -> entity.getReceiverId() == receiverId)
-                .toList();
+        return this.findAll(entity -> entity.getReceiverId() == receiverId);
     }
 
 }

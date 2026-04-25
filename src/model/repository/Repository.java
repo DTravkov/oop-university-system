@@ -8,8 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 
-public class Repository<T extends SerializableModel> implements IRepository<T> {
+public class Repository<T extends SerializableModel> {
 
     private final String PATH;
     private IDGenerator idGenerator;
@@ -22,7 +23,6 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         load();
     }
 
-    @Override
     public T save(T entity) {
         // if entity's id == 0, it means that the enitity is new,.
         // therefore, it needs unique id, that generator provides
@@ -37,7 +37,7 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         return entity;
     }
 
-    @Override
+    
     public void load() {
         File file = new File(PATH);
 
@@ -49,9 +49,9 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         this.data = readFromFile();
     }
 
-    @Override
+    
     public void update(T entity, T newEntity) {
-        if (!exists(entity.getId())) {
+        if (!exists(e -> e.getId() == entity.getId())) {
             throw new NoSuchElementException("Cannot update: Entity with ID " + entity.getId() + " not found");
         }
         int id = entity.getId();
@@ -60,29 +60,55 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
         writeToFile();
     }
 
-    @Override
-    public Optional<T> find(int id) {
-        return Optional.ofNullable(data.get(id));
-    }
-
     
-    @Override
-    public List<T> findAll() {
-        return new ArrayList<>(data.values());
-    }
-
-    @Override
     public void delete(int id) {
-        if (!exists(id)) {
+        if (!exists(e -> e.getId() == id)) {
             throw new NoSuchElementException("Cannot delete: Entity with ID " + id + " not found");
         }
         data.remove(id);
         writeToFile();
     }
 
-    public boolean exists(int id) {
-        return data.containsKey(id);
+
+    
+
+    protected Optional<T> findFirst(Predicate<T> predicate) {
+        return this.data.values().stream()
+                                 .filter(predicate)
+                                 .findFirst();
     }
+
+    protected List<T> findAll(Predicate<T> predicate) {
+        return this.data.values().stream()
+                                 .filter(predicate)
+                                 .toList();
+    }
+
+    
+    protected boolean exists(Predicate<T> predicate) {
+        return findFirst(predicate).isPresent();
+    }
+
+
+
+
+
+    public T find(int id){
+        return findFirst(entity -> entity.getId() == id).orElse(null);
+    }
+
+    public List<T> findAll(){
+        return findAll(enitity -> true);
+    }
+
+    public boolean exists(int id){
+        return findFirst(entity -> entity.getId() == id).isPresent();
+    }
+
+
+
+
+
 
     private void writeToFile() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(PATH))) {
@@ -114,4 +140,6 @@ public class Repository<T extends SerializableModel> implements IRepository<T> {
             throw new RuntimeException("Could not initialize storage file: " + PATH, e);
         }
     }
+
+    
 }

@@ -17,23 +17,15 @@ public class StudentOrganizationRepository extends Repository<StudentOrganizatio
     }
 
     public StudentOrganization findByPresidentId(int presidentId){
-        return this.data.values()
-                        .stream()
-                        .filter(organization -> organization.getPresidentId() == presidentId)
-                        .findFirst()
-                        .orElse(null);
+        return this.findFirst(org -> org.getPresidentId() == presidentId).orElse(null);
     }
 
     public StudentOrganization findByName(String name){
-        return this.data.values()
-                        .stream()
-                        .filter(organization -> organization.getName().equals(name))
-                        .findFirst()
-                        .orElse(null);
+        return this.findFirst(org -> org.getName().equals(name)).orElse(null);
     }
 
     public boolean existsByName(String name){
-        return findByName(name) != null;
+        return this.findByName(name) != null;
     }
 
 }
