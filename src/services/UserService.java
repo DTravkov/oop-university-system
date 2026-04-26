@@ -8,7 +8,6 @@ import java.util.List;
 import model.domain.DeletedUser;
 import model.domain.User;
 import model.enumeration.TeacherType;
-import model.enumeration.UserRole;
 import model.factories.UserFactory;
 import model.repository.UserRepository;
 import services.events.UserDeleteEvent;
@@ -25,11 +24,11 @@ public class UserService extends BaseService<User, UserRepository> {
     }
 
 
-    public User registerUser(UserRole role, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
+    public User registerUser(Class<? extends User> userClass, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
         if(repository.existsByLogin(login)){
             throw new AlreadyExists(" user with login " + login);
         }
-        User user = UserFactory.create(role, login, password, name, surname, admissionDate, teacherType);
+        User user = UserFactory.createFromClass(userClass, login, password, name, surname, admissionDate, teacherType);
         return repository.save(user);
     }
 
@@ -50,9 +49,9 @@ public class UserService extends BaseService<User, UserRepository> {
 
         return user;
     }
-
-    public List<User> getAllByRole(UserRole role) {
-        return repository.findAllByRole(role);
+    
+    public List<User> getAllByClass(Class<? extends User> dotClass) {
+        return repository.findAllByClass(dotClass);
     }
 
     private void registerDeletedUser(){

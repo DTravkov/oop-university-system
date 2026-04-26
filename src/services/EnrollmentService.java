@@ -7,9 +7,9 @@ import java.util.List;
 
 import model.domain.Course;
 import model.domain.Enrollment;
+import model.domain.IEnrollable;
 import model.domain.Student;
 import model.domain.User;
-import model.enumeration.UserRole;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
 import utils.FieldValidator;
@@ -37,8 +37,8 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new AlreadyExists(" enrollment for student id " + student.getId() + " and course id " + course.getId());
         }
 
-        if(!(student instanceof Student)){
-            throw new OperationNotAllowed(" enrolling the user, who is not a student. user id : "+ student.getId());
+        if(!(student instanceof IEnrollable)){
+            throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId());
         }
 
         return repository.save(enrollment);

@@ -4,6 +4,7 @@ import model.domain.Admin;
 import model.domain.Dean;
 import model.domain.DeletedUser;
 import model.domain.Employee;
+import model.domain.GraduateStudent;
 import model.domain.Manager;
 import model.domain.Student;
 import model.domain.Teacher;
@@ -14,6 +15,7 @@ public enum UserRole {
     USER(User.class),
     DELETED_USER(DeletedUser.class),
     STUDENT(Student.class),
+    GRADUATE_STUDENT(GraduateStudent.class),
     EMPLOYEE(Employee.class),
     TEACHER(Teacher.class),
     DEAN(Dean.class),
@@ -27,53 +29,39 @@ public enum UserRole {
         this.userClass = userClass;
     }
 
-    public boolean matches(User user) {
-        if (this == USER) {
-            return user.getClass().equals(User.class);
-        }
-        return userClass.isInstance(user);
-    }
-
+    
     public static UserRole fromUser(User user) {
         if (user.getClass().equals(User.class)) {
             return USER;
         }
-        if(user.getClass().equals(Employee.class)){
+        if (user.getClass().equals(Employee.class)) {
             return EMPLOYEE;
         }
-        if (user instanceof DeletedUser) {
+        if (user.getClass().equals(DeletedUser.class)) {
             return DELETED_USER;
         }
-        if (user instanceof Student) {
+        if (user.getClass().equals(Student.class)) {
             return STUDENT;
         }
-        if (user instanceof Teacher) {
+        if (user.getClass().equals(GraduateStudent.class)) {
+            return GRADUATE_STUDENT;
+        }
+        if (user.getClass().equals(Teacher.class)) {
             return TEACHER;
         }
-        if (user instanceof Admin) {
+        if (user.getClass().equals(Admin.class)) {
             return ADMIN;
         }
-        if (user instanceof Manager) {
+        if (user.getClass().equals(Manager.class)) {
             return MANAGER;
         }
-        if (user instanceof Dean) {
+        if (user.getClass().equals(Dean.class)) {
             return DEAN;
         }
-        if (user instanceof TechSupportSpecialist) {
+        if (user.getClass().equals(TechSupportSpecialist.class)) {
             return TECH_SUPPORT_SPECIALIST;
         }
         throw new IllegalArgumentException("Unknown user type " + user.getClass().getSimpleName());
-    }
-
-    public static boolean isValidRole(String raw) {
-        if (raw == null || raw.isBlank()) throw new IllegalArgumentException("Blank or null role string is provided");
-        try {
-            UserRole.valueOf(raw.trim().toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            // if no enumeration for 'raw' string exist
-            return false;
-        }
     }
 
 }

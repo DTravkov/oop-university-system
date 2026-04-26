@@ -5,7 +5,6 @@ import java.util.Scanner;
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import model.factories.ServiceFactory;
 import services.*;
 import utils.UIFields;
@@ -116,7 +115,7 @@ public class EnrollmentApp{
 
     private static void printStudents() {
         System.out.println("--- Students ---");
-        for (User user : userService.getAllByRole(UserRole.STUDENT)) {
+        for (User user : userService.getAllByClass(Student.class)) {
             Student student = (Student) user;
             System.out.println("ID: " + student.getId() + ", Name: " + student.getName() + ", Surname: " + student.getSurname());
         }

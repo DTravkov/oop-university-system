@@ -26,8 +26,8 @@ public class UserRepository extends Repository<User> {
         return this.exists(user -> user.getLogin().equals(login));
     }
 
-    public List<User> findAllByRole(UserRole role) {
-        return this.findAll(user -> UserRole.fromUser(user).equals(role));
+    public List<User> findAllByClass(Class<? extends User> dotClass) {
+        return this.findAll(user -> user.getClass().equals(dotClass));
     }
 
 }

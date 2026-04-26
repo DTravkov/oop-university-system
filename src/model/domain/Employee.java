@@ -1,7 +1,7 @@
 package model.domain;
 
 
-public abstract class Employee extends User {
+public abstract class Employee extends User implements IMessagable{
 	private static final long serialVersionUID = 1L;
 	private int salary = 0;
 	

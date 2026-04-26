@@ -7,7 +7,6 @@ import exceptions.OperationNotAllowed;
 import model.domain.*;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import model.factories.ServiceFactory;
 import services.*;
 import utils.UIFields;
@@ -125,21 +124,21 @@ public class ComplaintApp {
     
     private static void printTeachers() {
         System.out.println("--- Teachers ---");
-        for (User user : userService.getAllByRole(UserRole.TEACHER)) {
+        for (User user : userService.getAllByClass(Teacher.class)) {
             System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
         }
     }
 
     private static void printDeans() {
         System.out.println("--- Deans ---");
-        for (User user : userService.getAllByRole(UserRole.DEAN)) {
+        for (User user : userService.getAllByClass(Dean.class)) {
             System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
         }
     }
 
     private static void printStudents() {
         System.out.println("--- Students ---");
-        for (User user : userService.getAllByRole(UserRole.STUDENT)) {
+        for (User user : userService.getAllByClass(Student.class)) {
             System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
         }
     }

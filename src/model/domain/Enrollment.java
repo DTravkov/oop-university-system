@@ -76,6 +76,8 @@ public class Enrollment extends SerializableModel{
 		this.finalExamPoint = finalExamPoint;
 	}
 
+
+	
 	public double getTotalPoint() {
 		return firstAttestationPoint + secondAttestationPoint + finalExamPoint;
 	}

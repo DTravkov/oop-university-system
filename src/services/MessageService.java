@@ -4,6 +4,7 @@ import java.util.List;
 
 import exceptions.OperationNotAllowed;
 import model.domain.DeletedUser;
+import model.domain.IMessagable;
 import model.domain.Message;
 import model.domain.User;
 import model.repository.MessageRepository;
@@ -25,6 +26,10 @@ public class MessageService extends BaseService<Message, MessageRepository>{
 
         if(sender.getId() == DeletedUser.ID || receiver.getId() == DeletedUser.ID){
             throw new OperationNotAllowed(" sending messages to/from deleted account");
+        }
+        
+        if (!(sender instanceof IMessagable) || !(receiver instanceof IMessagable)) {
+            throw new OperationNotAllowed(" sending messages to/from non-employee account");
         }
 
         repository.save(message);

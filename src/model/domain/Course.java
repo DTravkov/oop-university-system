@@ -107,6 +107,8 @@ public class Course extends SerializableModel{
 				"id=" + id +
 				", name='" + name + '\'' +
 				", description='" + description + '\'' +
+				", lectureTeachers=" + lectureTeachers +
+				", practiceTeachers=" +practiceTeachers +
 				'}';
 	}
 }

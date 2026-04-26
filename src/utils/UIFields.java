@@ -1,10 +1,12 @@
 package utils;
 
+import model.domain.*;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import services.LanguageService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class UIFields {
@@ -99,13 +101,27 @@ public class UIFields {
         }
     }
 
-    public static UserRole readUserRole(Scanner scanner) {
-        UserRole[] roles = UserRole.values();
+    public static Class<? extends User> readUserClass(Scanner scanner) {
+
+        List<Class<? extends User>> roles = new ArrayList<>();
+        
+        roles.add(User.class);
+        roles.add(Student.class);
+        roles.add(GraduateStudent.class);
+        roles.add(Employee.class);
+        roles.add(Teacher.class);
+        roles.add(Manager.class);
+        roles.add(Dean.class);
+        roles.add(Admin.class);
+        roles.add(TechSupportSpecialist.class);
+        roles.add(DeletedUser.class);
+
         System.out.println(LanguageService.translate(UIMessages.INPUT_USER_ROLE));
-        for (int i = 0; i < roles.length; i++) {
-            System.out.println((i + 1) + ". " + roles[i].name());
+        for (int i = 0; i < roles.size(); i++) {
+            System.out.println((i + 1) + "." + roles.get(i).getSimpleName());
         }
-        String choice = readChoice(scanner, UIMessages.MENU_CHOOSE, 1, roles.length);
-        return roles[Integer.parseInt(choice) - 1];
+
+        String choice = readChoice(scanner, UIMessages.MENU_CHOOSE, 1, roles.size());
+        return roles.get(Integer.parseInt(choice) - 1);
     }
 }

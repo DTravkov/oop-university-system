@@ -24,21 +24,21 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     public void sendComplaint(TeacherComplaint complaint) {
 
-        User teacher = userService.get(complaint.getSenderId());
-        User dean = userService.get(complaint.getReceiverId());
-        User student = userService.get(complaint.getStudentId());
+        User from = userService.get(complaint.getSenderId());
+        User to = userService.get(complaint.getReceiverId());
+        User about = userService.get(complaint.getStudentId());
 
-        if(teacher.getId() == DeletedUser.ID || dean.getId() == DeletedUser.ID){
+        if(from.getId() == DeletedUser.ID || to.getId() == DeletedUser.ID){
             throw new OperationNotAllowed(" sending complaints to/from deleted account");
         }
-        if(!(teacher instanceof Teacher)){
-            throw new OperationNotAllowed(" sending complaints from non-teacher account");
+        if(!(from instanceof Teacher)){
+            throw new OperationNotAllowed(" sending complaints from " + from.getClass().getSimpleName() + " +account");
         }
-        if(!(dean instanceof Dean)){
-            throw new OperationNotAllowed(" sending complaints to non-dean account");
+        if(!(to instanceof Dean)){
+            throw new OperationNotAllowed(" sending complaints to " + to.getClass().getSimpleName() + " account");
         }
-        if(!(student instanceof Student)){
-            throw new OperationNotAllowed(" sending complaints about person who is not student");
+        if(!(about instanceof Student)){
+            throw new OperationNotAllowed(" sending complaints about person who is " + about.getClass().getSimpleName());
         }
 
         repository.save(complaint);

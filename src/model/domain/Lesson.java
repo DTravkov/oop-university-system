@@ -1,6 +1,7 @@
 package model.domain;
 
 import model.enumeration.LessonType;
+import utils.FieldValidator;
 
 import java.util.Date;
 import java.util.Objects;
@@ -13,6 +14,10 @@ public class Lesson extends SerializableModel{
     private Date startTime;
     
     public Lesson(LessonType lessonType, int courseId, int teacherId, Date startTime) {
+        FieldValidator.requireNonNull(lessonType, "Lesson type");
+        FieldValidator.requirePositive(courseId, "Course ID");
+        FieldValidator.requirePositive(teacherId, "Teacher ID");
+        FieldValidator.requireNonNull(startTime, "Scheduled time");
         this.lessonType = lessonType;
         this.courseId = courseId;
         this.teacherId = teacherId;

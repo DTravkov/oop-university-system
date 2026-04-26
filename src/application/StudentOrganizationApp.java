@@ -4,9 +4,9 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.StudentOrganization;
+import model.domain.Student;
 import model.domain.User;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import model.factories.ServiceFactory;
 import services.LanguageService;
 import services.StudentOrganizationService;
@@ -142,7 +142,7 @@ public class StudentOrganizationApp {
 
     private static void printStudents() {
         System.out.println(LanguageService.translate(UIMessages.MSG_STUDENTS_HEADER));
-        for (User user : userService.getAllByRole(UserRole.STUDENT)) {
+        for (User user : userService.getAllByClass(Student.class)) {
             System.out.println(user);
         }
     }

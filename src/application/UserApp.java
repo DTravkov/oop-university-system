@@ -7,7 +7,6 @@ import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import model.factories.ServiceFactory;
 import services.*;
 import utils.UIFields;
@@ -65,12 +64,12 @@ public class UserApp {
     }
 
     private static void getAllUsersByRole(Scanner scanner) {
-        UserRole role = UIFields.readUserRole(scanner);
-        System.out.println(userService.getAllByRole(role));
+        Class<? extends User> inputClass = UIFields.readUserClass(scanner);
+        System.out.println(userService.getAllByClass(inputClass));
     }
 
     private static void registerUser(Scanner scanner) {
-        UserRole role = UIFields.readUserRole(scanner);
+        Class<? extends User> inputClass = UIFields.readUserClass(scanner);
         String login = UIFields.readNonEmpty(scanner, UIMessages.INPUT_LOGIN);
         String password = UIFields.readNonEmpty(scanner, UIMessages.INPUT_PASSWORD);
         String name = UIFields.readNonEmpty(scanner, UIMessages.INPUT_NAME);
@@ -79,13 +78,16 @@ public class UserApp {
         Date admissionDate = null;
         TeacherType teacherType = null;
 
-        if (role == UserRole.STUDENT) {
+
+        // this thingy checks that inputClass is a subclass of IEnrollable or Teacher, to provide additional input options
+        if (IEnrollable.class.isAssignableFrom(inputClass)) {
             admissionDate = new Date();
-        } else if (role == UserRole.TEACHER) {
+        } else if (Teacher.class.isAssignableFrom(inputClass)) {
             teacherType = UIFields.askTeacherType(scanner);
         }
 
-        User user = userService.registerUser(role, login, password, name, surname, admissionDate, teacherType);
+        
+        User user = userService.registerUser(inputClass, login, password, name, surname, admissionDate, teacherType);
 
         System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
         System.out.println(user);

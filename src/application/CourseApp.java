@@ -7,7 +7,6 @@ import model.domain.*;
 import model.enumeration.CourseType;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessages;
-import model.enumeration.UserRole;
 import model.factories.ServiceFactory;
 import services.*;
 import utils.UIFields;
@@ -136,21 +135,21 @@ public class CourseApp {
 
     private static void printTeachers() {
         System.out.println("--- Lecturers ---");
-        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+        for(User u : userService.getAllByClass(Teacher.class)){
             Teacher t = (Teacher) u;
             if(t.isLecturer()){
                 System.out.println(t);
             }
         }
         System.out.println("--- Practice teachers ---");
-        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+        for(User u : userService.getAllByClass(Teacher.class)){
             Teacher t = (Teacher) u;
             if(t.isPractice()){
                 System.out.println(t);
             }
         }
         System.out.println("--- Both ---");
-        for(User u : userService.getAllByRole(UserRole.TEACHER)){
+        for(User u : userService.getAllByClass(Teacher.class)){
             Teacher t = (Teacher) u;
             if(t.isLecturer() && t.isPractice()){
                 System.out.println(t);

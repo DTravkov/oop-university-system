@@ -8,7 +8,7 @@ public class IDGenerator {
     private AtomicInteger lastId;
 
     public IDGenerator(String idPath) {
-        this.idPath = idPath + "_id.ser";
+        this.idPath = idPath.replace(".ser", "") + "_id.ser";
         this.lastId = load();
     }
 
