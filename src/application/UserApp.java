@@ -94,6 +94,7 @@ public class UserApp {
     }
 
     private static void printUserById(Scanner scanner) {
+        printAllUsers();
         int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
         System.out.println(userService.get(id));
     }

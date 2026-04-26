@@ -17,7 +17,7 @@ public class Repository<T extends SerializableModel> {
     protected Map<Integer, T> data = new HashMap<>();
 
     public Repository() {
-        this.PATH = "serialized/" + this.getClass().getSimpleName() + ".ser";
+        this.PATH = "serialized/" + this.getClass().getSimpleName().replace("Repository", "") + ".ser";
         ensureFileExists();
         this.idGenerator = new IDGenerator(PATH);
         load();

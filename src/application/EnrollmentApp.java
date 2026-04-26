@@ -84,6 +84,7 @@ public class EnrollmentApp{
     }
 
     private static void deleteEnrollment(Scanner scanner) {
+        getAllEnrollments();
         int enrollmentId = UIFields.readInt(scanner, UIMessages.INPUT_ENROLLMENT_ID);
         enrollmentService.delete(enrollmentId);
 
@@ -91,6 +92,7 @@ public class EnrollmentApp{
     }
 
     private static void getEnrollmentsOfCourse(Scanner scanner) {
+        printCourses();
         int courseId = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
         System.out.println(enrollmentService.getAllByCourseId(courseId));
     }

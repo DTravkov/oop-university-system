@@ -76,6 +76,7 @@ public class MessageApp {
     }
 
     private static void deleteMessage(Scanner scanner) {
+        getAllMessages();
         int messageId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
         messageService.delete(messageId);
 
@@ -83,11 +84,13 @@ public class MessageApp {
     }
 
     private static void getMessagesBySender(Scanner scanner) {
+        printUsers();
         int senderId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
         System.out.println(messageService.getAllBySenderId(senderId));
     }
 
     private static void getMessagesByReceiver(Scanner scanner) {
+        printUsers();
         int receiverId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
         System.out.println(messageService.getAllByReceiverId(receiverId));
     }
@@ -97,8 +100,8 @@ public class MessageApp {
     }
     
     private static void printUsers() {
-        System.out.println("--- Users ---");
-        for (User user : userService.getAll()) {
+        System.out.println("--- Employees ---");
+        for (User user : userService.getAllByClassOrSubclass(Employee.class)) {
             System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
         }
     }

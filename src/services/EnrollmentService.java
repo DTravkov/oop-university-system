@@ -41,7 +41,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId());
         }
 
-        return repository.save(enrollment);
+        return this.create(enrollment);
     }
 
     public Enrollment getByStudentIdAndCourseId(int studentId, int courseId) {
@@ -79,7 +79,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
                 throw new OperationNotAllowed(" choosing invalid point type");
         }
 
-        repository.save(enrollment);
+        this.update(enrollment);
     }
 
 

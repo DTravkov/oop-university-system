@@ -54,6 +54,10 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.findAllByClass(dotClass);
     }
 
+    public List<User> getAllByClassOrSubclass(Class<? extends User> dotClass) {
+        return repository.findAllByClassOrSubclass(dotClass);
+    }
+
     private void registerDeletedUser(){
         repository.save(new DeletedUser());
     }

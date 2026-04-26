@@ -74,6 +74,9 @@ public class Lesson extends SerializableModel{
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lessonType, courseId, teacherId, startTime);
+        if (id != 0) {
+            return Integer.hashCode(id);
+        }
+        return Objects.hash(lessonType, courseId, teacherId, startTime);
     }
 }

@@ -3,7 +3,6 @@ package model.repository;
 import java.util.List;
 
 import model.domain.*;
-import model.enumeration.UserRole;
 
 public class UserRepository extends Repository<User> {
 
@@ -28,6 +27,10 @@ public class UserRepository extends Repository<User> {
 
     public List<User> findAllByClass(Class<? extends User> dotClass) {
         return this.findAll(user -> user.getClass().equals(dotClass));
+    }
+
+    public List<User> findAllByClassOrSubclass(Class<? extends User> dotClass) {
+        return this.findAll(user -> dotClass.isAssignableFrom(user.getClass()));
     }
 
 }

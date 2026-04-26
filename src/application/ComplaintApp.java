@@ -102,6 +102,7 @@ public class ComplaintApp {
     }
 
     private static void deleteComplaint(Scanner scanner) {
+        getAllComplaints();
         int complaintId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
         complaintService.delete(complaintId);
 
@@ -109,11 +110,13 @@ public class ComplaintApp {
     }
 
     private static void getAllComplaintsByTeacher(Scanner scanner) {
+        printTeachers();
         int teacherId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
         System.out.println(complaintService.getAllByTeacherId(teacherId));
     }
 
     private static void getAllComplaintsByDean(Scanner scanner) {
+        printDeans();
         int deanId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
         System.out.println(complaintService.getAllByDeanId(deanId));
     }

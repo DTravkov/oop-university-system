@@ -57,8 +57,7 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
             course.addPracticeTeacher(teacherId);
         }
 
-        repository.save(course);
-
+        this.update(course);
     }
     
     @Override

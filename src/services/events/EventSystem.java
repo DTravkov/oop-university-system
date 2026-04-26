@@ -17,8 +17,8 @@ public class EventSystem {
     private EventSystem() {}
 
     public <T extends Event> void subscribe(Class<T> eventType, Consumer<T> handler) {
-        FieldValidator.requireNonNull(eventType, "Event type is required");
-        FieldValidator.requireNonNull(handler, "Handler is required");
+        FieldValidator.requireNonNull(eventType, "Event type");
+        FieldValidator.requireNonNull(handler, "Handler");
 
 
         @SuppressWarnings("unchecked")
@@ -34,7 +34,8 @@ public class EventSystem {
     }
 
     public void publish(Event event) {
-        FieldValidator.requireNonNull(event, "Event is required");
+        FieldValidator.requireNonNull(event, "Event");
+        
         List<Consumer<Event>> list = handlers.get(event.getClass());
         if(list == null || list.isEmpty()){
             return;

@@ -41,7 +41,7 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
             throw new OperationNotAllowed(" sending complaints about person who is " + about.getClass().getSimpleName());
         }
 
-        repository.save(complaint);
+        this.create(complaint);
     }
 
     public List<TeacherComplaint> getAllByTeacherId(int teacherId) {

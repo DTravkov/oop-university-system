@@ -32,7 +32,7 @@ public class MessageService extends BaseService<Message, MessageRepository>{
             throw new OperationNotAllowed(" sending messages to/from non-employee account");
         }
 
-        repository.save(message);
+        this.create(message);
     }
 
     public List<Message> getAllByReceiverId(int receiverId) {
@@ -48,15 +48,26 @@ public class MessageService extends BaseService<Message, MessageRepository>{
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
 
             int deletedUserId = event.getUserId();
+            boolean changed = false;
             List<Message> list = this.getAll();
 
             for(Message msg : list){
+
                 if(msg.getSenderId() == deletedUserId){
                     msg.setSenderId(DeletedUser.ID);
+                    changed = true;
                 }
+
                 if(msg.getReceiverId() == deletedUserId){
                     msg.setReceiverId(DeletedUser.ID);
+                    changed = true;
                 }
+
+                if(changed){
+                    this.update(msg);
+                    changed = false;
+                }
+
             }
             
         });

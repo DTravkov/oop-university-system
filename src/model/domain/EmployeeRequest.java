@@ -1,5 +1,7 @@
 package model.domain;
 
+import java.util.Objects;
+
 public class EmployeeRequest extends Message {
 
     private static final long serialVersionUID = 1L;
@@ -21,10 +23,19 @@ public class EmployeeRequest extends Message {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         EmployeeRequest that = (EmployeeRequest) o;
         return isApprovedByDean == that.isApprovedByDean;
+    }
+
+    @Override
+    public int hashCode() {
+        if (id != 0) {
+            return Integer.hashCode(id);
+        }
+        return Objects.hash(super.hashCode(), isApprovedByDean);
     }
 
     @Override

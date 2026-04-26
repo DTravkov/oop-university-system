@@ -11,8 +11,8 @@ public class Message extends SerializableModel {
 
     private int receiverId;
     private int senderId;
-    private String content;
-    private Date sentDate;
+    private final String content;
+    private final Date sentDate;
 
 
     public Message(int senderId, int receiverId, String content) {
@@ -47,28 +47,26 @@ public class Message extends SerializableModel {
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public Date getSentDate() {
         return sentDate;
     }
 
-    public void setSentDate(Date sentDate) {
-        this.sentDate = sentDate;
-    }
-
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
-        if(this.id != 0 && message.getId() != 0) return this.id == message.getId();
+        if (id != 0 || message.getId() != 0) {
+            return id != 0 && id == message.getId();
+        }
         return receiverId == message.receiverId && senderId == message.senderId && Objects.equals(content, message.content) && Objects.equals(sentDate, message.sentDate);
     }
 
     @Override
     public int hashCode() {
+        if (id != 0) {
+            return Integer.hashCode(id);
+        }
         return Objects.hash(receiverId, senderId, content, sentDate);
     }
 

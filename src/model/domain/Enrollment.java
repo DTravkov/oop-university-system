@@ -94,8 +94,8 @@ public class Enrollment extends SerializableModel{
 		if (o == null || getClass() != o.getClass()) return false;
 		Enrollment enr = (Enrollment) o;
 
-		if (this.getId() != 0 && enr.getId() != 0) {
-			return this.getId() == enr.getId();
+		if (id != 0 || enr.getId() != 0) {
+			return id != 0 && id == enr.getId();
 		}
 		return courseId == enr.courseId &&
 				studentId == enr.studentId &&
@@ -106,7 +106,10 @@ public class Enrollment extends SerializableModel{
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, courseId, studentId, firstAttestationPoint, secondAttestationPoint, finalExamPoint);
+		if (id != 0) {
+			return Integer.hashCode(id);
+		}
+		return Objects.hash(courseId, studentId, firstAttestationPoint, secondAttestationPoint, finalExamPoint);
 	}
 
 	@Override

@@ -74,7 +74,10 @@ public class StudentOrganization extends SerializableModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        if (id != 0) {
+            return Integer.hashCode(id);
+        }
+        return Objects.hash(name);
     }
 
     @Override

@@ -118,11 +118,13 @@ public class CourseApp {
     }
 
     private static void getCourseById(Scanner scanner) {
+        printCourses();
         int id = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
         System.out.println(courseService.get(id));
     }
 
     private static void getCourseTeacherList(Scanner scanner) {
+        printCourses();
         int courseId = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
         Course course = courseService.get(courseId);
         System.out.println("Lecturer IDs : " + course.getLectureTeachers());
@@ -159,6 +161,7 @@ public class CourseApp {
 
 
     private static void deleteCourse(Scanner scanner) {
+        printCourses();
         int id = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
         courseService.delete(id);
         System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));

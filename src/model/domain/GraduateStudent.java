@@ -13,15 +13,22 @@ public class GraduateStudent extends Student {
 
 	@Override
 	public boolean equals(Object o) {
+		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
+		GraduateStudent student = (GraduateStudent) o;
+		if (id != 0 || student.getId() != 0) {
+			return id != 0 && id == student.getId();
+		}
 		if (!super.equals(o)) return false;
-		Student student = (Student) o;
 		return Objects.equals(admissionDate, student.admissionDate);
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode();
+		if (id != 0) {
+			return Integer.hashCode(id);
+		}
+		return Objects.hash(super.hashCode(), admissionDate);
 	}
 
 	@Override

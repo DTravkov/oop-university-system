@@ -89,6 +89,7 @@ public class StudentOrganizationApp {
     }
 
     private static void getOrganizationById(Scanner scanner) {
+        printOrganizations();
         int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
         System.out.println(studentOrganizationService.get(organizationId));
     }
@@ -98,6 +99,7 @@ public class StudentOrganizationApp {
     }
 
     private static void deleteOrganization(Scanner scanner) {
+        printOrganizations();
         int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
         studentOrganizationService.delete(organizationId);
         System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));

@@ -16,17 +16,25 @@ public class ServiceFactory {
 
     private void initServices() {
         UserService userService = new UserService();
+
         CourseService courseService = new CourseService(userService);
-        EnrollmentService enrollmentService = new EnrollmentService(userService, courseService);
-        ComplaintService complaintService = new ComplaintService(userService);
         MessageService messageService = new MessageService(userService);
+        CommentService commentService = new CommentService(userService);
+        ComplaintService complaintService = new ComplaintService(userService);
+        NewsService newsService = new NewsService(userService);
         StudentOrganizationService studentOrganizationService = new StudentOrganizationService(userService);
+        
+        EnrollmentService enrollmentService = new EnrollmentService(userService, courseService);
+        
+        
 
         services.put(UserService.class, userService);
         services.put(CourseService.class, courseService);
         services.put(EnrollmentService.class, enrollmentService);
         services.put(ComplaintService.class, complaintService);
         services.put(MessageService.class, messageService);
+        services.put(CommentService.class, commentService);
+        services.put(NewsService.class, newsService);
         services.put(StudentOrganizationService.class, studentOrganizationService);
     }
 
