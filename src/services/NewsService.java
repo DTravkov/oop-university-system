@@ -63,12 +63,9 @@ public class NewsService extends BaseService<News, NewsRepository>{
 
             int deletedUserId = event.getUserId();
             List<News> list = this.getAll();
-            System.out.println("hit user delete in news");
-
             for(News news : list){
                 if(news.getPublisherId() == deletedUserId){
                     news.setPublisherId(DeletedUser.ID);
-                    System.out.println(news.getPublisherId());
                     this.update(news);
                 }
             }
@@ -79,12 +76,10 @@ public class NewsService extends BaseService<News, NewsRepository>{
         eventSystem.subscribe(CommentDeleteEvent.class, event -> {
 
             int deletedCommentId = event.getCommentId();
-            System.out.println("hit coment delete in news");
             List<News> list = this.getAll();
             for(News news : list){
                 if(news.getComments().contains(Integer.valueOf(deletedCommentId))){
                     news.removeComment(deletedCommentId);
-                    System.out.println(deletedCommentId);
                     this.update(news);
                 }
             }

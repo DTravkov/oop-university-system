@@ -41,7 +41,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId());
         }
 
-        return this.create(enrollment);
+        return super.create(enrollment);
     }
 
     public Enrollment getByStudentIdAndCourseId(int studentId, int courseId) {
@@ -68,18 +68,20 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         switch (pointTypeChoice) {
             case 1:
                 enrollment.setFirstAttestationPoint(enrollment.getFirstAttestationPoint() + pointsToAdd);
+                super.update(enrollment);
                 break;
             case 2:
                 enrollment.setSecondAttestationPoint(enrollment.getSecondAttestationPoint() + pointsToAdd);
+                super.update(enrollment);
                 break;
             case 3:
                 enrollment.setFinalExamPoint(enrollment.getFinalExamPoint() + pointsToAdd);
+                super.update(enrollment);
                 break;
             default:
                 throw new OperationNotAllowed(" choosing invalid point type");
         }
 
-        this.update(enrollment);
     }
 
 

@@ -16,6 +16,11 @@ public class UserRepository extends Repository<User> {
         return INSTANCE;
     }
 
+    @Override
+    public List<User> findAll() {
+        return super.findAll().stream().filter(user -> user.getId() != -1).toList();
+    }
+
     public User findByLogin(String login){
         return this.findFirst(user -> user.getLogin().equals(login))
                                                      .orElse(null);
