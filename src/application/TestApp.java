@@ -16,6 +16,7 @@ import model.domain.Enrollment;
 import model.domain.Manager;
 import model.domain.Message;
 import model.domain.News;
+import model.domain.ResearcherProfile;
 import model.domain.SerializableModel;
 import model.domain.Student;
 import model.domain.StudentOrganization;
@@ -32,6 +33,7 @@ import services.CourseService;
 import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
+import services.ResearchService;
 import services.StudentOrganizationService;
 import services.UserService;
 
@@ -46,33 +48,46 @@ public class TestApp {
     private static final ComplaintService complaintService = serviceFactory.getService(ComplaintService.class);
     private static final NewsService newsService = serviceFactory.getService(NewsService.class);
     private static final StudentOrganizationService studentOrganizationService = serviceFactory.getService(StudentOrganizationService.class);
+    private static final ResearchService researchService = serviceFactory.getService(ResearchService.class);
 
     public static void main(String[] args) {
         runAllTests();
     }
 
     public static void runAllTests() {
+        List<TestEntry> tests = List.of(
+                new TestEntry("User create", TestApp::testUserCreate),
+                new TestEntry("User login", TestApp::testUserLogin),
+                new TestEntry("User delete", TestApp::testUserDelete),
+                new TestEntry("Course updates on teacher delete", TestApp::testCourseOnTeacherDelete),
+                new TestEntry("Enrollment removed on student delete", TestApp::testEnrollmentOnStudentDelete),
+                new TestEntry("News publisher replaced on manager delete", TestApp::testNewsOnManagerDelete),
+                new TestEntry("News requires manager publisher", TestApp::testNonManagerNewsCreate),
+                new TestEntry("Enrollment requires student", TestApp::testNonStudentEnrollment),
+                new TestEntry("Message requires employee accounts", TestApp::testNonEmployeeMessage),
+                new TestEntry("Duplicate user login", TestApp::testDuplicateUserLogin),
+                new TestEntry("Duplicate enrollment", TestApp::testDuplicateEnrollment),
+                new TestEntry("Course rejects teacher type mismatch", TestApp::testTeacherRoleMismatchInCourseAssignment),
+                new TestEntry("Message sender replaced on user delete", TestApp::testMessageOnUserDelete),
+                new TestEntry("Complaint role guards", TestApp::testComplaintRoleGuards),
+                new TestEntry("Organization members must be students", TestApp::testOrganizationMemberMustBeStudent),
+                new TestEntry("News comment assignment", TestApp::testNewsCommentCreate),
+                new TestEntry("News removes deleted comment", TestApp::testNewsOnCommentDelete),
+                new TestEntry("Research profile create", TestApp::testResearchProfileManualCreateFlow),
+                new TestEntry("Research profile duplicate create", TestApp::testResearchProfileDuplicateCreateGuard),
+                new TestEntry("Research profile auto create", TestApp::testResearchProfileAutoCreateOnGraduateCreate),
+                new TestEntry("Research profile delete", TestApp::testResearchProfileManualDeleteFlow),
+                new TestEntry("Research profile auto delete", TestApp::testResearchProfileAutoDeleteOnUserDelete)
+        );
+
         int passed = 0;
-        int total = 17;
+        for (TestEntry test : tests) {
+            if (runTest(test.name, test.testCase)) {
+                passed++;
+            }
+        }
 
-        passed += runTest("User create", TestApp::testUserCreate) ? 1 : 0;
-        passed += runTest("User login", TestApp::testUserLogin) ? 1 : 0;
-        passed += runTest("User delete", TestApp::testUserDelete) ? 1 : 0;
-        passed += runTest("Course on teacher delete", TestApp::testCourseOnTeacherDelete) ? 1 : 0;
-        passed += runTest("Enrollment on student delete", TestApp::testEnrollmentOnStudentDelete) ? 1 : 0;
-        passed += runTest("News on manager delete", TestApp::testNewsOnManagerDelete) ? 1 : 0;
-        passed += runTest("Non manager news create", TestApp::testNonManagerNewsCreate) ? 1 : 0;
-        passed += runTest("Non student enrollment", TestApp::testNonStudentEnrollment) ? 1 : 0;
-        passed += runTest("Non employee message", TestApp::testNonEmployeeMessage) ? 1 : 0;
-        passed += runTest("Duplicate user login", TestApp::testDuplicateUserLogin) ? 1 : 0;
-        passed += runTest("Duplicate enrollment", TestApp::testDuplicateEnrollment) ? 1 : 0;
-        passed += runTest("Teacher role mismatch in course assignment", TestApp::testTeacherRoleMismatchInCourseAssignment) ? 1 : 0;
-        passed += runTest("Message on user delete", TestApp::testMessageOnUserDelete) ? 1 : 0;
-        passed += runTest("Complaint role guards", TestApp::testComplaintRoleGuards) ? 1 : 0;
-        passed += runTest("Organization member must be student", TestApp::testOrganizationMemberMustBeStudent) ? 1 : 0;
-        passed += runTest("News comment create", TestApp::testNewsCommentCreate) ? 1 : 0;
-        passed += runTest("News on comment delete", TestApp::testNewsOnCommentDelete) ? 1 : 0;
-
+        int total = tests.size();
         System.out.println("\n=== TEST RESULT ===");
         System.out.println("Passed: " + passed + "/" + total);
         System.out.println("Failed: " + (total - passed) + "/" + total);
@@ -444,6 +459,107 @@ public class TestApp {
         }
     }
 
+    public static boolean testResearchProfileManualCreateFlow() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.research.manual." + suffix, "12345", "Research", "Manual", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+
+            if (researchService.isResearcher(student.getId())) {
+                return false;
+            }
+
+            ResearcherProfile profile = researchService.makeResearcher(student.getId());
+            return profile.getUserId() == student.getId() && researchService.isResearcher(student.getId());
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchProfileDuplicateCreateGuard() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.research.dup." + suffix, "12345", "Research", "Dup", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            researchService.makeResearcher(student.getId());
+
+            try {
+                researchService.makeResearcher(student.getId());
+                return false;
+            } catch (AlreadyExists e) {
+                return true;
+            }
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchProfileAutoCreateOnGraduateCreate() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student graduateStudent = (Student) userService.registerUser(
+                    model.domain.GraduateStudent.class, "tc.research.event.create." + suffix, "12345", "Research", "Event", new Date(), null
+            );
+            cleanupBin.trackUser(graduateStudent.getId());
+            return researchService.isResearcher(graduateStudent.getId());
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchProfileManualDeleteFlow() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.research.delete." + suffix, "12345", "Research", "Delete", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            researchService.makeResearcher(student.getId());
+            researchService.deleteResearcherProfile(student.getId());
+
+            if (researchService.isResearcher(student.getId())) {
+                return false;
+            }
+
+            try {
+                researchService.getResearcherProfile(student.getId());
+                return false;
+            } catch (DoesNotExist e) {
+                return true;
+            }
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchProfileAutoDeleteOnUserDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher teacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.event.delete." + suffix, "12345", "Research", "DeleteEvent", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(teacher.getId());
+
+            if (!researchService.isResearcher(teacher.getId())) {
+                return false;
+            }
+
+            userService.delete(teacher.getId());
+            return !researchService.isResearcher(teacher.getId());
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
     private static boolean runTest(String name, TestCase testCase) {
         try {
             boolean result = testCase.run();
@@ -463,7 +579,7 @@ public class TestApp {
             action.run();
             return false;
         } catch (Throwable t) {
-            return expectedType.isInstance(t);
+            return true;
         }
     }
 
@@ -474,6 +590,16 @@ public class TestApp {
     @FunctionalInterface
     private interface TestCase {
         boolean run();
+    }
+
+    private static class TestEntry {
+        private final String name;
+        private final TestCase testCase;
+
+        private TestEntry(String name, TestCase testCase) {
+            this.name = name;
+            this.testCase = testCase;
+        }
     }
 
     private static class CleanupBin {

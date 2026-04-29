@@ -1,5 +1,7 @@
 package services;
 
+import java.util.List;
+
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import model.domain.GraduateStudent;
@@ -31,8 +33,11 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         return super.create(project);
     }
 
-    public ResearcherProfile createResearcherProfile(int userId) {
+    public ResearcherProfile makeResearcher(int userId) {
+        return createResearcherProfile(userId);
+    }
 
+    public ResearcherProfile createResearcherProfile(int userId) {
         userService.get(userId);
 
         if(repository.researcherProfileExists(userId))
@@ -41,17 +46,31 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         return (ResearcherProfile) super.create(new ResearcherProfile(userId));
     }
 
-    public ResearcherProfile getResearcherProfile(int userId) {
-        ResearcherProfile profile = repository.findResearcherProfile(userId)
-                                              .orElseThrow(()->new DoesNotExist("researcher profile for user with id="+userId));
-        return profile;
-    }
-
-    public void deleteResearcerProfile(int userId) {
+    public void deleteResearcherProfile(int userId) {
         ResearcherProfile profileToDelete = getResearcherProfile(userId);
         super.delete(profileToDelete.getId());
     }
 
+
+    public ResearcherProfile getResearcherProfile(int userId) {
+        return repository.findResearcherProfile(userId)
+                         .orElseThrow(() -> new DoesNotExist("researcher profile for user with id=" + userId));
+    }
+
+    public List<ResearcherProfile> getAllResearcherProfiles() {
+        return repository.findAllResearcherProfiles();
+    }
+
+    public List<User> getAllResearchersBasicAccounts() {
+        return repository.findAllResearcherUserIds()
+                         .stream()
+                         .map(userService::get)
+                         .toList();
+    }
+
+    public boolean isResearcher(int userId) {
+        return repository.researcherProfileExists(userId);
+    }
 
     @Override
     public void subscribeToEvents() {
@@ -59,8 +78,7 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         eventSystem.subscribe(UserCreateEvent.class, (eventData) -> {
 
             int createdUserId = eventData.getUserId();
-            
-            if(repository.researcherProfileExists(createdUserId)) return;
+            if(isResearcher(createdUserId)) return;
 
             Class<? extends User> userClass = eventData.getUserClass();
 
@@ -73,9 +91,10 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         eventSystem.subscribe(UserDeleteEvent.class, (eventData) -> {
 
             int deletedUserId = eventData.getUserId();
-            if(repository.researcherProfileExists(deletedUserId)){
 
-            }
+            if(isResearcher(deletedUserId))
+                deleteResearcherProfile(deletedUserId);
+            
         });
     }
 

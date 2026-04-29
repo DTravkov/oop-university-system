@@ -23,6 +23,7 @@ public class ResearchRepository extends Repository<SerializableModel> {
         return this.findAllByClass(ResearcherProfile.class)
                    .stream()
                    .map(entity -> (ResearcherProfile) entity)
+                   .filter(profile -> profile.getUserId() == userId)
                    .findFirst();
     }
 
@@ -30,8 +31,17 @@ public class ResearchRepository extends Repository<SerializableModel> {
         return this.findResearcherProfile(userId).isPresent();
     }
 
-    public List<SerializableModel> findAllResearcherProfiles() {
-        return this.findAllByClass(ResearcherProfile.class);
+    public List<ResearcherProfile> findAllResearcherProfiles() {
+        return this.findAllByClass(ResearcherProfile.class)
+                   .stream()
+                   .map(entity -> (ResearcherProfile) entity)
+                   .toList();
+    }
+
+    public List<Integer> findAllResearcherUserIds() {
+        return findAllResearcherProfiles().stream()
+                                          .map(ResearcherProfile::getUserId)
+                                          .toList();
     }
     public List<SerializableModel> findAllResearchPapers() {
         return this.findAllByClass(ResearchPaper.class);
