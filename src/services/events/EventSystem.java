@@ -27,15 +27,14 @@ public class EventSystem {
         if(handlers.get(eventType) == null){
             handlers.put(eventType, new ArrayList<>());
         }
-        List<Consumer<Event>> list = handlers.get(eventType);
-        list.add(eventHandler);
+
+        handlers.get(eventType).add(eventHandler);
 
 
     }
 
     public void publish(Event event) {
         FieldValidator.requireNonNull(event, "Event");
-        
         List<Consumer<Event>> list = handlers.get(event.getClass());
         if(list == null || list.isEmpty()){
             return;

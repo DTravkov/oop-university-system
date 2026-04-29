@@ -1,8 +1,10 @@
 package services;
 
+import java.util.Comparator;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
+import model.domain.Comparators;
 import model.domain.DeletedUser;
 import model.domain.Manager;
 import model.domain.News;
@@ -51,9 +53,10 @@ public class NewsService extends BaseService<News, NewsRepository>{
         this.update(news);
     }
 
-
-
-
+    @Override
+    public List<News> getAll() {
+        return super.getAll().stream().sorted(Comparators.getNewsResearchComparator()).toList();
+    }
 
 
     @Override

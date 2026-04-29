@@ -5,8 +5,8 @@ import java.util.ResourceBundle;
 import java.util.Locale;
 
 import model.enumeration.LanguagePreference;
-import model.domain.SessionData;
 import model.enumeration.UIMessages;
+import settings.SessionData;
 
 public class LanguageService {
     private static final String BUNDLE_NAME = "messages";

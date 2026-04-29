@@ -10,6 +10,7 @@ import model.domain.User;
 import model.enumeration.TeacherType;
 import model.factories.UserFactory;
 import model.repository.UserRepository;
+import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
 
 
@@ -29,7 +30,9 @@ public class UserService extends BaseService<User, UserRepository> {
             throw new AlreadyExists(" user with login " + login);
         }
         User user = UserFactory.createFromClass(userClass, login, password, name, surname, admissionDate, teacherType);
-        return repository.save(user);
+        User savedUser = repository.save(user);
+        this.eventSystem.publish(new UserCreateEvent(savedUser));
+        return savedUser;
     }
 
     @Override

@@ -16,7 +16,10 @@ public abstract class SerializableModel implements Serializable {
 			return;
 		}
 		throw new ImmutableFieldChanged();
+	}
 
+	public boolean isNewRecord(){
+		return this.id == 0;
 	}
 	
 }

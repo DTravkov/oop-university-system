@@ -31,17 +31,15 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
     }
 
     public T get(int id){
-        T entity = repository.find(id);
-
-        if(entity == null) 
-            throw new DoesNotExist(baseName + " object with id : " + id);
-        
+        T entity = repository.find(id)
+                             .orElseThrow(() -> new DoesNotExist(baseName + " record with id=" + id));
         return entity;
     }
 
     public void update(T entity){
         // used to save changes of ALREADY existing object.
         // this will not throw any excpetions if entity is fetched and edited object from repository.data map
+        
         if(!repository.exists(entity.getId())){
             throw new DoesNotExist(baseName + " object with id : " + entity.getId());
         }

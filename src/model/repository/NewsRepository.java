@@ -1,6 +1,5 @@
 package model.repository;
 
-import model.domain.Comment;
 import model.domain.News;
 import model.enumeration.NewsUrgencyLevel;
 

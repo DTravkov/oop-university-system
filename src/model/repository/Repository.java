@@ -10,28 +10,34 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 
+import exceptions.DoesNotExist;
+import exceptions.OperationNotAllowed;
+
 public class Repository<T extends SerializableModel> {
 
     private final String PATH;
     private IDGenerator idGenerator;
     protected Map<Integer, T> data = new HashMap<>();
+    protected final String baseName;
 
     public Repository() {
-        this.PATH = "serialized/" + this.getClass().getSimpleName().replace("Repository", "") + ".ser";
+        this.baseName = this.getClass().getSimpleName().replace("Repository", "");
+        this.PATH = "serialized/" + baseName + ".ser";
         ensureFileExists();
         this.idGenerator = new IDGenerator(PATH);
         load();
     }
 
     public T save(T entity) {
-        // if entity's id == 0, it means that the enitity is new,.
-        // therefore, it needs unique id, that generator provides
-        // only negative id that should appera in code is -1, it is reserved for deleted user.
-        if (entity.getId() == 0) {
+        // upsert pattern save function.
+        // if entity is new(id == 0), then save() creates one
+        // else it will update record with id == entity.getId()
+        if (entity.isNewRecord()) {
             entity.setId(idGenerator.nextId());
         }
 
         data.put(entity.getId(), entity);
+
         writeToFile();
 
         return entity;
@@ -50,21 +56,22 @@ public class Repository<T extends SerializableModel> {
     }
 
     
-    public void update(T entity, T newEntity) {
-        if (!exists(e -> e.getId() == entity.getId())) {
-            throw new NoSuchElementException("Cannot update: Entity with ID " + entity.getId() + " not found");
-        }
+    public void update(T entity){
+        // used to save changes of ALREADY existing object.
+        // this will not throw any excpetions if entity is fetched and edited object's id exists in repository.data map
         int id = entity.getId();
-        newEntity.setId(id);
-        data.put(id, newEntity);
-        writeToFile();
+        if(entity.isNewRecord()) 
+            throw new OperationNotAllowed("Cannot update: " + baseName + entity.toString() + " is write-only (id=0)");
+        this.find(id)
+            .orElseThrow(() -> new DoesNotExist(baseName + " record with id=" + id));
+
+        this.save(entity);
     }
 
     
     public void delete(int id) {
-        if (!exists(e -> e.getId() == id)) {
-            throw new NoSuchElementException("Cannot delete: Entity with ID " + id + " not found");
-        }
+        this.find(id)
+            .orElseThrow(() -> new DoesNotExist("Cannot delete: " + baseName + " with ID " + id + " not found"));
         data.remove(id);
         writeToFile();
     }
@@ -90,11 +97,8 @@ public class Repository<T extends SerializableModel> {
     }
 
 
-
-
-
-    public T find(int id){
-        return findFirst(entity -> entity.getId() == id).orElse(null);
+    public Optional<T> find(int id){
+        return findFirst(entity -> entity.getId() == id);
     }
 
     public List<T> findAll(){
@@ -104,10 +108,6 @@ public class Repository<T extends SerializableModel> {
     public boolean exists(int id){
         return findFirst(entity -> entity.getId() == id).isPresent();
     }
-
-
-
-
 
 
     private void writeToFile() {

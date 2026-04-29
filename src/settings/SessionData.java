@@ -1,12 +1,14 @@
-package model.domain;
+package settings;
 
+
+import model.domain.User;
 import model.enumeration.LanguagePreference;
 
 import java.util.Locale;
 
 public class SessionData {
 
-    private static SessionData instance = null;
+    private static SessionData instance = new SessionData();
     private Locale language = Locale.of(LanguagePreference.RU.getCode());
     private User user = null;
 

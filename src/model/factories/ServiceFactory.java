@@ -17,6 +17,7 @@ public class ServiceFactory {
     private void initServices() {
         UserService userService = new UserService();
 
+        ResearchService researchService = new ResearchService(userService);
         CourseService courseService = new CourseService(userService);
         MessageService messageService = new MessageService(userService);
         CommentService commentService = new CommentService(userService);
@@ -29,6 +30,7 @@ public class ServiceFactory {
         
 
         services.put(UserService.class, userService);
+        services.put(ResearchService.class, researchService);
         services.put(CourseService.class, courseService);
         services.put(EnrollmentService.class, enrollmentService);
         services.put(ComplaintService.class, complaintService);

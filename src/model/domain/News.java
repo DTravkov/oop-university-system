@@ -117,4 +117,5 @@ public class News extends SerializableModel {
                 ", comments=" + comments +
                 '}';
     }
+
 }
