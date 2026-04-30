@@ -45,7 +45,7 @@ public class Main {
                     ResearchApp.startApp(scanner);
                     break;
                 case "9":
-                    TestApp.runScenario();
+                    TestApp.runAllTests();
                     break;
                 case "10":
                     TestApp.printAllData();

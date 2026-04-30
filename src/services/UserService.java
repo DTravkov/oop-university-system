@@ -46,7 +46,7 @@ public class UserService extends BaseService<User, UserRepository> {
 
     public User authenticate(String login, String password) {
         User user = repository.findByLogin(login);
-        
+
         if (user == null || !user.getPassword().equals(password)) {
             throw new InvalidCredentials();
         }

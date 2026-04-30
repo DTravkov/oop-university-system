@@ -94,10 +94,6 @@ public class TestApp {
         System.out.println("Failed: " + (total - passed) + "/" + total);
     }
 
-    public static void runScenario() {
-        runAllTests();
-    }
-
     public static void printAllData() {
         System.out.println("=== Persisted Data Snapshot ===");
         printModelList("Students", userService.getAllByClass(Student.class));
