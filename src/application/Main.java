@@ -3,9 +3,10 @@ package application;
 import java.util.Scanner;
 
 import model.enumeration.LanguagePreference;
-import model.enumeration.UIMessages;
-import services.*;
-import utils.UIFields;
+import model.enumeration.UIMessage;
+import settings.AppSettings;
+import utils.Translator;
+import utils.UIForms;
 
 public class Main {
 
@@ -16,7 +17,7 @@ public class Main {
 
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 11);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 11);
 
             switch (choice) {
                 case "1":
@@ -50,11 +51,11 @@ public class Main {
                     TestApp.printAllData();
                     break;
                 case "11":
-                    System.out.println(LanguageService.translate(UIMessages.AUTH_GOODBYE));
+                    System.out.println(Translator.translate(UIMessage.AUTH_GOODBYE));
                     scanner.close();
                     return;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
             }
         }
     }
@@ -71,28 +72,30 @@ public class Main {
         System.out.println("8. Research App");
         System.out.println("9. Run tests");
         System.out.println("10. Print all data");
-        System.out.println("11. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("11. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void askLanguage(Scanner scanner){
+
         System.out.println("\n=== Choose preferable language ===");
         System.out.println("1. English language");
         System.out.println("2. Қазақ тілі");
         System.out.println("3. Русский язык");
+
         while(true){
-            String choice = UIFields.readChoice(scanner, UIMessages.AUTH_CHANGE_LANG, 1, 3);
+            String choice = UIForms.readChoice(scanner, UIMessage.AUTH_CHANGE_LANG, 1, 3);
             switch (choice) {
                 case "1":
-                    LanguageService.updateLanguage(LanguagePreference.EN);
+                    AppSettings.setLanguage(LanguagePreference.EN);
                     return;
                 case "2":
-                    LanguageService.updateLanguage(LanguagePreference.KK);
+                    AppSettings.setLanguage(LanguagePreference.KK);
                     return;
                 case "3":
-                    LanguageService.updateLanguage(LanguagePreference.RU);
+                    AppSettings.setLanguage(LanguagePreference.RU);
                     return;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                     break;
             }
         }

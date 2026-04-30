@@ -1,15 +1,17 @@
 package model.domain;
 
+import settings.AppSettings;
+
 public class DeletedUser extends User{
-	// placeholder for deleted users' data.
-	public static final int ID = -1;
+	// placeholder that represents deleted user.
+	private static final long serialVersionUID = 1L;
+
     public DeletedUser() {
-		super("DELETED", "DELETED", "DELETED", "USERS");
+		super("DELETED", "DELETED", "DELETED", "USER");
 		this.setBanned(true);
-		this.id = ID;
+		this.id = AppSettings.DELETED_USER_ID;
 	}
 
-	private static final long serialVersionUID = 1L;
 	
 
     

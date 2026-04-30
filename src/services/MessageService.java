@@ -3,12 +3,12 @@ package services;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
-import model.domain.DeletedUser;
 import model.domain.IMessagable;
 import model.domain.Message;
 import model.domain.User;
 import model.repository.MessageRepository;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class MessageService extends BaseService<Message, MessageRepository>{
 
@@ -24,7 +24,7 @@ public class MessageService extends BaseService<Message, MessageRepository>{
         User sender = userService.get(message.getSenderId());
         User receiver = userService.get(message.getReceiverId());
 
-        if(sender.getId() == DeletedUser.ID || receiver.getId() == DeletedUser.ID){
+        if(sender.getId() == AppSettings.DELETED_USER_ID || receiver.getId() == AppSettings.DELETED_USER_ID){
             throw new OperationNotAllowed(" sending messages to/from deleted account");
         }
         
@@ -54,12 +54,12 @@ public class MessageService extends BaseService<Message, MessageRepository>{
             for(Message msg : list){
 
                 if(msg.getSenderId() == deletedUserId){
-                    msg.setSenderId(DeletedUser.ID);
+                    msg.setSenderId(AppSettings.DELETED_USER_ID);
                     changed = true;
                 }
 
                 if(msg.getReceiverId() == deletedUserId){
-                    msg.setReceiverId(DeletedUser.ID);
+                    msg.setReceiverId(AppSettings.DELETED_USER_ID);
                     changed = true;
                 }
 

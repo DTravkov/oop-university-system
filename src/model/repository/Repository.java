@@ -1,7 +1,7 @@
 package model.repository;
 
 import model.domain.SerializableModel;
-import utils.IDGenerator;
+import settings.AppSettings;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,7 +22,7 @@ public class Repository<T extends SerializableModel> {
 
     public Repository() {
         this.baseName = this.getClass().getSimpleName().replace("Repository", "");
-        this.PATH = "serialized/" + baseName + ".ser";
+        this.PATH = AppSettings.DEFAULT_REPOSITORY_ROOT + baseName + ".ser";
         ensureFileExists();
         this.idGenerator = new IDGenerator(PATH);
         load();

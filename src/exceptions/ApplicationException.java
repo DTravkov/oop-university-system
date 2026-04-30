@@ -1,35 +1,25 @@
 package exceptions;
 
-import model.enumeration.UIMessages;
-import services.LanguageService;
+import model.enumeration.UIMessage;
+import utils.Translator;
 
 public abstract class ApplicationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final String messageKey;
+    private final UIMessage message;
     private final Object[] args;
 
-    protected ApplicationException(UIMessages messageKey, Object... args) {
-        this(messageKey.getKey(), args);
-    }
 
-    protected ApplicationException(String messageKey, Object... args) {
-        super(messageKey);
-        this.messageKey = messageKey;
-        this.args = args != null ? args.clone() : new Object[0];
-    }
-
-    public String getMessageKey() {
-        return messageKey;
-    }
-
-    public Object[] getArgs() {
-        return args.clone();
+    protected ApplicationException(UIMessage message, Object... args) {
+        super(message.getKey());
+        this.message = message;
+        this.args = (args != null) ? args : new Object[0];
+            
     }
 
     @Override
     public String getMessage() {
-        return LanguageService.translate(messageKey, args);
+        return Translator.translate(message, args);
     }
 }

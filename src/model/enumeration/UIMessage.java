@@ -1,6 +1,6 @@
 package model.enumeration;
 
-public enum UIMessages {
+public enum UIMessage {
 
     MENU_TITLE_AUTH("menu.title_auth"),
     MENU_TITLE_ADMIN("menu.title_admin"),
@@ -100,7 +100,7 @@ public enum UIMessages {
 
     private final String key;
 
-    UIMessages(String key) {
+    UIMessage(String key) {
         this.key = key;
     }
 

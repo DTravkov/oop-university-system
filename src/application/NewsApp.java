@@ -5,10 +5,11 @@ import java.util.Scanner;
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.NewsUrgencyLevel;
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 import model.factories.ServiceFactory;
 import services.*;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class NewsApp {
 
@@ -20,7 +21,7 @@ public class NewsApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 8);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 8);
 
             try {
                 switch (choice) {
@@ -48,10 +49,10 @@ public class NewsApp {
                     case "8":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
-                System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -62,50 +63,50 @@ public class NewsApp {
         System.out.println("2. Delete news");
         System.out.println("3. Add comment");
         System.out.println("4. Delete comment");
-        System.out.println("5. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
+        System.out.println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
         System.out.println("6. Get news by urgency level");
         System.out.println("7. Get news comments");
-        System.out.println("8. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("8. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void addNews(Scanner scanner) {
         printManagers();
-        int publisherId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
-        String title = UIFields.readNonEmpty(scanner, UIMessages.INPUT_NAME);
-        String content = UIFields.readNonEmpty(scanner, UIMessages.INPUT_MESSAGE_CONTENT);
+        int publisherId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
+        String title = UIForms.readNonEmpty(scanner, UIMessage.INPUT_NAME);
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
         NewsUrgencyLevel urgencyLevel = askUrgencyLevel(scanner);
 
         News news = new News(publisherId, title, content, urgencyLevel);
         newsService.postNews(news);
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(news);
     }
 
     private static void deleteNews(Scanner scanner) {
         getAllNews();
-        int newsId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
+        int newsId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         newsService.delete(newsId);
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
     private static void addComment(Scanner scanner) {
         getAllNews();
-        int newsId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
-        int senderId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
-        String content = UIFields.readNonEmpty(scanner, UIMessages.INPUT_MESSAGE_CONTENT);
+        int newsId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
+        int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
         Comment comment = commentService.create(new Comment(senderId, content));
         newsService.assignComment(newsId, comment.getId());
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(newsService.get(newsId));
     }
 
     private static void deleteComment(Scanner scanner) {
         printAllCommentIds();
-        int commentId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
+        int commentId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         commentService.delete(commentId);
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
     private static void getAllNews() {
@@ -119,7 +120,7 @@ public class NewsApp {
 
     private static void getNewsComments(Scanner scanner) {
         getAllNews();
-        int newsId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
+        int newsId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         News news = newsService.get(newsId);
         System.out.println("--- Comments ---");
         for (Integer commentId : news.getComments()) {
@@ -134,7 +135,7 @@ public class NewsApp {
             System.out.println("2. HIGH");
             System.out.println("3. AVERAGE");
             System.out.println("4. LOW");
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 4);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 4);
             switch (choice) {
                 case "1":
                     return NewsUrgencyLevel.RESEARCH;
@@ -145,7 +146,7 @@ public class NewsApp {
                 case "4":
                     return NewsUrgencyLevel.LOW;
                 default:
-                    System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
             }
         }
     }

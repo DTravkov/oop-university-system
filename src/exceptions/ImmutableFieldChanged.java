@@ -1,10 +1,10 @@
 package exceptions;
 
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 
 public class ImmutableFieldChanged extends ApplicationException {
 
     public ImmutableFieldChanged() {
-        super(UIMessages.ERR_IMMUTABLE_ID);
+        super(UIMessage.ERR_IMMUTABLE_ID);
     }
 }

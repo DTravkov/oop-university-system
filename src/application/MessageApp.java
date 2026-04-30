@@ -4,10 +4,11 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.*;
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 import model.factories.ServiceFactory;
 import services.*;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class MessageApp {
 
@@ -18,7 +19,7 @@ public class MessageApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 6);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
@@ -40,29 +41,29 @@ public class MessageApp {
                     case "6":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
-                System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
+                System.out.println(e.getMessage());
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + LanguageService.translate(UIMessages.MENU_TITLE_MSG) + " ---");
-        System.out.println("1. " + LanguageService.translate(UIMessages.MSG_SEND));
+        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " ---");
+        System.out.println("1. " + Translator.translate(UIMessage.MSG_SEND));
         System.out.println("2. Delete message by id");
         System.out.println("3. List messages by sender id");
         System.out.println("4. List messages by receiver id");
-        System.out.println("5. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
-        System.out.println("6. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        System.out.println("6. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void sendMessage(Scanner scanner) {
         printUsers();
-        int senderId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
-        int receiverId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
-        String content = UIFields.readNonEmpty(scanner, UIMessages.INPUT_MESSAGE_CONTENT);
+        int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
+        int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
         userService.get(senderId);
         userService.get(receiverId);
@@ -70,28 +71,28 @@ public class MessageApp {
         Message message = new Message(senderId, receiverId, content);
         messageService.sendMessage(message);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_SENT));
+        System.out.println(Translator.translate(UIMessage.MSG_SENT));
         System.out.println("Created: " + message);
         System.out.println("Receiver inbox: " + messageService.getAllByReceiverId(receiverId));
     }
 
     private static void deleteMessage(Scanner scanner) {
         getAllMessages();
-        int messageId = UIFields.readInt(scanner, UIMessages.INPUT_MESSAGE_ID);
+        int messageId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         messageService.delete(messageId);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
     private static void getMessagesBySender(Scanner scanner) {
         printUsers();
-        int senderId = UIFields.readInt(scanner, UIMessages.INPUT_SENDER_ID);
+        int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
         System.out.println(messageService.getAllBySenderId(senderId));
     }
 
     private static void getMessagesByReceiver(Scanner scanner) {
         printUsers();
-        int receiverId = UIFields.readInt(scanner, UIMessages.INPUT_RECEIVER_ID);
+        int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
         System.out.println(messageService.getAllByReceiverId(receiverId));
     }
 

@@ -5,12 +5,11 @@ import java.util.List;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
-import model.domain.DeletedUser;
-import model.domain.Student;
 import model.domain.StudentOrganization;
 import model.domain.User;
 import model.repository.StudentOrganizationRepository;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class StudentOrganizationService extends BaseService<StudentOrganization, StudentOrganizationRepository>  {
 
@@ -35,7 +34,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     public void addMember(int organizationId, int studentId) {
         StudentOrganization org = this.get(organizationId);
         User user = userService.get(studentId);
-        if(!(user instanceof Student)){
+        if(!AppSettings.ST_ORG_ALLOWED_PRESIDENT_CLASSES.contains(user.getClass())){
             throw new OperationNotAllowed("adding not a student to a Student Organization members");
         }
         org.addMember(studentId);
@@ -54,7 +53,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     public void setPresident(int organizationId, int studentId) {
         StudentOrganization org = this.get(organizationId);
         User user = userService.get(studentId);
-        if(!(user instanceof Student)){
+        if(!AppSettings.ST_ORG_ALLOWED_PRESIDENT_CLASSES.contains(user.getClass())){
             throw new OperationNotAllowed("adding not a student to a Student Organization members");
         }
         org.setPresidentId(studentId);
@@ -65,7 +64,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     public void removePresident(int organizationId) {
         StudentOrganization org = this.get(organizationId);
         org.removeMember(org.getPresidentId());
-        org.setPresidentId(DeletedUser.ID);
+        org.setPresidentId(AppSettings.DELETED_USER_ID);
         repository.save(org);
     }
 

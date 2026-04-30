@@ -1,11 +1,9 @@
 package services;
 
-import java.util.Comparator;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
 import model.domain.Comparators;
-import model.domain.DeletedUser;
 import model.domain.Manager;
 import model.domain.News;
 import model.domain.User;
@@ -13,6 +11,7 @@ import model.enumeration.NewsUrgencyLevel;
 import model.repository.NewsRepository;
 import services.events.CommentDeleteEvent;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class NewsService extends BaseService<News, NewsRepository>{
 
@@ -27,7 +26,7 @@ public class NewsService extends BaseService<News, NewsRepository>{
     public void postNews(News news) {
         User publisher = userService.get(news.getPublisherId());
 
-        if(publisher.getId() == DeletedUser.ID){
+        if(publisher.getId() == AppSettings.DELETED_USER_ID){
             throw new OperationNotAllowed(" posting news as a deleted user");
         }
         
@@ -68,7 +67,7 @@ public class NewsService extends BaseService<News, NewsRepository>{
             List<News> list = this.getAll();
             for(News news : list){
                 if(news.getPublisherId() == deletedUserId){
-                    news.setPublisherId(DeletedUser.ID);
+                    news.setPublisherId(AppSettings.DELETED_USER_ID);
                     this.update(news);
                 }
             }

@@ -6,10 +6,11 @@ import java.util.Scanner;
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.TeacherType;
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 import model.factories.ServiceFactory;
 import services.*;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class UserApp {
 
@@ -19,7 +20,7 @@ public class UserApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 7);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 7);
 
             try {
                 switch (choice) {
@@ -44,7 +45,7 @@ public class UserApp {
                     case "7":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
                 System.out.println(e.getMessage());
@@ -53,27 +54,27 @@ public class UserApp {
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + LanguageService.translate(UIMessages.MENU_TITLE_USER) + " ---");
-        System.out.println("1. " + LanguageService.translate(UIMessages.AUTH_SIGN_UP));
+        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_USER) + " ---");
+        System.out.println("1. " + Translator.translate(UIMessage.AUTH_SIGN_UP));
         System.out.println("2. Get user by id");
         System.out.println("3. List all users by role");
-        System.out.println("4. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
-        System.out.println("5. " + LanguageService.translate(UIMessages.USER_DELETE));
-        System.out.println("6. " + LanguageService.translate(UIMessages.AUTH_LOG_IN));
-        System.out.println("7. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("4. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        System.out.println("5. " + Translator.translate(UIMessage.USER_DELETE));
+        System.out.println("6. " + Translator.translate(UIMessage.AUTH_LOG_IN));
+        System.out.println("7. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void getAllUsersByRole(Scanner scanner) {
-        Class<? extends User> inputClass = UIFields.readUserClass(scanner);
+        Class<? extends User> inputClass = UIForms.readUserClass(scanner);
         System.out.println(userService.getAllByClass(inputClass));
     }
 
     private static void registerUser(Scanner scanner) {
-        Class<? extends User> inputClass = UIFields.readUserClass(scanner);
-        String login = UIFields.readNonEmpty(scanner, UIMessages.INPUT_LOGIN);
-        String password = UIFields.readNonEmpty(scanner, UIMessages.INPUT_PASSWORD);
-        String name = UIFields.readNonEmpty(scanner, UIMessages.INPUT_NAME);
-        String surname = UIFields.readNonEmpty(scanner, UIMessages.INPUT_SURNAME);
+        Class<? extends User> inputClass = UIForms.readUserClass(scanner);
+        String login = UIForms.readNonEmpty(scanner, UIMessage.INPUT_LOGIN);
+        String password = UIForms.readNonEmpty(scanner, UIMessage.INPUT_PASSWORD);
+        String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_NAME);
+        String surname = UIForms.readNonEmpty(scanner, UIMessage.INPUT_SURNAME);
 
         Date admissionDate = null;
         TeacherType teacherType = null;
@@ -83,19 +84,19 @@ public class UserApp {
         if (IEnrollable.class.isAssignableFrom(inputClass)) {
             admissionDate = new Date();
         } else if (Teacher.class.isAssignableFrom(inputClass)) {
-            teacherType = UIFields.askTeacherType(scanner);
+            teacherType = UIForms.askTeacherType(scanner);
         }
 
         
         User user = userService.registerUser(inputClass, login, password, name, surname, admissionDate, teacherType);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(user);
     }
 
     private static void printUserById(Scanner scanner) {
         printAllUsers();
-        int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int id = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         System.out.println(userService.get(id));
     }
 
@@ -105,15 +106,15 @@ public class UserApp {
 
     private static void deleteUser(Scanner scanner) {
         printAllUsers();
-        int id = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int id = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         userService.delete(id);
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
         System.out.println(userService.getAll());
     }
 
     private static void authenticate(Scanner scanner) {
-        String login = UIFields.readNonEmpty(scanner, UIMessages.INPUT_LOGIN);
-        String password = UIFields.readNonEmpty(scanner, UIMessages.INPUT_PASSWORD);
+        String login = UIForms.readNonEmpty(scanner, UIMessage.INPUT_LOGIN);
+        String password = UIForms.readNonEmpty(scanner, UIMessage.INPUT_PASSWORD);
         User user = userService.authenticate(login, password);
         System.out.println("Authenticated: " + user);
     }

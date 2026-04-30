@@ -9,7 +9,8 @@ import java.util.Locale;
 public class SessionData {
 
     private static SessionData instance = new SessionData();
-    private Locale language = Locale.of(LanguagePreference.RU.getCode());
+
+    private Locale language = Locale.of(AppSettings.DEFAULT_LANGUAGE.getCode());
     private User user = null;
 
     private SessionData() {}

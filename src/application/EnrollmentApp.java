@@ -4,10 +4,11 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.*;
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 import model.factories.ServiceFactory;
 import services.*;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class EnrollmentApp{
 
@@ -19,7 +20,7 @@ public class EnrollmentApp{
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 7);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 7);
 
             try {
                 switch (choice) {
@@ -44,56 +45,56 @@ public class EnrollmentApp{
                     case "7":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
-                System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
+                System.out.println(e.getMessage());
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + LanguageService.translate(UIMessages.MENU_TITLE_ENROLL) + " ---");
-        System.out.println("1. " + LanguageService.translate(UIMessages.ENROLL_CREATE));
-        System.out.println("2. " + LanguageService.translate(UIMessages.ENROLL_DROP));
-        System.out.println("3. " + LanguageService.translate(UIMessages.ENROLL_VIEW_STUDENT));
+        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ENROLL) + " ---");
+        System.out.println("1. " + Translator.translate(UIMessage.ENROLL_CREATE));
+        System.out.println("2. " + Translator.translate(UIMessage.ENROLL_DROP));
+        System.out.println("3. " + Translator.translate(UIMessage.ENROLL_VIEW_STUDENT));
         System.out.println("4. Get enrollments by course");
         System.out.println("5. Increase student points");
-        System.out.println("6. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
-        System.out.println("7. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("6. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        System.out.println("7. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void createEnrollment(Scanner scanner) {
         printStudents();
         printCourses();
-        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
-        int courseId = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
+        int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
 
         Enrollment enrollment = new Enrollment(courseId, studentId);
         enrollmentService.create(enrollment);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(enrollment);
         System.out.println(enrollmentService.getAll());
     }
 
     private static void getEnrollmentsOfStudent(Scanner scanner) {
         printStudents();
-        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         System.out.println(enrollmentService.getAllByStudentId(studentId));
     }
 
     private static void deleteEnrollment(Scanner scanner) {
         getAllEnrollments();
-        int enrollmentId = UIFields.readInt(scanner, UIMessages.INPUT_ENROLLMENT_ID);
+        int enrollmentId = UIForms.readInt(scanner, UIMessage.INPUT_ENROLLMENT_ID);
         enrollmentService.delete(enrollmentId);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
     private static void getEnrollmentsOfCourse(Scanner scanner) {
         printCourses();
-        int courseId = UIFields.readInt(scanner, UIMessages.INPUT_COURSE_ID);
+        int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
         System.out.println(enrollmentService.getAllByCourseId(courseId));
     }
 
@@ -103,15 +104,15 @@ public class EnrollmentApp{
 
     private static void increaseStudentPoints(Scanner scanner) {
         getAllEnrollments();
-        int enrollmentId = UIFields.readInt(scanner, UIMessages.INPUT_ENROLLMENT_ID);
+        int enrollmentId = UIForms.readInt(scanner, UIMessage.INPUT_ENROLLMENT_ID);
         System.out.println("Choose point type:");
         System.out.println("1. First attestation");
         System.out.println("2. Second attestation");
         System.out.println("3. Final exam");
-        int pointTypeChoice = Integer.parseInt(UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 3));
-        double pointsToAdd = UIFields.readDouble(scanner, UIMessages.INPUT_POINTS_TO_ADD);
+        int pointTypeChoice = Integer.parseInt(UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 3));
+        double pointsToAdd = UIForms.readDouble(scanner, UIMessage.INPUT_POINTS_TO_ADD);
         enrollmentService.increasePoints(enrollmentId, pointTypeChoice, pointsToAdd);
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(enrollmentService.get(enrollmentId));
     }
 

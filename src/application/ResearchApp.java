@@ -5,11 +5,11 @@ import java.util.Scanner;
 import exceptions.ApplicationException;
 import model.domain.ResearcherProfile;
 import model.factories.ServiceFactory;
-import model.enumeration.UIMessages;
-import services.LanguageService;
+import model.enumeration.UIMessage;
 import services.ResearchService;
 import services.UserService;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class ResearchApp {
     private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
@@ -19,7 +19,7 @@ public class ResearchApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 6);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
@@ -41,7 +41,7 @@ public class ResearchApp {
                     case "6":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
                 System.out.println(e.getMessage());
@@ -56,7 +56,7 @@ public class ResearchApp {
         System.out.println("3. Check if user is researcher by id");
         System.out.println("4. Make person a researcher");
         System.out.println("5. Delete researcher profile");
-        System.out.println("6. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("6. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void printAllResearchersBasicAccounts() {
@@ -68,23 +68,23 @@ public class ResearchApp {
     }
 
     private static void checkIsResearcher(Scanner scanner) {
-        int userId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int userId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         System.out.println(researchService.isResearcher(userId));
     }
 
     private static void makeResearcher(Scanner scanner) {
         System.out.println("Available user IDs: " +
                 userService.getAll().stream().map(user -> user.getId()).toList());
-        int userId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int userId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         ResearcherProfile profile = researchService.makeResearcher(userId);
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println("User account: " + userService.get(userId));
         System.out.println("Researcher profile: " + profile);
     }
 
     private static void deleteResearcherProfile(Scanner scanner) {
-        int userId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int userId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         researchService.deleteResearcherProfile(userId);
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
     }
 }

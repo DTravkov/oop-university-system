@@ -11,7 +11,6 @@ import exceptions.OperationNotAllowed;
 import model.domain.Comment;
 import model.domain.Course;
 import model.domain.Dean;
-import model.domain.DeletedUser;
 import model.domain.Enrollment;
 import model.domain.Manager;
 import model.domain.Message;
@@ -36,6 +35,7 @@ import services.NewsService;
 import services.ResearchService;
 import services.StudentOrganizationService;
 import services.UserService;
+import settings.AppSettings;
 
 public class TestApp {
 
@@ -219,7 +219,7 @@ public class TestApp {
             cleanupBin.trackNews(news.getId());
             int newsId = news.getId();
             userService.delete(manager.getId());
-            return newsService.get(newsId).getPublisherId() == DeletedUser.ID;
+            return newsService.get(newsId).getPublisherId() == AppSettings.DELETED_USER_ID;
         } finally {
             cleanupBin.cleanup();
         }
@@ -345,7 +345,7 @@ public class TestApp {
             userService.delete(sender.getId());
             List<Message> messagesByReceiver = messageService.getAllByReceiverId(receiver.getId());
             return messagesByReceiver.stream().anyMatch(msg ->
-                    msg.getContent().equals("delete user message mapping") && msg.getSenderId() == DeletedUser.ID);
+                    msg.getContent().equals("delete user message mapping") && msg.getSenderId() == AppSettings.DELETED_USER_ID);
         } finally {
             cleanupBin.cleanup();
         }

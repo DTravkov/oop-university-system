@@ -4,16 +4,15 @@ import java.util.List;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
-import model.domain.GraduateStudent;
 import model.domain.ResearchPaper;
 import model.domain.ResearchProject;
 import model.domain.ResearcherProfile;
 import model.domain.SerializableModel;
-import model.domain.Teacher;
 import model.domain.User;
 import model.repository.ResearchRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class ResearchService extends BaseService<SerializableModel, ResearchRepository> {
 
@@ -74,20 +73,26 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
     @Override
     public void subscribeToEvents() {
-
+        //creates researcher profile when :
+        // 1) when user is registered 
+        // 2) his class belongs to DEFAULT_RESEARCHER_CLASS in src/settings/AppSettings.java
         eventSystem.subscribe(UserCreateEvent.class, (eventData) -> {
 
             int createdUserId = eventData.getUserId();
-            if(isResearcher(createdUserId)) return;
+            
+            if(isResearcher(createdUserId)) 
+                return;
 
             Class<? extends User> userClass = eventData.getUserClass();
 
-            if(userClass.equals(GraduateStudent.class) || userClass.equals(Teacher.class)){
+            if(AppSettings.DEFAULT_RESEARCHER_CLASSES.contains(userClass))
                 this.createResearcherProfile(eventData.getUserId());
-            }
+            
 
         });
 
+        //deletes researcher profile when :
+        // a user with researcher profile is deleted from a system
         eventSystem.subscribe(UserDeleteEvent.class, (eventData) -> {
 
             int deletedUserId = eventData.getUserId();

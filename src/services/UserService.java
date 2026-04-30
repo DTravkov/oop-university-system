@@ -12,6 +12,7 @@ import model.factories.UserFactory;
 import model.repository.UserRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 
 public class UserService extends BaseService<User, UserRepository> {
@@ -19,7 +20,7 @@ public class UserService extends BaseService<User, UserRepository> {
     public UserService() {
         super(UserRepository.getInstance());
         // we need to register the deleted user object as a placholder for deleted users.
-        if(!repository.exists(DeletedUser.ID)){
+        if(!repository.exists(AppSettings.DELETED_USER_ID)){
             registerDeletedUser();
         }
     }

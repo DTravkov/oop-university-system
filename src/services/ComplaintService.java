@@ -4,13 +4,13 @@ import java.util.List;
 
 import exceptions.OperationNotAllowed;
 import model.domain.Dean;
-import model.domain.DeletedUser;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
 import model.repository.ComplaintRepository;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRepository>{
 
@@ -28,7 +28,7 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
         User to = userService.get(complaint.getReceiverId());
         User about = userService.get(complaint.getStudentId());
 
-        if(from.getId() == DeletedUser.ID || to.getId() == DeletedUser.ID){
+        if(from.getId() == AppSettings.DELETED_USER_ID || to.getId() == AppSettings.DELETED_USER_ID){
             throw new OperationNotAllowed(" sending complaints to/from deleted account");
         }
         if(!(from instanceof Teacher)){

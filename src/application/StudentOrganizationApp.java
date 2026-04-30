@@ -6,12 +6,12 @@ import exceptions.ApplicationException;
 import model.domain.StudentOrganization;
 import model.domain.Student;
 import model.domain.User;
-import model.enumeration.UIMessages;
+import model.enumeration.UIMessage;
 import model.factories.ServiceFactory;
-import services.LanguageService;
 import services.StudentOrganizationService;
 import services.UserService;
-import utils.UIFields;
+import utils.Translator;
+import utils.UIForms;
 
 public class StudentOrganizationApp {
 
@@ -22,7 +22,7 @@ public class StudentOrganizationApp {
     public static void startApp(Scanner scanner) {
         while (true) {
             printMenu();
-            String choice = UIFields.readChoice(scanner, UIMessages.MENU_CHOOSE, 1, 9);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 9);
 
             try {
                 switch (choice) {
@@ -53,44 +53,45 @@ public class StudentOrganizationApp {
                     case "9":
                         return;
                     default:
-                        System.out.println(LanguageService.translate(UIMessages.MSG_INVALID_CHOICE));
+                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                 }
             } catch (ApplicationException e) {
-                System.out.println(LanguageService.translate(e.getMessageKey(), e.getArgs()));
+                System.out.println(e.getMessage());
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + LanguageService.translate(UIMessages.MENU_TITLE_ORG) + " ---");
-        System.out.println("1. " + LanguageService.translate(UIMessages.ORG_CREATE));
-        System.out.println("2. " + LanguageService.translate(UIMessages.ORG_GET_BY_ID));
-        System.out.println("3. " + LanguageService.translate(UIMessages.MENU_VIEW_ALL));
-        System.out.println("4. " + LanguageService.translate(UIMessages.ORG_DELETE));
-        System.out.println("5. " + LanguageService.translate(UIMessages.ORG_ADD_MEMBER));
-        System.out.println("6. " + LanguageService.translate(UIMessages.ORG_REMOVE_MEMBER));
-        System.out.println("7. " + LanguageService.translate(UIMessages.ORG_SET_PRESIDENT));
-        System.out.println("8. " + LanguageService.translate(UIMessages.ORG_REMOVE_PRESIDENT));
-        System.out.println("9. " + LanguageService.translate(UIMessages.MENU_EXIT));
+        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ORG) + " ---");
+        System.out.println("1. " + Translator.translate(UIMessage.ORG_CREATE));
+        System.out.println("2. " + Translator.translate(UIMessage.ORG_GET_BY_ID));
+        System.out.println("3. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        System.out.println("4. " + Translator.translate(UIMessage.ORG_DELETE));
+        System.out.println("5. " + Translator.translate(UIMessage.ORG_ADD_MEMBER));
+        System.out.println("6. " + Translator.translate(UIMessage.ORG_REMOVE_MEMBER));
+        System.out.println("7. " + Translator.translate(UIMessage.ORG_SET_PRESIDENT));
+        System.out.println("8. " + Translator.translate(UIMessage.ORG_REMOVE_PRESIDENT));
+        System.out.println("9. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void createOrganization(Scanner scanner) {
-        String name = UIFields.readNonEmpty(scanner, UIMessages.INPUT_NAME);
-        String description = UIFields.readNonEmpty(scanner, UIMessages.INPUT_COURSE_DESC);
+        String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_NAME);
+        String description = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COURSE_DESC);
         printStudents();
-        int presidentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int presidentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
 
         StudentOrganization organization = new StudentOrganization(name, description, presidentId);
         studentOrganizationService.create(organization);
 
-        System.out.println(LanguageService.translate(UIMessages.MSG_CREATED));
+        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println("Created: " + organization);
-        System.out.println(LanguageService.translate(UIMessages.MSG_ALL_ORGANIZATIONS) + " " + studentOrganizationService.getAll());
+        System.out.println(Translator.translate(UIMessage.MSG_ALL_ORGANIZATIONS));
+        System.out.println(studentOrganizationService.getAll());
     }
 
     private static void getOrganizationById(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         System.out.println(studentOrganizationService.get(organizationId));
     }
 
@@ -100,50 +101,52 @@ public class StudentOrganizationApp {
 
     private static void deleteOrganization(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         studentOrganizationService.delete(organizationId);
-        System.out.println(LanguageService.translate(UIMessages.MSG_DELETED));
+        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
         System.out.println(studentOrganizationService.getAll());
     }
 
     private static void addMemberToOrganization(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         printStudents();
-        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         studentOrganizationService.addMember(organizationId, studentId);
         System.out.println(studentOrganizationService.get(organizationId));
-        System.out.println(LanguageService.translate(UIMessages.MSG_MEMBERS_IDS) + " " + studentOrganizationService.get(organizationId).getMembers());
+        System.out.println(Translator.translate(UIMessage.MSG_MEMBERS_IDS));
+        System.out.println(studentOrganizationService.get(organizationId).getMembers());
     }
 
     private static void deleteMemberFromOrganization(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         printStudents();
-        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         studentOrganizationService.removeMember(organizationId, studentId);
         System.out.println(studentOrganizationService.get(organizationId));
-        System.out.println(LanguageService.translate(UIMessages.MSG_MEMBERS_IDS) + " " + studentOrganizationService.get(organizationId).getMembers());
+        System.out.println(Translator.translate(UIMessage.MSG_MEMBERS_IDS));
+        System.out.println(studentOrganizationService.get(organizationId).getMembers());
     }
 
     private static void setOrganizationPresident(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         printStudents();
-        int studentId = UIFields.readInt(scanner, UIMessages.INPUT_STUDENT_ID);
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         studentOrganizationService.setPresident(organizationId, studentId);
         System.out.println(studentOrganizationService.get(organizationId));
     }
 
     private static void removeOrganizationPresident(Scanner scanner) {
         printOrganizations();
-        int organizationId = UIFields.readInt(scanner, UIMessages.INPUT_ORG_ID);
+        int organizationId = UIForms.readInt(scanner, UIMessage.INPUT_ORG_ID);
         studentOrganizationService.removePresident(organizationId);
         System.out.println(studentOrganizationService.get(organizationId));
     }
 
     private static void printStudents() {
-        System.out.println(LanguageService.translate(UIMessages.MSG_STUDENTS_HEADER));
+        System.out.println(Translator.translate(UIMessage.MSG_STUDENTS_HEADER));
         for (User user : userService.getAllByClass(Student.class)) {
             System.out.println(user);
         }
