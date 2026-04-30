@@ -21,6 +21,7 @@ import model.domain.Student;
 import model.domain.StudentOrganization;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
+import model.domain.User;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.CourseType;
 import model.enumeration.NewsUrgencyLevel;
@@ -145,7 +146,9 @@ public class TestApp {
                     Manager.class, "tc.user.login." + suffix, "pass-login", "Test", "Login", null, null
             );
             cleanupBin.trackUser(manager.getId());
-            return userService.authenticate("tc.user.login." + suffix, "pass-login").getId() == manager.getId();
+            User authenticated = userService.authenticate("tc.user.login." + suffix, "pass-login");
+            return authenticated.getId() == manager.getId() && authenticated.getId() == AppSettings.getActiveUser().getId();
+            
         } finally {
             cleanupBin.cleanup();
         }
