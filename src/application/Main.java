@@ -61,6 +61,7 @@ public class Main {
     }
 
     private static void printMenu() {
+        System.out.print("\nCurrent active user : "  + AppSettings.getActiveUser());
         System.out.println("\n=== University System ===");
         System.out.println("1. User App");
         System.out.println("2. Course App");

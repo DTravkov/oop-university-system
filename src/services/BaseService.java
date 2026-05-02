@@ -10,6 +10,7 @@ import model.domain.SerializableModel;
 import model.repository.Repository;
 import services.events.EventSystem;
 import services.events.IObserver;
+import settings.AppSettings;
 import utils.Logger;
 
 public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> implements IService, IObserver {
@@ -29,7 +30,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
             throw new AlreadyExists(baseName + " with id " + entity.getId());
         }
         T saved = repository.save(entity);
-        Logger.log("Created " + baseName + " " + saved.getId());
+        Logger.log("Created " + baseName + " id=" + saved.getId());
         return saved;
     }
 
@@ -50,7 +51,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
             throw new OperationNotAllowed( baseName + " non-existing object can not be updated");
         }
         repository.save(entity);
-        Logger.log("Updated " + baseName + " " + entity.getId());
+        Logger.log("Updated " + baseName + " id=" + entity.getId());
     }
 
     public void delete(int id){
@@ -59,7 +60,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
         }
         T entity = repository.find(id)
                 .orElseThrow(() -> new DoesNotExist(baseName + " object with id " + id));
-        Logger.log("Deleted " + baseName + " " + entity.getId());
+        Logger.log("Deleted " + baseName + " id=" + entity.getId());
         repository.delete(id);
     }
 

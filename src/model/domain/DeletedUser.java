@@ -1,5 +1,6 @@
 package model.domain;
 
+import exceptions.ImmutableFieldChanged;
 import settings.AppSettings;
 
 public class DeletedUser extends User{
@@ -10,10 +11,11 @@ public class DeletedUser extends User{
 		super("DELETED", "DELETED", "DELETED", "USER");
 		this.setBanned(true);
 		this.id = AppSettings.DELETED_USER_ID;
+	}    
+
+	@Override
+	public void setId(int id) {
+		throw new ImmutableFieldChanged();
 	}
-
-	
-
-    
 
 }

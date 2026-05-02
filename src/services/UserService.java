@@ -5,7 +5,6 @@ import exceptions.InvalidCredentials;
 import java.util.Date;
 import java.util.List;
 
-import model.domain.DeletedUser;
 import model.domain.User;
 import model.enumeration.TeacherType;
 import model.factories.UserFactory;
@@ -19,10 +18,10 @@ public class UserService extends BaseService<User, UserRepository> {
 
     public UserService() {
         super(UserRepository.getInstance());
-        // we need to register the deleted user object as a placholder for deleted users.
-        if(!repository.exists(AppSettings.DELETED_USER_ID)){
-            registerDeletedUser();
-        }
+    }
+
+    static {
+        initializeSystemUsers();
     }
 
 
@@ -41,8 +40,8 @@ public class UserService extends BaseService<User, UserRepository> {
         User userToDelete = this.get(id);
         this.eventSystem.publish(new UserDeleteEvent(userToDelete));
         super.delete(id);
-        if(id == AppSettings.getActiveUser().getId()){
-            AppSettings.setActiveUser(new DeletedUser());
+        if(AppSettings.getActiveUser().getId() == userToDelete.getId()){
+            AppSettings.clearActiveUser();
         }
     }
 
@@ -55,7 +54,7 @@ public class UserService extends BaseService<User, UserRepository> {
         }
 
         AppSettings.setActiveUser(user);
-        Logger.log("Logged in " + user.getId());
+        Logger.log("Logged in id=" + user.getId());
 
         return user;
     }
@@ -68,8 +67,19 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.findAllByClassOrSubclass(dotClass);
     }
 
-    private void registerDeletedUser(){
-        super.create(new DeletedUser());
+    private static void initializeSystemUsers(){
+
+        UserRepository userRepository = UserRepository.getInstance();
+
+        User deletedUser = AppSettings.DELETED_USER;
+        User systemUser = AppSettings.SYSTEM_USER;
+
+        if(!userRepository.exists(deletedUser.getId())){
+            userRepository.save(deletedUser);
+        }
+        if(!userRepository.exists(systemUser.getId())){
+            userRepository.save(systemUser);
+        }
     }
 
 }

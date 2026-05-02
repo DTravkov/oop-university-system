@@ -34,8 +34,7 @@ public final class Logger {
         if (!INSTANCE.isActive) {
             return;
         }
-        User user = SessionData.getInstance().getUser();
-        if(user == null) return;
+        User user = AppSettings.getActiveUser();
         int userId = user.getId();
         LogEntry entry = new LogEntry(action, user.getId());
         INSTANCE.data.computeIfAbsent(userId, logList -> new ArrayList<>()).add(entry);

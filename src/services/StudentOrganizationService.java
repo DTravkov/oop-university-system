@@ -54,7 +54,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         StudentOrganization org = this.get(organizationId);
         User user = userService.get(studentId);
         if(!AppSettings.ST_ORG_ALLOWED_PRESIDENT_CLASSES.contains(user.getClass())){
-            throw new OperationNotAllowed("adding not a student to a Student Organization members");
+            throw new OperationNotAllowed("adding not allowed role as a Student Organization president");
         }
         org.setPresidentId(studentId);
         org.addMember(studentId);

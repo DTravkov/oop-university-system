@@ -18,7 +18,7 @@ public class UserRepository extends Repository<User> {
 
     @Override
     public List<User> findAll() {
-        return super.findAll().stream().filter(user -> user.getId() != -1).toList();
+        return super.findAll().stream().toList();
     }
 
     public User findByLogin(String login){
