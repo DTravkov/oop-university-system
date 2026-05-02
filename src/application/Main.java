@@ -45,10 +45,10 @@ public class Main {
                     ResearchApp.startApp(scanner);
                     break;
                 case "9":
-                    TestApp.runAllTests();
+                    AdminApp.startApp(scanner);
                     break;
                 case "10":
-                    TestApp.printAllData();
+                    TestApp.runAllTests();
                     break;
                 case "11":
                     System.out.println(Translator.translate(UIMessage.AUTH_GOODBYE));
@@ -70,8 +70,8 @@ public class Main {
         System.out.println("6. Student Org. App");
         System.out.println("7. News App");
         System.out.println("8. Research App");
-        System.out.println("9. Run tests");
-        System.out.println("10. Print all data");
+        System.out.println("9. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
+        System.out.println("10. Run tests");
         System.out.println("11. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 

@@ -11,6 +11,7 @@ import exceptions.OperationNotAllowed;
 import model.domain.Comment;
 import model.domain.Course;
 import model.domain.Dean;
+import model.domain.DeletedUser;
 import model.domain.Enrollment;
 import model.domain.Manager;
 import model.domain.Message;
@@ -37,6 +38,7 @@ import services.ResearchService;
 import services.StudentOrganizationService;
 import services.UserService;
 import settings.AppSettings;
+import utils.Logger;
 
 public class TestApp {
 
@@ -56,6 +58,9 @@ public class TestApp {
     }
 
     public static void runAllTests() {
+
+        Logger.setIsActive(false);
+        
         List<TestEntry> tests = List.of(
                 new TestEntry("User create", TestApp::testUserCreate),
                 new TestEntry("User login", TestApp::testUserLogin),
@@ -92,31 +97,13 @@ public class TestApp {
         System.out.println("\n=== TEST RESULT ===");
         System.out.println("Passed: " + passed + "/" + total);
         System.out.println("Failed: " + (total - passed) + "/" + total);
+
+
+        Logger.setIsActive(true);
+
+
     }
 
-    public static void printAllData() {
-        System.out.println("=== Persisted Data Snapshot ===");
-        printModelList("Students", userService.getAllByClass(Student.class));
-        printModelList("Courses", courseService.getAll());
-        printModelList("Enrollments", enrollmentService.getAll());
-        printModelList("Teachers", userService.getAllByClass(Teacher.class));
-        printModelList("Deans", userService.getAllByClass(Dean.class));
-        printModelList("Managers", userService.getAllByClass(Manager.class));
-        printModelList("Messages", messageService.getAll());
-        printModelList("Complaints", complaintService.getAll());
-        printModelList("Organizations", studentOrganizationService.getAll());
-        printModelList("News", newsService.getAll());
-    }
-
-    private static List<String> getFormattedList(List<? extends SerializableModel> list) {
-        return list.stream().map(model -> model.toString() + '\n').toList();
-    }
-
-    private static void printModelList(String modelName, List<? extends SerializableModel> list) {
-        System.out.println("--- " + modelName + " ---");
-        System.out.print(String.join("", getFormattedList(list)));
-        System.out.println();
-    }
 
     // basic CRUD tests
     public static boolean testUserCreate() {

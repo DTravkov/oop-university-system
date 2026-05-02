@@ -67,7 +67,7 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
             this.getAll().forEach(course -> {
                 course.removePracticeTeacher(deletedUserId);
                 course.removeLectureTeacher(deletedUserId);
-                repository.save(course);
+                this.update(course);
             });
         });
     }

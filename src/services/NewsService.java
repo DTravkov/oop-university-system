@@ -34,7 +34,7 @@ public class NewsService extends BaseService<News, NewsRepository>{
             throw new OperationNotAllowed(" sending messages to/from non-manager account");
         }
 
-        repository.save(news);
+        super.create(news);
     }
 
     public List<News> getAllByUrgency(NewsUrgencyLevel urgencyLevel) {

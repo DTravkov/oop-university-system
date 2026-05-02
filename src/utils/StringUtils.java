@@ -1,8 +1,15 @@
 package utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public final class StringUtils {
 
     private StringUtils() {
+    }
+
+    public static String formatLogTime(Date time) {
+        return new SimpleDateFormat("MM.dd HH:mm:ss").format(time);
     }
 
     public static String capitalize(String value) {

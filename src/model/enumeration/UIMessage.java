@@ -9,6 +9,12 @@ public enum UIMessage {
     MENU_TITLE_MSG("menu.title_msg"),
     MENU_TITLE_ORG("menu.title_org"),
 
+    ADMIN_LOGS_ALL("admin.logs_all"),
+    ADMIN_LOGS_BY_USER("admin.logs_by_user"),
+    ADMIN_LOGS_SESSION("admin.logs_session"),
+    ADMIN_EMPTY_LOGS("admin.empty_logs"),
+    ADMIN_NO_ACTIVE_USER("admin.no_active_user"),
+
     MENU_CHOOSE("menu.choose"),
     MENU_EXIT("menu.exit"),
 
@@ -37,6 +43,7 @@ public enum UIMessage {
     INPUT_COURSE_TEACHER_TYPE("input.course_teacher_type"),
     INPUT_EMPLOYEE_ID("input.employee_id"),
     INPUT_STUDENT_ID("input.student_id"),
+    INPUT_USER_ID("input.user_id"),
     INPUT_LECTURER_ID("input.lecturer_id"),
     INPUT_TEACHER_ID("input.teacher_id"),
     INPUT_PRACTICE_ID("input.practice_id"),

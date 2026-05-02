@@ -28,7 +28,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         }
         userService.get(org.getPresidentId());
         org.addMember(org.getPresidentId());
-        return repository.save(org);
+        return super.create(org);
     }
 
     public void addMember(int organizationId, int studentId) {
@@ -38,7 +38,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
             throw new OperationNotAllowed("adding not a student to a Student Organization members");
         }
         org.addMember(studentId);
-        repository.save(org);
+        this.update(org);
     }
 
     public void removeMember(int organizationId, int studentId) {
@@ -47,7 +47,7 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
             throw new DoesNotExist("no member with id : " + studentId + " in organization");
         }
         org.removeMember(studentId);
-        repository.save(org);
+        this.update(org);
     }
 
     public void setPresident(int organizationId, int studentId) {
@@ -58,14 +58,14 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         }
         org.setPresidentId(studentId);
         org.addMember(studentId);
-        repository.save(org);
+        this.update(org);
     }
 
     public void removePresident(int organizationId) {
         StudentOrganization org = this.get(organizationId);
         org.removeMember(org.getPresidentId());
         org.setPresidentId(AppSettings.DELETED_USER_ID);
-        repository.save(org);
+        this.update(org);
     }
 
     public StudentOrganization getByPresidentId(int presidentId){
@@ -91,11 +91,10 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
             for(StudentOrganization organization : list){
                 if(organization.getPresidentId() == deletedUserId){
                     this.removePresident(organization.getId());
-                    repository.save(organization);
                 }
                 else if(organization.getMembers().contains(deletedUserId)){
                     organization.removeMember(deletedUserId);
-                    repository.save(organization);
+                    this.update(organization);
                 }
             }
 

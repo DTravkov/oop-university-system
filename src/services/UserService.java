@@ -13,7 +13,7 @@ import model.repository.UserRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
-
+import utils.Logger;
 
 public class UserService extends BaseService<User, UserRepository> {
 
@@ -31,7 +31,7 @@ public class UserService extends BaseService<User, UserRepository> {
             throw new AlreadyExists(" user with login " + login);
         }
         User user = UserFactory.createFromClass(userClass, login, password, name, surname, admissionDate, teacherType);
-        User savedUser = repository.save(user);
+        User savedUser = super.create(user);
         this.eventSystem.publish(new UserCreateEvent(savedUser));
         return savedUser;
     }
@@ -40,7 +40,10 @@ public class UserService extends BaseService<User, UserRepository> {
     public void delete(int id) {
         User userToDelete = this.get(id);
         this.eventSystem.publish(new UserDeleteEvent(userToDelete));
-        repository.delete(id);
+        super.delete(id);
+        if(id == AppSettings.getActiveUser().getId()){
+            AppSettings.setActiveUser(new DeletedUser());
+        }
     }
 
 
@@ -52,6 +55,7 @@ public class UserService extends BaseService<User, UserRepository> {
         }
 
         AppSettings.setActiveUser(user);
+        Logger.log("Logged in " + user.getId());
 
         return user;
     }
@@ -65,7 +69,7 @@ public class UserService extends BaseService<User, UserRepository> {
     }
 
     private void registerDeletedUser(){
-        repository.save(new DeletedUser());
+        super.create(new DeletedUser());
     }
 
 }

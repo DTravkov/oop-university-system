@@ -8,7 +8,6 @@ import java.util.List;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.IEnrollable;
-import model.domain.Student;
 import model.domain.User;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
@@ -90,7 +89,7 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
             int deletedUserId = event.getUserId();
             this.getAllByStudentId(deletedUserId).forEach(enr -> {
-                repository.delete(enr.getId());
+                this.delete(enr.getId());
             });
         });
     }
