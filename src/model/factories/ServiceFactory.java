@@ -24,6 +24,7 @@ public class ServiceFactory {
         ComplaintService complaintService = new ComplaintService(userService);
         NewsService newsService = new NewsService(userService);
         StudentOrganizationService studentOrganizationService = new StudentOrganizationService(userService);
+        TechRequestService techRequestService = new TechRequestService(userService);
         
         EnrollmentService enrollmentService = new EnrollmentService(userService, courseService);
         
@@ -38,6 +39,7 @@ public class ServiceFactory {
         services.put(CommentService.class, commentService);
         services.put(NewsService.class, newsService);
         services.put(StudentOrganizationService.class, studentOrganizationService);
+        services.put(TechRequestService.class, techRequestService);
     }
 
     public static ServiceFactory getInstance() {

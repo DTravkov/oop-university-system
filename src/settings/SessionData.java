@@ -11,7 +11,7 @@ public class SessionData {
     private static SessionData instance = new SessionData();
 
     private Locale language = Locale.of(AppSettings.DEFAULT_LANGUAGE.getCode());
-    private User user = AppSettings.SYSTEM_USER;
+    private User user = AppSettings.ANONYMOUS_USER;
 
     private SessionData() {}
 

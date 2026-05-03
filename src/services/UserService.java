@@ -67,12 +67,13 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.findAllByClassOrSubclass(dotClass);
     }
 
+
     private static void initializeSystemUsers(){
 
         UserRepository userRepository = UserRepository.getInstance();
 
         User deletedUser = AppSettings.DELETED_USER;
-        User systemUser = AppSettings.SYSTEM_USER;
+        User systemUser = AppSettings.ANONYMOUS_USER;
 
         if(!userRepository.exists(deletedUser.getId())){
             userRepository.save(deletedUser);

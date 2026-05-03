@@ -4,41 +4,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import exceptions.AlreadyExists;
-import exceptions.ApplicationException;
-import exceptions.DoesNotExist;
-import exceptions.OperationNotAllowed;
-import model.domain.Comment;
-import model.domain.Course;
-import model.domain.Dean;
-import model.domain.DeletedUser;
-import model.domain.Enrollment;
-import model.domain.Manager;
-import model.domain.Message;
-import model.domain.News;
-import model.domain.ResearcherProfile;
-import model.domain.SerializableModel;
-import model.domain.Student;
-import model.domain.StudentOrganization;
-import model.domain.Teacher;
-import model.domain.TeacherComplaint;
-import model.domain.User;
-import model.enumeration.ComplaintUrgencyLevel;
-import model.enumeration.CourseType;
-import model.enumeration.NewsUrgencyLevel;
-import model.enumeration.TeacherType;
-import model.factories.ServiceFactory;
-import services.CommentService;
-import services.ComplaintService;
-import services.CourseService;
-import services.EnrollmentService;
-import services.MessageService;
-import services.NewsService;
-import services.ResearchService;
-import services.StudentOrganizationService;
-import services.UserService;
-import settings.AppSettings;
-import utils.Logger;
+
+import exceptions.*;
+import model.domain.*;
+import model.factories.*;
+import services.*;
+import settings.*;
+import utils.*;
+import model.enumeration.*;
 
 public class TestApp {
 

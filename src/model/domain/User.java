@@ -73,6 +73,10 @@ public class User extends SerializableModel{
 		this.surname = surname;
 	}
 
+	public String getFullName() {
+		return name + " " + surname;
+	}
+
 	public boolean isBanned() {
 		return isBanned;
 	}

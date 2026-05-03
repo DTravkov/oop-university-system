@@ -17,7 +17,7 @@ public class Main {
 
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 11);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 12);
 
             switch (choice) {
                 case "1":
@@ -33,24 +33,27 @@ public class Main {
                     MessageApp.startApp(scanner);
                     break;
                 case "5":
-                    ComplaintApp.startApp(scanner);
+                    TechSupportApp.startApp(scanner);
                     break;
                 case "6":
-                    StudentOrganizationApp.startApp(scanner);
+                    ComplaintApp.startApp(scanner);
                     break;
                 case "7":
-                    NewsApp.startApp(scanner);
+                    StudentOrganizationApp.startApp(scanner);
                     break;
                 case "8":
-                    ResearchApp.startApp(scanner);
+                    NewsApp.startApp(scanner);
                     break;
                 case "9":
-                    AdminApp.startApp(scanner);
+                    ResearchApp.startApp(scanner);
                     break;
                 case "10":
-                    TestApp.runAllTests();
+                    AdminApp.startApp(scanner);
                     break;
                 case "11":
+                    TestApp.runAllTests();
+                    break;
+                case "12":
                     System.out.println(Translator.translate(UIMessage.AUTH_GOODBYE));
                     scanner.close();
                     return;
@@ -67,13 +70,14 @@ public class Main {
         System.out.println("2. Course App");
         System.out.println("3. Enrollment App");
         System.out.println("4. Message App");
-        System.out.println("5. Teacher Complaint App");
-        System.out.println("6. Student Org. App");
-        System.out.println("7. News App");
-        System.out.println("8. Research App");
-        System.out.println("9. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
-        System.out.println("10. Run tests");
-        System.out.println("11. " + Translator.translate(UIMessage.MENU_EXIT));
+        System.out.println("5. Tech Support App");
+        System.out.println("6. Teacher Complaint App");
+        System.out.println("7. Student Org. App");
+        System.out.println("8. News App");
+        System.out.println("9. Research App");
+        System.out.println("10. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
+        System.out.println("11. Run tests");
+        System.out.println("12. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void askLanguage(Scanner scanner){

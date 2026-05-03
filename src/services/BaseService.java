@@ -10,7 +10,6 @@ import model.domain.SerializableModel;
 import model.repository.Repository;
 import services.events.EventSystem;
 import services.events.IObserver;
-import settings.AppSettings;
 import utils.Logger;
 
 public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> implements IService, IObserver {
@@ -42,7 +41,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
 
     public void update(T entity){
         // used to save changes of ALREADY existing object.
-        // this will not throw any excpetions if entity is fetched and edited object from repository.data map
+        // this will not throw any excpetions only if (T entity) argument is existing one.
         
         if(!repository.exists(entity.getId())){
             throw new DoesNotExist(baseName + " object with id : " + entity.getId());

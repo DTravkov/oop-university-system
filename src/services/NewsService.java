@@ -3,7 +3,6 @@ package services;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
-import model.domain.Comparators;
 import model.domain.Manager;
 import model.domain.News;
 import model.domain.User;
@@ -12,6 +11,7 @@ import model.repository.NewsRepository;
 import services.events.CommentDeleteEvent;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
+import utils.Comparators;
 
 public class NewsService extends BaseService<News, NewsRepository>{
 
@@ -25,10 +25,6 @@ public class NewsService extends BaseService<News, NewsRepository>{
 
     public void postNews(News news) {
         User publisher = userService.get(news.getPublisherId());
-
-        if(publisher.getId() == AppSettings.DELETED_USER_ID){
-            throw new OperationNotAllowed(" posting news as a deleted user");
-        }
         
         if (!(publisher instanceof Manager)) {
             throw new OperationNotAllowed(" sending messages to/from non-manager account");
@@ -41,8 +37,6 @@ public class NewsService extends BaseService<News, NewsRepository>{
         return repository.findAllByUrgency(urgencyLevel);
 
     }
-
-
 
     public void assignComment(int newsId, int commentId) {
         News news = this.get(newsId);

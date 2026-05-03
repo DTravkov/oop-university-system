@@ -7,6 +7,8 @@ import java.util.Scanner;
 import exceptions.ApplicationException;
 import model.domain.User;
 import model.enumeration.UIMessage;
+import model.factories.ServiceFactory;
+import services.UserService;
 import settings.SessionData;
 import utils.LogEntry;
 import utils.Logger;
@@ -14,6 +16,8 @@ import utils.Translator;
 import utils.UIForms;
 
 public class AdminApp {
+
+    private static final UserService userService = ServiceFactory.getInstance().getService(UserService.class);
 
     public static void startApp(Scanner scanner) {
         while (true) {
@@ -57,7 +61,8 @@ public class AdminApp {
             return;
         }
         for (Map.Entry<Integer, List<LogEntry>> e : all.entrySet()) {
-            System.out.println("--- userId=" + e.getKey() + " ---");
+            User currentUser = userService.get(e.getKey());
+            System.out.println("--- " + currentUser.getClass().getSimpleName() + ", " + currentUser.getFullName() + ", id=" + e.getKey() + " ---");
             for (LogEntry entry : e.getValue()) {
                 System.out.print(entry);
             }

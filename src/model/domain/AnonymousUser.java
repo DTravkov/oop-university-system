@@ -3,13 +3,13 @@ package model.domain;
 import exceptions.ImmutableFieldChanged;
 import settings.AppSettings;
 
-public class SystemUser extends User{
+public class AnonymousUser extends User{
 
 	private static final long serialVersionUID = 1L;
 
-	public SystemUser() {
-		super("SYSTEM", "hello, system!", "USER", "SYSTEM");
-		this.id = AppSettings.SYSTEM_USER_ID;
+	public AnonymousUser() {
+		super("ANONYMOUS", "hello, anonymous!", "N/A", "N/A");
+		this.id = AppSettings.ANONYMOUS_USER_ID;
 	}
 
 	@Override
