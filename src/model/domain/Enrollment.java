@@ -12,17 +12,24 @@ public class Enrollment extends SerializableModel{
 	private int courseId;
 	private int studentId;
 	private Date enrollmentDate;
+
 	private double firstAttestationPoint;
 	private double secondAttestationPoint;
 	private double finalExamPoint;
 
-	public Enrollment(int courseId, int studentId) {
+	private int lectureTeacherId;
+	private int practiceTeacherId;
+
+	public Enrollment(int courseId, int studentId, int lectureTeacherId, int practiceTeacherId) {
 		this.courseId = courseId;
 		this.studentId = studentId;
 		this.enrollmentDate = new Date();
+
 		this.firstAttestationPoint = 0.0;
 		this.secondAttestationPoint = 0.0;
 		this.finalExamPoint = 0.0;
+		this.lectureTeacherId = lectureTeacherId;
+		this.practiceTeacherId = practiceTeacherId;
 	}
 
 	public int getCourseId() {
@@ -75,9 +82,24 @@ public class Enrollment extends SerializableModel{
 		FieldValidator.requireInRange(finalExamPoint, 0, 40, "Final exam point");
 		this.finalExamPoint = finalExamPoint;
 	}
-
-
 	
+	public int getLectureTeacherId() {
+		return lectureTeacherId;
+	}
+
+	public void setLectureTeacherId(int lectureTeacherId) {
+		this.lectureTeacherId = lectureTeacherId;
+	}
+
+	public int getPracticeTeacherId() {
+		return practiceTeacherId;
+	}
+
+	public void setPracticeTeacherId(int practiceTeacherId) {
+		this.practiceTeacherId = practiceTeacherId;
+	}
+
+
 	public double getTotalPoint() {
 		return firstAttestationPoint + secondAttestationPoint + finalExamPoint;
 	}

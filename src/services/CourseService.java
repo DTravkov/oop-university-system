@@ -11,6 +11,7 @@ import model.dto.CourseDTO;
 import model.dto.UserDTO;
 import model.enumeration.TeacherType;
 import model.repository.CourseRepository;
+import services.events.CourseDeleteEvent;
 import services.events.UserDeleteEvent;
 
 public class CourseService extends BaseService<Course, CourseRepository>  {
@@ -29,6 +30,12 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
             throw new AlreadyExists("course with the '" +  course.getName() + "' name");
         }
         return super.create(course);
+    }
+
+    @Override
+    public void delete(int id) {
+        eventSystem.publish(new CourseDeleteEvent(get(id)));
+        super.delete(id);
     }
 
     public CourseDTO getDTO(int courseId) {

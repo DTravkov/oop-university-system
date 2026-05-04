@@ -19,10 +19,12 @@ public final class EnrollmentDTO extends BaseViewDTO {
     private final double finalExamPoint;
     private final double totalPoint;
     private final double gpa;
+    private final UserDTO lectureTeacher;
+    private final UserDTO practiceTeacher;
 
     public EnrollmentDTO(int id, String courseName, int courseId, UserDTO student,
                          Date enrollmentDate, double firstAttestationPoint, double secondAttestationPoint,
-                         double finalExamPoint, double totalPoint, double gpa) {
+                         double finalExamPoint, double totalPoint, double gpa, UserDTO lectureTeacher, UserDTO practiceTeacher) {
         super();
         if (id != 0) {
             setId(id);
@@ -36,9 +38,11 @@ public final class EnrollmentDTO extends BaseViewDTO {
         this.finalExamPoint = finalExamPoint;
         this.totalPoint = totalPoint;
         this.gpa = gpa;
+        this.lectureTeacher = lectureTeacher;
+        this.practiceTeacher = practiceTeacher;
     }
 
-    public EnrollmentDTO(Enrollment enrollment, Course course, User student) {
+    public EnrollmentDTO(Enrollment enrollment, Course course, User student, User lectureTeacher, User practiceTeacher) {
         this(
                 enrollment.getId(),
                 course.getName(),
@@ -49,7 +53,9 @@ public final class EnrollmentDTO extends BaseViewDTO {
                 enrollment.getSecondAttestationPoint(),
                 enrollment.getFinalExamPoint(),
                 enrollment.getTotalPoint(),
-                enrollment.getGpa());
+                enrollment.getGpa(),
+                new UserDTO(lectureTeacher),
+                new UserDTO(practiceTeacher));
     }
 
     public String getCourseName() {
@@ -88,11 +94,23 @@ public final class EnrollmentDTO extends BaseViewDTO {
         return gpa;
     }
 
+    
+
+    public UserDTO getLectureTeacher() {
+        return lectureTeacher;
+    }
+
+    public UserDTO getPracticeTeacher() {
+        return practiceTeacher;
+    }
+
     @Override
     public String toShortString() {
         return "ID: " + getId()
                 + " | Course: " + courseName + " (id=" + courseId + ")"
                 + " | Student: " + formatUser(student)
+                + " | Lecture Teacher: " + formatUser(lectureTeacher)
+                + " | Practice Teacher: " + formatUser(practiceTeacher)
                 + " | GPA: " + gpa;
     }
 
@@ -102,6 +120,8 @@ public final class EnrollmentDTO extends BaseViewDTO {
         body.append("\nID: ").append(getId());
         body.append("\nCourse: ").append(courseName).append(" (id=").append(courseId).append(")");
         body.append("\nStudent: ").append(formatUser(student));
+        body.append("\nLecture Teacher: ").append(formatUser(lectureTeacher));
+        body.append("\nPractice Teacher: ").append(formatUser(practiceTeacher));
         body.append("\nEnrolled: ").append(formatDate(enrollmentDate));
         body.append("\nFirst attestation: ").append(firstAttestationPoint);
         body.append("\nSecond attestation: ").append(secondAttestationPoint);

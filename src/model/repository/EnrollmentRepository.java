@@ -29,6 +29,10 @@ public class EnrollmentRepository extends Repository<Enrollment> {
         return this.findAll(entity -> entity.getCourseId() == courseId);
     }
 
+    public List<Enrollment> findAllByTeacherId(int teacherId) {
+        return this.findAll(entity -> entity.getPracticeTeacherId() == teacherId || entity.getLectureTeacherId() == teacherId);
+    }
+
     public boolean exists(int studentId, int courseId) {
         return this.exists(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId);
     }

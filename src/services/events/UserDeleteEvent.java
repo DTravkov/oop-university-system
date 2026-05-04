@@ -8,8 +8,4 @@ public record UserDeleteEvent(User user) implements Event{
         return user.getId();
     }
 
-    public Class<? extends User> getUserClass(){
-        return user.getClass();
-    }
-
 }

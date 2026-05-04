@@ -1,7 +1,10 @@
 package application;
 
+import java.util.List;
+
 import exceptions.ApplicationException;
 import model.domain.*;
+import model.dto.CourseDTO;
 import model.enumeration.UIMessage;
 import services.CourseService;
 import services.EnrollmentService;
@@ -67,18 +70,23 @@ public final class EnrollmentApp extends BaseApp {
 
     private static void createEnrollment() {
         printStudents();
-        printCourses();
         int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
+        printCourses();
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
+        CourseDTO enrollCourseData = courseService.getDTO(courseId);
 
-        Enrollment enrollment = new Enrollment(courseId, studentId);
-        enrollmentService.create(enrollment);
+        println("Available Lecturers : ");
+        println(enrollCourseData.getLectureTeachers().stream().map(dto -> dto.toShortString()).toList());
+        int lecturerId = UIForms.readInt(scanner, UIMessage.INPUT_TEACHER_ID);
+
+        println("Available Practice teachers : ");
+        println(enrollCourseData.getPracticeTeachers().stream().map(dto -> dto.toShortString()).toList());
+        int practiceId = UIForms.readInt(scanner, UIMessage.INPUT_TEACHER_ID);
+
+        Enrollment created = enrollmentService.create(new Enrollment(courseId, studentId, lecturerId, practiceId));
 
         println(Translator.translate(UIMessage.MSG_CREATED));
-        println(enrollmentService.getDTO(enrollment.getId()));
-        for (Enrollment e : enrollmentService.getAll()) {
-            println(enrollmentService.getDTO(e.getId()));
-        }
+        println(enrollmentService.getDTO(created));
     }
 
     private static void printEnrollmentsOfStudent() {

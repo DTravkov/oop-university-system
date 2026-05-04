@@ -1,3 +1,5 @@
 package services;
 
-public interface IService {}
+
+public interface IService {
+}

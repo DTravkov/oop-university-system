@@ -1,7 +1,5 @@
 package application;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import exceptions.ApplicationException;
@@ -88,14 +86,11 @@ public final class AdminApp extends BaseApp {
     }
 
     private static void printLastLogs() {
-        List<LogEntry> logs = Logger.getAllLogs();
+        List<LogEntry> logs = Logger.getRecentLogs();
         if (logs.isEmpty()) {
             println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
             return;
         }
-        Instant startingPoint = Instant.now().minus(Duration.ofHours(AppSettings.RECENT_LOG_HOURS));
-        logs.stream()
-                .filter(log -> log.getTime().toInstant().isAfter(startingPoint))
-                .forEach(log -> println(log));
+        logs.forEach(log -> println(log));
     }
 }

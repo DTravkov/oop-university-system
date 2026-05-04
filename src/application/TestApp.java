@@ -24,6 +24,7 @@ public class TestApp extends BaseApp {
     private static final StudentOrganizationService studentOrganizationService =
             services.studentOrganizationService;
     private static final ResearchService researchService = services.researchService;
+    private static final TechRequestService techRequestService = services.techRequestService;
 
     public static void main(String[] args) {
         runAllTests();
@@ -45,10 +46,26 @@ public class TestApp extends BaseApp {
                 new TestEntry("Message requires employee accounts", TestApp::testNonEmployeeMessage),
                 new TestEntry("Duplicate user login", TestApp::testDuplicateUserLogin),
                 new TestEntry("Duplicate enrollment", TestApp::testDuplicateEnrollment),
+                new TestEntry("Enrollment removed on course delete", TestApp::testEnrollmentRemovedOnCourseDelete),
+                new TestEntry("Enrollment rejects lecture teacher not on course", TestApp::testEnrollmentLectureTeacherNotOnCourse),
+                new TestEntry("Enrollment rejects practice teacher not on course", TestApp::testEnrollmentPracticeTeacherNotOnCourse),
+                new TestEntry("Enrollment lecture teacher replaced on teacher delete", TestApp::testEnrollmentLectureTeacherReplacedOnTeacherDelete),
+                new TestEntry("Enrollment practice teacher replaced on teacher delete", TestApp::testEnrollmentPracticeTeacherReplacedOnTeacherDelete),
+                new TestEntry("Enrollment increasePoints rejects invalid type", TestApp::testEnrollmentIncreasePointsInvalidType),
                 new TestEntry("Course rejects teacher type mismatch", TestApp::testTeacherRoleMismatchInCourseAssignment),
                 new TestEntry("Message sender replaced on user delete", TestApp::testMessageOnUserDelete),
+                new TestEntry("Tech request send success", TestApp::testTechRequestSendSuccess),
+                new TestEntry("Tech request rejects self-addressed", TestApp::testTechRequestRejectsSelfAddressed),
+                new TestEntry("Tech request rejects student sender", TestApp::testTechRequestRejectsStudentSender),
+                new TestEntry("Tech request rejects non-specialist receiver", TestApp::testTechRequestRejectsNonSpecialistReceiver),
+                new TestEntry("Tech request sender replaced on user delete", TestApp::testTechRequestSenderReplacedOnUserDelete),
+                new TestEntry("Tech request receiver DONE unchanged on specialist delete", TestApp::testTechRequestReceiverDoneUnchangedOnDelete),
+                new TestEntry("Tech request receiver not DONE resets to pending on specialist delete", TestApp::testTechRequestReceiverNotDoneResetsOnDelete),
                 new TestEntry("Complaint role guards", TestApp::testComplaintRoleGuards),
                 new TestEntry("Organization members must be students", TestApp::testOrganizationMemberMustBeStudent),
+                new TestEntry("Student org duplicate name", TestApp::testStudentOrganizationDuplicateName),
+                new TestEntry("Student org president role constraint", TestApp::testStudentOrganizationPresidentRoleConstraint),
+                new TestEntry("Student org president deleted", TestApp::testStudentOrganizationPresidentDeleted),
                 new TestEntry("News comment assignment", TestApp::testNewsCommentCreate),
                 new TestEntry("News removes deleted comment", TestApp::testNewsOnCommentDelete),
                 new TestEntry("Research profile create", TestApp::testResearchProfileManualCreateFlow),
@@ -153,9 +170,20 @@ public class TestApp extends BaseApp {
                     Student.class, "tc.enr.student." + suffix, "12345", "Enroll", "Student", new Date(), null
             );
             cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.lecture." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.practice." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
             Course course = courseService.create(new Course("tc-enr-course-" + suffix, "enrollment relation", 4, CourseType.MAJOR));
             cleanupBin.trackCourse(course.getId());
-            Enrollment enrollment = enrollmentService.create(new Enrollment(course.getId(), student.getId()));
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
             cleanupBin.trackEnrollment(enrollment.getId());
             userService.delete(student.getId());
             return enrollmentService.getAllByStudentId(student.getId()).isEmpty();
@@ -203,13 +231,24 @@ public class TestApp extends BaseApp {
         CleanupBin cleanupBin = new CleanupBin();
         String suffix = uniqueSuffix();
         try {
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.nonenroll.lecture." + suffix, "12345", "Course", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.nonenroll.practice." + suffix, "12345", "Course", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
             Teacher teacher = (Teacher) userService.registerUser(
                     Teacher.class, "tc.nonenroll.teacher." + suffix, "12345", "Wrong", "Enrollment", null, TeacherType.LECTURE
             );
             cleanupBin.trackUser(teacher.getId());
             Course course = courseService.create(new Course("tc-non-student-course-" + suffix, "should fail", 2, CourseType.MINOR));
             cleanupBin.trackCourse(course.getId());
-            return expectThrows(OperationNotAllowed.class, () -> enrollmentService.create(new Enrollment(course.getId(), teacher.getId())));
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            return expectThrows(OperationNotAllowed.class, () -> enrollmentService.create(new Enrollment(
+                    course.getId(), teacher.getId(), lectureTeacher.getId(), practiceTeacher.getId())));
         } finally {
             cleanupBin.cleanup();
         }
@@ -257,12 +296,216 @@ public class TestApp extends BaseApp {
                     Student.class, "tc.dup.enr.student." + suffix, "12345", "Dup", "Enroll", new Date(), null
             );
             cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.dup.enr.lecture." + suffix, "12345", "Dup", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.dup.enr.practice." + suffix, "12345", "Dup", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
             Course course = courseService.create(new Course("tc-dup-enr-course-" + suffix, "duplicate enrollment", 4, CourseType.MAJOR));
             cleanupBin.trackCourse(course.getId());
-            Enrollment enrollment = enrollmentService.create(new Enrollment(course.getId(), student.getId()));
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
             cleanupBin.trackEnrollment(enrollment.getId());
             return expectThrows(AlreadyExists.class, () ->
-                    enrollmentService.create(new Enrollment(course.getId(), student.getId())));
+                    enrollmentService.create(new Enrollment(
+                            course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId())));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentRemovedOnCourseDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.del.course.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.del.course.lecture." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.del.course.practice." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
+            Course course = courseService.create(new Course("tc-enr-del-course-" + suffix, "course delete drops enrollments", 3, CourseType.MAJOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
+            int enrollmentId = enrollment.getId();
+            cleanupBin.trackEnrollment(enrollmentId);
+            courseService.delete(course.getId());
+            cleanupBin.untrackCourse(course.getId());
+            return expectThrows(DoesNotExist.class, () -> enrollmentService.get(enrollmentId));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentLectureTeacherNotOnCourse() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.badlect.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher onCourseLecture = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badlect.on." + suffix, "12345", "On", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(onCourseLecture.getId());
+            Teacher notOnCourseLecture = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badlect.off." + suffix, "12345", "Off", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(notOnCourseLecture.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badlect.practice." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
+            Course course = courseService.create(new Course("tc-enr-bad-lect-" + suffix, "lecture must teach course", 2, CourseType.MINOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), onCourseLecture.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            return expectThrows(DoesNotExist.class, () -> enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), notOnCourseLecture.getId(), practiceTeacher.getId())));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentPracticeTeacherNotOnCourse() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.badpr.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badpr.lecture." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher onCoursePractice = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badpr.on." + suffix, "12345", "On", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(onCoursePractice.getId());
+            Teacher notOnCoursePractice = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.badpr.off." + suffix, "12345", "Off", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(notOnCoursePractice.getId());
+            Course course = courseService.create(new Course("tc-enr-bad-pr-" + suffix, "practice must teach course", 2, CourseType.MINOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), onCoursePractice.getId(), TeacherType.PRACTICE);
+            return expectThrows(DoesNotExist.class, () -> enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), notOnCoursePractice.getId())));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentLectureTeacherReplacedOnTeacherDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.tdel.lect.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.tdel.lect." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.tdel.practice." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
+            Course course = courseService.create(new Course("tc-enr-tdel-lect-" + suffix, "lecture teacher delete", 3, CourseType.MAJOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
+            cleanupBin.trackEnrollment(enrollment.getId());
+            int lectureId = lectureTeacher.getId();
+            userService.delete(lectureId);
+            cleanupBin.untrackUser(lectureId);
+            Enrollment updated = enrollmentService.get(enrollment.getId());
+            return updated.getLectureTeacherId() == AppSettings.DELETED_USER_ID
+                    && updated.getPracticeTeacherId() == practiceTeacher.getId();
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentPracticeTeacherReplacedOnTeacherDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.tdel.pr.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.tdel.pr.lecture." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.tdel.pr." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
+            Course course = courseService.create(new Course("tc-enr-tdel-pr-" + suffix, "practice teacher delete", 3, CourseType.MAJOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
+            cleanupBin.trackEnrollment(enrollment.getId());
+            int practiceId = practiceTeacher.getId();
+            userService.delete(practiceId);
+            cleanupBin.untrackUser(practiceId);
+            Enrollment updated = enrollmentService.get(enrollment.getId());
+            return updated.getPracticeTeacherId() == AppSettings.DELETED_USER_ID
+                    && updated.getLectureTeacherId() == lectureTeacher.getId();
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testEnrollmentIncreasePointsInvalidType() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.enr.points.student." + suffix, "12345", "Enroll", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher lectureTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.points.lecture." + suffix, "12345", "Enroll", "Lecture", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(lectureTeacher.getId());
+            Teacher practiceTeacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.enr.points.practice." + suffix, "12345", "Enroll", "Practice", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(practiceTeacher.getId());
+            Course course = courseService.create(new Course("tc-enr-points-" + suffix, "invalid point branch", 2, CourseType.MINOR));
+            cleanupBin.trackCourse(course.getId());
+            courseService.addTeacher(course.getId(), lectureTeacher.getId(), TeacherType.LECTURE);
+            courseService.addTeacher(course.getId(), practiceTeacher.getId(), TeacherType.PRACTICE);
+            Enrollment enrollment = enrollmentService.create(new Enrollment(
+                    course.getId(), student.getId(), lectureTeacher.getId(), practiceTeacher.getId()));
+            cleanupBin.trackEnrollment(enrollment.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    enrollmentService.increasePoints(enrollment.getId(), 0, 1.0));
         } finally {
             cleanupBin.cleanup();
         }
@@ -304,6 +547,166 @@ public class TestApp extends BaseApp {
             List<Message> messagesByReceiver = messageService.getAllByReceiverId(receiver.getId());
             return messagesByReceiver.stream().anyMatch(msg ->
                     msg.getContent().equals("delete user message mapping") && msg.getSenderId() == AppSettings.DELETED_USER_ID);
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestSendSuccess() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher sender = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.ok.sender." + suffix, "12345", "Tech", "Sender", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(sender.getId());
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.ok.spec." + suffix, "12345", "Tech", "Spec", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            TechRequest created = techRequestService.sendRequest(
+                    new TechRequest(sender.getId(), specialist.getId(), "projector issue"));
+            cleanupBin.trackTechRequest(created.getId());
+            TechRequest loaded = techRequestService.get(created.getId());
+            return loaded.getSenderId() == sender.getId()
+                    && loaded.getReceiverId() == specialist.getId()
+                    && loaded.getStatus() == TechRequestStatus.PENDING;
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestRejectsSelfAddressed() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.self." + suffix, "12345", "Tech", "Self", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            int id = specialist.getId();
+            return expectThrows(OperationNotAllowed.class, () ->
+                    techRequestService.sendRequest(new TechRequest(id, id, "to myself")));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestRejectsStudentSender() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.tech.student." + suffix, "12345", "Tech", "Student", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.student.spec." + suffix, "12345", "Tech", "Spec", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    techRequestService.sendRequest(new TechRequest(student.getId(), specialist.getId(), "help")));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestRejectsNonSpecialistReceiver() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher sender = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.ns.sender." + suffix, "12345", "Tech", "Sender", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(sender.getId());
+            Teacher receiver = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.ns.recv." + suffix, "12345", "Tech", "Receiver", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(receiver.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    techRequestService.sendRequest(new TechRequest(sender.getId(), receiver.getId(), "wrong receiver")));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestSenderReplacedOnUserDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher sender = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.del.sender." + suffix, "12345", "Tech", "Sender", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(sender.getId());
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.del.spec." + suffix, "12345", "Tech", "Spec", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            TechRequest request = techRequestService.sendRequest(
+                    new TechRequest(sender.getId(), specialist.getId(), "replace sender"));
+            cleanupBin.trackTechRequest(request.getId());
+            int senderId = sender.getId();
+            userService.delete(senderId);
+            cleanupBin.untrackUser(senderId);
+            TechRequest updated = techRequestService.get(request.getId());
+            return updated.getSenderId() == AppSettings.DELETED_USER_ID
+                    && updated.getReceiverId() == specialist.getId();
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestReceiverDoneUnchangedOnDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher sender = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.done.sender." + suffix, "12345", "Tech", "Sender", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(sender.getId());
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.done.spec." + suffix, "12345", "Tech", "Spec", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            TechRequest request = techRequestService.sendRequest(
+                    new TechRequest(sender.getId(), specialist.getId(), "done flow"));
+            cleanupBin.trackTechRequest(request.getId());
+            request.setStatus(TechRequestStatus.DONE);
+            techRequestService.updateRequest(request);
+            int specialistId = specialist.getId();
+            userService.delete(specialistId);
+            cleanupBin.untrackUser(specialistId);
+            TechRequest updated = techRequestService.get(request.getId());
+            return updated.getStatus() == TechRequestStatus.DONE
+                    && updated.getReceiverId() == AppSettings.DELETED_USER_ID;
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testTechRequestReceiverNotDoneResetsOnDelete() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher sender = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.tech.reset.sender." + suffix, "12345", "Tech", "Sender", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(sender.getId());
+            TechSupportSpecialist specialist = (TechSupportSpecialist) userService.registerUser(
+                    TechSupportSpecialist.class, "tc.tech.reset.spec." + suffix, "12345", "Tech", "Spec", null, null
+            );
+            cleanupBin.trackUser(specialist.getId());
+            TechRequest request = techRequestService.sendRequest(
+                    new TechRequest(sender.getId(), specialist.getId(), "accepted then specialist leaves"));
+            cleanupBin.trackTechRequest(request.getId());
+            request.setStatus(TechRequestStatus.ACCEPTED);
+            techRequestService.updateRequest(request);
+            int specialistId = specialist.getId();
+            userService.delete(specialistId);
+            cleanupBin.untrackUser(specialistId);
+            TechRequest updated = techRequestService.get(request.getId());
+            return updated.getStatus() == TechRequestStatus.PENDING
+                    && updated.getReceiverId() == AppSettings.DELETED_USER_ID;
         } finally {
             cleanupBin.cleanup();
         }
@@ -357,6 +760,76 @@ public class TestApp extends BaseApp {
             cleanupBin.trackOrganization(organization.getId());
             return expectThrows(OperationNotAllowed.class, () ->
                     studentOrganizationService.addMember(organization.getId(), teacher.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testStudentOrganizationDuplicateName() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        String orgName = "tc-sorg-dup-" + suffix;
+        try {
+            Student president = (Student) userService.registerUser(
+                    Student.class, "tc.sorg.dup.p1." + suffix, "12345", "Sorg", "P1", new Date(), null
+            );
+            cleanupBin.trackUser(president.getId());
+            Student other = (Student) userService.registerUser(
+                    Student.class, "tc.sorg.dup.p2." + suffix, "12345", "Sorg", "P2", new Date(), null
+            );
+            cleanupBin.trackUser(other.getId());
+            StudentOrganization first = studentOrganizationService.create(
+                    new StudentOrganization(orgName, "first", president.getId())
+            );
+            cleanupBin.trackOrganization(first.getId());
+            return expectThrows(AlreadyExists.class, () -> studentOrganizationService.create(
+                    new StudentOrganization(orgName, "second", other.getId())
+            ));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testStudentOrganizationPresidentRoleConstraint() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student president = (Student) userService.registerUser(
+                    Student.class, "tc.sorg.spt.p." + suffix, "12345", "Sorg", "Pres", new Date(), null
+            );
+            cleanupBin.trackUser(president.getId());
+            Teacher teacher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.sorg.spt.t." + suffix, "12345", "Sorg", "Teacher", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(teacher.getId());
+            StudentOrganization org = studentOrganizationService.create(
+                    new StudentOrganization("tc-sorg-spt-" + suffix, "teacher president", president.getId())
+            );
+            cleanupBin.trackOrganization(org.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    studentOrganizationService.setPresident(org.getId(), teacher.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testStudentOrganizationPresidentDeleted() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student president = (Student) userService.registerUser(
+                    Student.class, "tc.sorg.delp." + suffix, "12345", "Sorg", "Pres", new Date(), null
+            );
+            cleanupBin.trackUser(president.getId());
+            StudentOrganization org = studentOrganizationService.create(
+                    new StudentOrganization("tc-sorg-delp-" + suffix, "president deleted", president.getId())
+            );
+            cleanupBin.trackOrganization(org.getId());
+            int presidentId = president.getId();
+            userService.delete(presidentId);
+            cleanupBin.untrackUser(presidentId);
+            StudentOrganization updated = studentOrganizationService.get(org.getId());
+            return updated.getPresidentId() == AppSettings.DELETED_USER_ID;
         } finally {
             cleanupBin.cleanup();
         }
@@ -538,7 +1011,7 @@ public class TestApp extends BaseApp {
             action.run();
             return false;
         } catch (Throwable t) {
-            return true;
+            return expectedType.isInstance(t);
         }
     }
 
@@ -570,14 +1043,18 @@ public class TestApp extends BaseApp {
         private final List<Integer> complaintIds = new java.util.ArrayList<>();
         private final List<Integer> newsIds = new java.util.ArrayList<>();
         private final List<Integer> organizationIds = new java.util.ArrayList<>();
+        private final List<Integer> techRequestIds = new java.util.ArrayList<>();
 
         void trackUser(int id) { userIds.add(id); }
+        void untrackUser(int id) { userIds.remove(Integer.valueOf(id)); }
         void trackCourse(int id) { courseIds.add(id); }
+        void untrackCourse(int id) { courseIds.remove(Integer.valueOf(id)); }
         void trackEnrollment(int id) { enrollmentIds.add(id); }
         void trackComment(int id) { commentIds.add(id); }
         void trackMessage(int id) { messageIds.add(id); }
         void trackNews(int id) { newsIds.add(id); }
         void trackOrganization(int id) { organizationIds.add(id); }
+        void trackTechRequest(int id) { techRequestIds.add(id); }
 
         void cleanup() {
             deleteAll(organizationIds, id -> studentOrganizationService.delete(id));
@@ -586,6 +1063,7 @@ public class TestApp extends BaseApp {
             deleteAll(commentIds, id -> commentService.delete(id));
             deleteAll(enrollmentIds, id -> enrollmentService.delete(id));
             deleteAll(newsIds, id -> newsService.delete(id));
+            deleteAll(techRequestIds, id -> techRequestService.delete(id));
             deleteAll(courseIds, id -> courseService.delete(id));
             deleteAll(userIds, id -> userService.delete(id));
         }

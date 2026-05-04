@@ -11,6 +11,7 @@ import model.dto.TechRequestDTO;
 import model.enumeration.TechRequestStatus;
 import model.repository.TechRequestRepository;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 
 public class TechRequestService extends BaseService<TechRequest, TechRequestRepository>{
 
@@ -77,14 +78,14 @@ public class TechRequestService extends BaseService<TechRequest, TechRequestRepo
                 this.getAll().forEach((req) -> {
                     boolean isChanged = false;
                     if(req.getSenderId() == deletedId){
-                        req.setSenderId(-1);
+                        req.setSenderId(AppSettings.DELETED_USER_ID);
                         isChanged = true;
                     }
                     if(req.getReceiverId() == deletedId){
                         if(req.getStatus() != TechRequestStatus.DONE){
                             req.setStatus(TechRequestStatus.PENDING);
                         }
-                        req.setReceiverId(-1);
+                        req.setReceiverId(AppSettings.DELETED_USER_ID);
                         isChanged = true;
                     }
 

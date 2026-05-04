@@ -8,10 +8,14 @@ import java.util.List;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.IEnrollable;
+import model.domain.Student;
+import model.domain.Teacher;
 import model.domain.User;
 import model.dto.EnrollmentDTO;
 import model.repository.EnrollmentRepository;
+import services.events.CourseDeleteEvent;
 import services.events.UserDeleteEvent;
+import settings.AppSettings;
 import utils.FieldValidator;
 
 public class EnrollmentService extends BaseService<Enrollment, EnrollmentRepository>{
@@ -30,15 +34,35 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
 
     @Override
     public Enrollment create(Enrollment enrollment) {
+
         User student = userService.get(enrollment.getStudentId());
         Course course = courseService.get(enrollment.getCourseId());
+
+        User lectureTeacher = userService.get(enrollment.getLectureTeacherId());
+        User practiceTeacher = userService.get(enrollment.getPracticeTeacherId());
+        
+        if(!(student instanceof IEnrollable)){
+            throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId() + " can not be enrolled");
+        }
 
         if(repository.exists(student.getId(), course.getId())){
             throw new AlreadyExists(" enrollment for student id " + student.getId() + " and course id " + course.getId());
         }
 
-        if(!(student instanceof IEnrollable)){
-            throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId());
+        if(!course.getLectureTeachers().contains(lectureTeacher.getId())){
+            throw new DoesNotExist(" lecturer with id=" + lectureTeacher.getId() + " that teaches the id=" + course.getId() + " course" );
+        }
+
+        if(!course.getPracticeTeachers().contains(practiceTeacher.getId())){
+            throw new DoesNotExist(" practice teacher with id=" + lectureTeacher.getId() + " that teaches the id=" + course.getId() + " course" );
+        }
+
+        if(!(lectureTeacher instanceof Teacher castedLecturer) || !castedLecturer.isLecturer()){
+            throw new OperationNotAllowed(" assign non-lecturer as a lecture teacher.");
+        }
+
+        if(!(practiceTeacher instanceof Teacher castedPractice) || !castedPractice.isPractice()){
+            throw new OperationNotAllowed(" assign non-practice teacher as a practice teacher.");
         }
 
         return super.create(enrollment);
@@ -60,6 +84,10 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         return repository.findAllByCourseId(courseId);
     }
 
+    public List<Enrollment> getAllByTeacherId(int teacherId) {
+        return repository.findAllByTeacherId(teacherId);
+    }
+
     public EnrollmentDTO getDTO(int enrollmentId) {
         Enrollment enrollment = get(enrollmentId);
         return getDTO(enrollment);
@@ -68,7 +96,9 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     public EnrollmentDTO getDTO(Enrollment enrollment) {
         Course course = courseService.get(enrollment.getCourseId());
         User student = userService.get(enrollment.getStudentId());
-        return new EnrollmentDTO(enrollment, course, student);
+        User lectureTeacher = userService.get(enrollment.getLectureTeacherId());
+        User practiceTeacher = userService.get(enrollment.getPracticeTeacherId());
+        return new EnrollmentDTO(enrollment, course, student, lectureTeacher, practiceTeacher);
     }
 
     public void increasePoints(int enrollmentId, int pointTypeChoice, double pointsToAdd) {
@@ -98,11 +128,33 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
 
     @Override
     public void subscribeToEvents(){
+        
+        eventSystem.subscribe(CourseDeleteEvent.class, event -> {
+            int deletedId = event.getCourseId();
+            this.getAllByCourseId(deletedId).forEach(enr -> this.delete(enr.getId()));
+        });
+
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            int deletedUserId = event.getUserId();
-            this.getAllByStudentId(deletedUserId).forEach(enr -> {
-                this.delete(enr.getId());
-            });
+            int deletedId = event.getUserId();
+            User deletedUser = userService.get(deletedId);
+            if(deletedUser instanceof Student){
+                this.getAllByStudentId(deletedId).forEach(enr -> {
+                    this.delete(enr.getId());
+                });
+            }
+            else if(deletedUser instanceof Teacher){
+                this.getAllByTeacherId(deletedUser.getId()).forEach(enr -> {
+                    if(enr.getLectureTeacherId() == deletedId){
+                        enr.setLectureTeacherId(AppSettings.DELETED_USER_ID);
+                        this.update(enr);
+                    }
+                    if(enr.getPracticeTeacherId() == deletedId){
+                        enr.setPracticeTeacherId(AppSettings.DELETED_USER_ID);
+                        this.update(enr);
+                    }
+                
+                });
+            }
         });
     }
 

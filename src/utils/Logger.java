@@ -7,6 +7,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +18,9 @@ public final class Logger {
 
     private final String path = AppSettings.DEFAULT_REPOSITORY_ROOT + "Logger.ser";
     private List<LogEntry> data = new ArrayList<>();
+    
     private boolean isActive = true;
+    private static final int RECENT_LOG_HOURS = AppSettings.RECENT_LOG_HOURS;
 
     private Logger() {
         ensureFileExists();
@@ -28,23 +32,37 @@ public final class Logger {
     }
 
     public static void log(String action) {
-        if (!INSTANCE.isActive) {
-            return;
-        }
+        if (!INSTANCE.isActive) return;
+
         User user = AppSettings.getActiveUser();
         LogEntry entry = new LogEntry(action, user);
+
         INSTANCE.data.add(entry);
         INSTANCE.writeToFile();
     }
+
+
 
     public static List<LogEntry> getUserLogs(int userId) {
         List<LogEntry> userLogs = INSTANCE.data.stream().filter(log -> log.getUserId() == userId).toList();
         return List.copyOf(userLogs);
     }
+
+    public static List<LogEntry> getRecentLogs() {
+        List<LogEntry> logs = getAllLogs();
+        Instant startingPoint = Instant.now().minus(Duration.ofHours(RECENT_LOG_HOURS));
+        return logs.stream()
+                   .filter(log -> log.getTime().toInstant().isAfter(startingPoint))
+                   .toList();
+    }
     
     public static List<LogEntry> getAllLogs() {
         return List.copyOf(INSTANCE.data);
     }
+
+
+
+
 
     private void load() {
         File file = new File(path);
