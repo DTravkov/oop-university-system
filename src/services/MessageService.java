@@ -6,6 +6,7 @@ import exceptions.OperationNotAllowed;
 import model.domain.IMessagable;
 import model.domain.Message;
 import model.domain.User;
+import model.dto.MessageDTO;
 import model.repository.MessageRepository;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
@@ -41,6 +42,17 @@ public class MessageService extends BaseService<Message, MessageRepository>{
 
     public List<Message> getAllBySenderId(int senderId) {
         return repository.findAllBySenderId(senderId);
+    }
+
+    public MessageDTO getDTO(int messageId) {
+        Message message = get(messageId);
+        return getDTO(message);
+    }
+
+    public MessageDTO getDTO(Message message) {
+        User sender = userService.get(message.getSenderId());
+        User receiver = userService.get(message.getReceiverId());
+        return new MessageDTO(message, sender, receiver);
     }
 
     @Override

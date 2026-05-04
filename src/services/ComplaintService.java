@@ -8,6 +8,7 @@ import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
+import model.dto.TeacherComplaintDTO;
 import model.repository.ComplaintRepository;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
@@ -50,6 +51,18 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     public List<TeacherComplaint> getAllByDeanId(int deanId) {
         return repository.findAllByDeanId(deanId);
+    }
+
+    public TeacherComplaintDTO getDTO(int complaintId) {
+        TeacherComplaint complaint = get(complaintId);
+        return getDTO(complaint);
+    }
+
+    public TeacherComplaintDTO getDTO(TeacherComplaint complaint) {
+        User sender = userService.get(complaint.getSenderId());
+        User receiver = userService.get(complaint.getReceiverId());
+        User student = userService.get(complaint.getStudentId());
+        return new TeacherComplaintDTO(complaint, sender, receiver, student);
     }
 
     @Override

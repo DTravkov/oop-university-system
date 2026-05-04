@@ -1,19 +1,20 @@
 package application;
 
-import java.util.Scanner;
-
 import model.enumeration.LanguagePreference;
 import model.enumeration.UIMessage;
 import settings.AppSettings;
 import utils.Translator;
 import utils.UIForms;
 
-public class Main {
+public class Main extends BaseApp {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        startApp();
+        scanner.close();
+    }
 
-        askLanguage(scanner);
+    public static void startApp() {
+        askLanguage();
 
         while (true) {
             printMenu();
@@ -21,73 +22,72 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    UserApp.startApp(scanner);
+                    UserApp.startApp();
                     break;
                 case "2":
-                    CourseApp.startApp(scanner);
+                    CourseApp.startApp();
                     break;
                 case "3":
-                    EnrollmentApp.startApp(scanner);
+                    EnrollmentApp.startApp();
                     break;
                 case "4":
-                    MessageApp.startApp(scanner);
+                    MessageApp.startApp();
                     break;
                 case "5":
-                    TechSupportApp.startApp(scanner);
+                    TechSupportApp.startApp();
                     break;
                 case "6":
-                    ComplaintApp.startApp(scanner);
+                    ComplaintApp.startApp();
                     break;
                 case "7":
-                    StudentOrganizationApp.startApp(scanner);
+                    StudentOrganizationApp.startApp();
                     break;
                 case "8":
-                    NewsApp.startApp(scanner);
+                    NewsApp.startApp();
                     break;
                 case "9":
-                    ResearchApp.startApp(scanner);
+                    ResearchApp.startApp();
                     break;
                 case "10":
-                    AdminApp.startApp(scanner);
+                    AdminApp.startApp();
                     break;
                 case "11":
                     TestApp.runAllTests();
                     break;
                 case "12":
-                    System.out.println(Translator.translate(UIMessage.AUTH_GOODBYE));
-                    scanner.close();
+                    println(Translator.translate(UIMessage.AUTH_GOODBYE));
                     return;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
             }
         }
     }
 
     private static void printMenu() {
-        System.out.print("\nCurrent active user : "  + AppSettings.getActiveUser());
-        System.out.println("\n=== University System ===");
-        System.out.println("1. User App");
-        System.out.println("2. Course App");
-        System.out.println("3. Enrollment App");
-        System.out.println("4. Message App");
-        System.out.println("5. Tech Support App");
-        System.out.println("6. Teacher Complaint App");
-        System.out.println("7. Student Org. App");
-        System.out.println("8. News App");
-        System.out.println("9. Research App");
-        System.out.println("10. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
-        System.out.println("11. Run tests");
-        System.out.println("12. " + Translator.translate(UIMessage.MENU_EXIT));
+        print("\nCurrent active user : "
+                + services.userService.getDTO(AppSettings.getActiveUser()).toShortString());
+        println("\n=== University System ===");
+        println("1. User App");
+        println("2. Course App");
+        println("3. Enrollment App");
+        println("4. Message App");
+        println("5. Tech Support App");
+        println("6. Teacher Complaint App");
+        println("7. Student Org. App");
+        println("8. News App");
+        println("9. Research App");
+        println("10. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
+        println("11. Run tests");
+        println("12. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
-    private static void askLanguage(Scanner scanner){
+    private static void askLanguage() {
+        println("\n=== Choose preferable language ===");
+        println("1. English language");
+        println("2. Қазақ тілі");
+        println("3. Русский язык");
 
-        System.out.println("\n=== Choose preferable language ===");
-        System.out.println("1. English language");
-        System.out.println("2. Қазақ тілі");
-        System.out.println("3. Русский язык");
-
-        while(true){
+        while (true) {
             String choice = UIForms.readChoice(scanner, UIMessage.AUTH_CHANGE_LANG, 1, 3);
             switch (choice) {
                 case "1":
@@ -100,7 +100,7 @@ public class Main {
                     AppSettings.setLanguage(LanguagePreference.RU);
                     return;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
                     break;
             }
         }

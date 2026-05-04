@@ -21,9 +21,9 @@ public class TechRequest extends Message {
 
     @Override
     public String toString() {
-        return "TechRequest [" + ", id=" + id
+        return "TechRequest[" + "id=" + id
                 + ", from=" + getSenderId() + ", to=" + getReceiverId() 
-                + ", content=" + getContent() 
+                + ", content=" + getContent() + ", " 
                 + "status=" + status + "]";
 
     }

@@ -1,67 +1,67 @@
 package application;
 
-import java.util.Scanner;
-
 import exceptions.ApplicationException;
 import exceptions.OperationNotAllowed;
 import model.domain.*;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.UIMessage;
-import model.factories.ServiceFactory;
-import services.*;
+import services.ComplaintService;
+import services.UserService;
 import utils.Translator;
 import utils.UIForms;
 
-public class ComplaintApp {
+public final class ComplaintApp extends BaseApp {
 
-    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
-    private static final ComplaintService complaintService = serviceFactory.getService(ComplaintService.class);
-    private static final UserService userService = serviceFactory.getService(UserService.class);
+    private static final ComplaintService complaintService = services.complaintService;
+    private static final UserService userService = services.userService;
 
-    public static void startApp(Scanner scanner) {
+    private ComplaintApp() {
+    }
+
+    public static void startApp() {
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 6);
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
                     case "1":
-                        sendComplaint(scanner);
+                        sendComplaint();
                         break;
                     case "2":
-                        deleteComplaint(scanner);
+                        deleteComplaint();
                         break;
                     case "3":
-                        getAllComplaintsByTeacher(scanner);
+                        printAllComplaintsByTeacher();
                         break;
                     case "4":
-                        getAllComplaintsByDean(scanner);
+                        printAllComplaintsByDean();
                         break;
                     case "5":
-                        getAllComplaints();
+                        printAllComplaints();
                         break;
                     case "6":
                         return;
                     default:
-                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                        printInvalidChoice();
                 }
             } catch (ApplicationException e) {
-                System.out.println(e.getMessage());
+                printExceptionDetails(e);
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- Complaints ---");
-        System.out.println("1. Send complaint");
-        System.out.println("2. Delete complaint by id");
-        System.out.println("3. List complaints by teacher id");
-        System.out.println("4. List complaints by dean id");
-        System.out.println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
-        System.out.println("6. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("\n--- Complaints ---");
+        println("1. Send complaint");
+        println("2. Delete complaint by id");
+        println("3. List complaints by teacher id");
+        println("4. List complaints by dean id");
+        println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        println("6. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
-    private static void sendComplaint(Scanner scanner) {
+    private static void sendComplaint() {
         printTeachers();
         printDeans();
 
@@ -80,7 +80,7 @@ public class ComplaintApp {
 
         ComplaintUrgencyLevel urgencyLevel;
 
-        switch (urgencyChoice){
+        switch (urgencyChoice) {
             case 1:
                 urgencyLevel = ComplaintUrgencyLevel.LOW;
                 break;
@@ -94,58 +94,66 @@ public class ComplaintApp {
                 throw new OperationNotAllowed(" entering invalid urgency level");
         }
 
-        TeacherComplaint complaint = new TeacherComplaint(urgencyLevel,teacherId, deanId, studentId, content);
+        TeacherComplaint complaint = new TeacherComplaint(urgencyLevel, teacherId, deanId, studentId, content);
         complaintService.sendComplaint(complaint);
 
-        System.out.println(Translator.translate(UIMessage.MSG_SENT));
-        System.out.println("Created: " + complaint);
-        System.out.println("Dean addressed complaints: " + complaintService.getAllByDeanId(deanId));
+        println(Translator.translate(UIMessage.MSG_SENT));
+        TeacherComplaint saved = complaintService.get(complaint.getId());
+        println(complaintService.getDTO(saved));
+        println("Dean addressed complaints:");
+        for (TeacherComplaint c : complaintService.getAllByDeanId(deanId)) {
+            println(complaintService.getDTO(c));
+        }
     }
 
-    private static void deleteComplaint(Scanner scanner) {
-        getAllComplaints();
+    private static void deleteComplaint() {
+        printAllComplaints();
         int complaintId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         complaintService.delete(complaintId);
 
-        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
+        println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
-    private static void getAllComplaintsByTeacher(Scanner scanner) {
+    private static void printAllComplaintsByTeacher() {
         printTeachers();
         int teacherId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
-        System.out.println(complaintService.getAllByTeacherId(teacherId));
+        for (TeacherComplaint c : complaintService.getAllByTeacherId(teacherId)) {
+            println(complaintService.getDTO(c).toShortString());
+        }
     }
 
-    private static void getAllComplaintsByDean(Scanner scanner) {
+    private static void printAllComplaintsByDean() {
         printDeans();
         int deanId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-        System.out.println(complaintService.getAllByDeanId(deanId));
+        for (TeacherComplaint c : complaintService.getAllByDeanId(deanId)) {
+            println(complaintService.getDTO(c).toShortString());
+        }
     }
 
-    private static void getAllComplaints() {
-        System.out.println(complaintService.getAll());
+    private static void printAllComplaints() {
+        for (TeacherComplaint c : complaintService.getAll()) {
+            println(complaintService.getDTO(c).toShortString());
+        }
     }
-    
+
     private static void printTeachers() {
-        System.out.println("--- Teachers ---");
+        println("--- Teachers ---");
         for (User user : userService.getAllByClass(Teacher.class)) {
-            System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
+            println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printDeans() {
-        System.out.println("--- Deans ---");
+        println("--- Deans ---");
         for (User user : userService.getAllByClass(Dean.class)) {
-            System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
+            println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printStudents() {
-        System.out.println("--- Students ---");
+        println("--- Students ---");
         for (User user : userService.getAllByClass(Student.class)) {
-            System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
+            println(userService.getDTO(user).toShortString());
         }
     }
-
-
 }

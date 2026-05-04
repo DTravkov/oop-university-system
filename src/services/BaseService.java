@@ -46,7 +46,7 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
         if(!repository.exists(entity.getId())){
             throw new DoesNotExist(baseName + " object with id : " + entity.getId());
         }
-        if(entity.getId() == 0){
+        if(entity.getId() <= 0){
             throw new OperationNotAllowed( baseName + " non-existing object can not be updated");
         }
         repository.save(entity);

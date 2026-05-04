@@ -9,6 +9,7 @@ import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.IEnrollable;
 import model.domain.User;
+import model.dto.EnrollmentDTO;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
 import utils.FieldValidator;
@@ -57,6 +58,17 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
 
     public List<Enrollment> getAllByCourseId(int courseId) {
         return repository.findAllByCourseId(courseId);
+    }
+
+    public EnrollmentDTO getDTO(int enrollmentId) {
+        Enrollment enrollment = get(enrollmentId);
+        return getDTO(enrollment);
+    }
+
+    public EnrollmentDTO getDTO(Enrollment enrollment) {
+        Course course = courseService.get(enrollment.getCourseId());
+        User student = userService.get(enrollment.getStudentId());
+        return new EnrollmentDTO(enrollment, course, student);
     }
 
     public void increasePoints(int enrollmentId, int pointTypeChoice, double pointsToAdd) {

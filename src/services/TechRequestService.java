@@ -7,6 +7,7 @@ import model.domain.IMessagable;
 import model.domain.TechRequest;
 import model.domain.TechSupportSpecialist;
 import model.domain.User;
+import model.dto.TechRequestDTO;
 import model.enumeration.TechRequestStatus;
 import model.repository.TechRequestRepository;
 import services.events.UserDeleteEvent;
@@ -38,6 +39,10 @@ public class TechRequestService extends BaseService<TechRequest, TechRequestRepo
         return super.create(request);
     }
 
+    public void updateRequest(TechRequest updated){
+        super.update(updated);
+    }
+
     public List<TechRequest> getAll(){
         return repository.findAll();
     }
@@ -48,6 +53,19 @@ public class TechRequestService extends BaseService<TechRequest, TechRequestRepo
 
     public List<TechRequest> getAllByStatus(TechRequestStatus status){
         return repository.findAllByStatus(status);
+    }
+
+    public TechRequestDTO getDTO(int requestId){
+        TechRequest request = get(requestId);
+        User sender = userService.get(request.getSenderId());
+        User receiver = userService.get(request.getReceiverId());
+        return new TechRequestDTO(request, sender, receiver);
+    }
+
+    public TechRequestDTO getDTO(TechRequest request){
+        User sender = userService.get(request.getSenderId());
+        User receiver = userService.get(request.getReceiverId());
+        return new TechRequestDTO(request, sender, receiver);
     }
 
     @Override

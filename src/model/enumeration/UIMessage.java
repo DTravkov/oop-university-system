@@ -54,6 +54,7 @@ public enum UIMessage {
     INPUT_SENDER_ID("input.sender_id"),
     INPUT_RECEIVER_ID("input.receiver_id"),
     INPUT_MESSAGE_ID("input.message_id"),
+    INPUT_REQUEST_ID("input.request_id"),
     INPUT_MESSAGE_CONTENT("input.message_content"),
 
     INPUT_COMPLAINT_LEVEL("input.complaint_level"),

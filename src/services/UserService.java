@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import model.domain.User;
+import model.dto.UserDTO;
 import model.enumeration.TeacherType;
 import model.factories.UserFactory;
 import model.repository.UserRepository;
@@ -45,7 +46,6 @@ public class UserService extends BaseService<User, UserRepository> {
         }
     }
 
-
     public User authenticate(String login, String password) {
         User user = repository.findByLogin(login);
 
@@ -67,6 +67,15 @@ public class UserService extends BaseService<User, UserRepository> {
         return repository.findAllByClassOrSubclass(dotClass);
     }
 
+
+    public UserDTO getDTO(int userId){
+        User user = get(userId);
+        return new UserDTO(user);
+    }
+    
+    public UserDTO getDTO(User user){
+        return new UserDTO(user);
+    }
 
     private static void initializeSystemUsers(){
 

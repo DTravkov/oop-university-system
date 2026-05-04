@@ -1,39 +1,39 @@
 package application;
 
-import java.util.Scanner;
-
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.UIMessage;
-import model.factories.ServiceFactory;
-import services.*;
+import services.MessageService;
+import services.UserService;
 import utils.Translator;
 import utils.UIForms;
 
-public class MessageApp {
+public final class MessageApp extends BaseApp {
 
-    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
-    private static final MessageService messageService = serviceFactory.getService(MessageService.class);
-    private static final UserService userService = serviceFactory.getService(UserService.class);
+    private static final MessageService messageService = services.messageService;
+    private static final UserService userService = services.userService;
 
-    public static void startApp(Scanner scanner) {
+    private MessageApp() {
+    }
+
+    public static void startApp() {
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 6);
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 6);
 
             try {
                 switch (choice) {
                     case "1":
-                        sendMessage(scanner);
+                        sendMessage();
                         break;
                     case "2":
-                        deleteMessage(scanner);
+                        deleteMessage();
                         break;
                     case "3":
-                        getMessagesBySender(scanner);
+                        printMessagesBySender();
                         break;
                     case "4":
-                        getMessagesByReceiver(scanner);
+                        printMessagesByReceiver();
                         break;
                     case "5":
                         getAllMessages();
@@ -41,26 +41,26 @@ public class MessageApp {
                     case "6":
                         return;
                     default:
-                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                        printInvalidChoice();
                 }
             } catch (ApplicationException e) {
-                System.out.println(e.getMessage());
+                printExceptionDetails(e);
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " ---");
-        System.out.println("1. " + Translator.translate(UIMessage.MSG_SEND));
-        System.out.println("2. Delete message by id");
-        System.out.println("3. List messages by sender id");
-        System.out.println("4. List messages by receiver id");
-        System.out.println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
-        System.out.println("6. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " ---");
+        println("1. " + Translator.translate(UIMessage.MSG_SEND));
+        println("2. Delete message by id");
+        println("3. List messages by sender id");
+        println("4. List messages by receiver id");
+        println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        println("6. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
-    private static void sendMessage(Scanner scanner) {
-        printUsers();
+    private static void sendMessage() {
+        printEmployees();
         int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
         int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
         String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
@@ -71,39 +71,52 @@ public class MessageApp {
         Message message = new Message(senderId, receiverId, content);
         messageService.sendMessage(message);
 
-        System.out.println(Translator.translate(UIMessage.MSG_SENT));
-        System.out.println("Created: " + message);
-        System.out.println("Receiver inbox: " + messageService.getAllByReceiverId(receiverId));
+        println(Translator.translate(UIMessage.MSG_SENT));
+        Message saved = messageService.get(message.getId());
+        println(messageService.getDTO(saved));
+        println("Receiver inbox:");
+        for (Message m : messageService.getAllByReceiverId(receiverId)) {
+            println(messageService.getDTO(m));
+        }
     }
 
-    private static void deleteMessage(Scanner scanner) {
+    private static void deleteMessage() {
         getAllMessages();
         int messageId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         messageService.delete(messageId);
 
-        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
+        println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
-    private static void getMessagesBySender(Scanner scanner) {
-        printUsers();
+    private static void printMessagesBySender() {
+        printEmployees();
         int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
-        System.out.println(messageService.getAllBySenderId(senderId));
+        println("--- Messages ---");
+        for (Message m : messageService.getAllBySenderId(senderId)) {
+            println(messageService.getDTO(m).toShortString());
+        }
     }
 
-    private static void getMessagesByReceiver(Scanner scanner) {
-        printUsers();
+    private static void printMessagesByReceiver() {
+        printEmployees();
         int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-        System.out.println(messageService.getAllByReceiverId(receiverId));
+        println("--- Messages ---");
+        for (Message m : messageService.getAllByReceiverId(receiverId)) {
+            println(messageService.getDTO(m).toShortString());
+        }
     }
 
     private static void getAllMessages() {
-        System.out.println(messageService.getAll());
+        println("--- Messages ---");
+        for (Message m : messageService.getAll()) {
+            println(messageService.getDTO(m).toShortString());
+        }
     }
-    
-    private static void printUsers() {
-        System.out.println("--- Employees ---");
+
+    private static void printEmployees() {
+        println("--- Employees ---");
         for (User user : userService.getAllByClassOrSubclass(Employee.class)) {
-            System.out.println("ID: " + user.getId() + ", Name: " + user.getName() + ", Surname: " + user.getSurname());
+            println(userService.getDTO(user).toShortString());
         }
     }
 }

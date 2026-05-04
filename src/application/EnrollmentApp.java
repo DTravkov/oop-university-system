@@ -1,70 +1,71 @@
 package application;
 
-import java.util.Scanner;
-
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.UIMessage;
-import model.factories.ServiceFactory;
-import services.*;
+import services.CourseService;
+import services.EnrollmentService;
+import services.UserService;
 import utils.Translator;
 import utils.UIForms;
 
-public class EnrollmentApp{
+public final class EnrollmentApp extends BaseApp {
 
-    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
-    private static final EnrollmentService enrollmentService = serviceFactory.getService(EnrollmentService.class);
-    private static final UserService userService = serviceFactory.getService(UserService.class);
-    private static final CourseService courseService = serviceFactory.getService(CourseService.class);
+    private static final EnrollmentService enrollmentService = services.enrollmentService;
+    private static final UserService userService = services.userService;
+    private static final CourseService courseService = services.courseService;
 
-    public static void startApp(Scanner scanner) {
+    private EnrollmentApp() {
+    }
+
+    public static void startApp() {
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 7);
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 7);
 
             try {
                 switch (choice) {
                     case "1":
-                        createEnrollment(scanner);
+                        createEnrollment();
                         break;
                     case "2":
-                        deleteEnrollment(scanner);
+                        deleteEnrollment();
                         break;
                     case "3":
-                        getEnrollmentsOfStudent(scanner);
+                        printEnrollmentsOfStudent();
                         break;
                     case "4":
-                        getEnrollmentsOfCourse(scanner);
+                        printEnrollmentsOfCourse();
                         break;
                     case "5":
-                        increaseStudentPoints(scanner);
+                        increaseStudentPoints();
                         break;
                     case "6":
-                        getAllEnrollments();
+                        printAllEnrollments();
                         break;
                     case "7":
                         return;
                     default:
-                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                        printInvalidChoice();
                 }
             } catch (ApplicationException e) {
-                System.out.println(e.getMessage());
+                printExceptionDetails(e);
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ENROLL) + " ---");
-        System.out.println("1. " + Translator.translate(UIMessage.ENROLL_CREATE));
-        System.out.println("2. " + Translator.translate(UIMessage.ENROLL_DROP));
-        System.out.println("3. " + Translator.translate(UIMessage.ENROLL_VIEW_STUDENT));
-        System.out.println("4. Get enrollments by course");
-        System.out.println("5. Increase student points");
-        System.out.println("6. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
-        System.out.println("7. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ENROLL) + " ---");
+        println("1. " + Translator.translate(UIMessage.ENROLL_CREATE));
+        println("2. " + Translator.translate(UIMessage.ENROLL_DROP));
+        println("3. " + Translator.translate(UIMessage.ENROLL_VIEW_STUDENT));
+        println("4. Get enrollments by course");
+        println("5. Increase student points");
+        println("6. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        println("7. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
-    private static void createEnrollment(Scanner scanner) {
+    private static void createEnrollment() {
         printStudents();
         printCourses();
         int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
@@ -73,61 +74,68 @@ public class EnrollmentApp{
         Enrollment enrollment = new Enrollment(courseId, studentId);
         enrollmentService.create(enrollment);
 
-        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
-        System.out.println(enrollment);
-        System.out.println(enrollmentService.getAll());
+        println(Translator.translate(UIMessage.MSG_CREATED));
+        println(enrollmentService.getDTO(enrollment.getId()));
+        for (Enrollment e : enrollmentService.getAll()) {
+            println(enrollmentService.getDTO(e.getId()));
+        }
     }
 
-    private static void getEnrollmentsOfStudent(Scanner scanner) {
+    private static void printEnrollmentsOfStudent() {
         printStudents();
         int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
-        System.out.println(enrollmentService.getAllByStudentId(studentId));
+        for (Enrollment e : enrollmentService.getAllByStudentId(studentId)) {
+            println(enrollmentService.getDTO(e.getId()));
+        }
     }
 
-    private static void deleteEnrollment(Scanner scanner) {
-        getAllEnrollments();
+    private static void deleteEnrollment() {
+        printAllEnrollments();
         int enrollmentId = UIForms.readInt(scanner, UIMessage.INPUT_ENROLLMENT_ID);
         enrollmentService.delete(enrollmentId);
 
-        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
+        println(Translator.translate(UIMessage.MSG_DELETED));
     }
 
-    private static void getEnrollmentsOfCourse(Scanner scanner) {
+    private static void printEnrollmentsOfCourse() {
         printCourses();
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
-        System.out.println(enrollmentService.getAllByCourseId(courseId));
+        for (Enrollment e : enrollmentService.getAllByCourseId(courseId)) {
+            println(enrollmentService.getDTO(e.getId()).toShortString());
+        }
     }
 
-    private static void getAllEnrollments() {
-        System.out.println(enrollmentService.getAll());
+    private static void printAllEnrollments() {
+        for (Enrollment e : enrollmentService.getAll()) {
+            println(enrollmentService.getDTO(e.getId()).toShortString());
+        }
     }
 
-    private static void increaseStudentPoints(Scanner scanner) {
-        getAllEnrollments();
+    private static void increaseStudentPoints() {
+        printAllEnrollments();
         int enrollmentId = UIForms.readInt(scanner, UIMessage.INPUT_ENROLLMENT_ID);
-        System.out.println("Choose point type:");
-        System.out.println("1. First attestation");
-        System.out.println("2. Second attestation");
-        System.out.println("3. Final exam");
-        int pointTypeChoice = Integer.parseInt(UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 3));
+        println("Choose point type:");
+        println("1. First attestation");
+        println("2. Second attestation");
+        println("3. Final exam");
+        int pointTypeChoice = Integer.parseInt(readChoice(UIMessage.MENU_CHOOSE, 1, 3));
         double pointsToAdd = UIForms.readDouble(scanner, UIMessage.INPUT_POINTS_TO_ADD);
         enrollmentService.increasePoints(enrollmentId, pointTypeChoice, pointsToAdd);
-        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
-        System.out.println(enrollmentService.get(enrollmentId));
+        println(Translator.translate(UIMessage.MSG_CREATED));
+        println(enrollmentService.getDTO(enrollmentId));
     }
 
     private static void printStudents() {
-        System.out.println("--- Students ---");
-        for (User user : userService.getAllByClass(Student.class)) {
-            Student student = (Student) user;
-            System.out.println("ID: " + student.getId() + ", Name: " + student.getName() + ", Surname: " + student.getSurname());
+        println("--- Students ---");
+        for (User user : userService.getAllByClassOrSubclass(Student.class)) {
+            println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printCourses() {
-        System.out.println("--- Courses ---");
+        println("--- Courses ---");
         for (Course course : courseService.getAll()) {
-            System.out.println("ID: " + course.getId() + ", Name: " + course.getName());
+            println(courseService.getDTO(course).toShortString());
         }
     }
 }

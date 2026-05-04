@@ -1,91 +1,90 @@
 package application;
 
-import java.util.Scanner;
-
 import exceptions.ApplicationException;
 import model.domain.*;
 import model.enumeration.CourseType;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessage;
-import model.factories.ServiceFactory;
-import services.*;
+import services.CourseService;
+import services.UserService;
 import utils.Translator;
 import utils.UIForms;
 
-public class CourseApp {
+public final class CourseApp extends BaseApp {
 
-    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
-    private static final CourseService courseService = serviceFactory.getService(CourseService.class);
-    private static final UserService userService = serviceFactory.getService(UserService.class);
+    private static final CourseService courseService = services.courseService;
+    private static final UserService userService = services.userService;
 
-    public static void startApp(Scanner scanner) {
+    private CourseApp() {
+    }
+
+    public static void startApp() {
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 7);
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 7);
 
             try {
                 switch (choice) {
                     case "1":
-                        createCourse(scanner);
+                        createCourse();
                         break;
                     case "2":
-                        getCourseById(scanner);
+                        printCourseById();
                         break;
                     case "3":
-                        printCourses();
+                        printAllCourses();
                         break;
                     case "4":
-                        deleteCourse(scanner);
+                        deleteCourse();
                         break;
                     case "5":
-                        addTeacherToCourse(scanner);
+                        addTeacherToCourse();
                         break;
                     case "6":
-                        getCourseTeacherList(scanner);
+                        printCourseTeacherList();
                         break;
                     case "7":
                         return;
                     default:
-                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                        printInvalidChoice();
                 }
             } catch (ApplicationException e) {
-                System.out.println(e.getMessage());
+                printExceptionDetails(e);
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- Course App ---");
-        System.out.println("1. " + Translator.translate(UIMessage.COURSE_CREATE));
-        System.out.println("2. Get course by id");
-        System.out.println("3. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
-        System.out.println("4. Delete course");
-        System.out.println("5. " + "Add teacher to a course");
-        System.out.println("6. " + "Get list of teachers for a course");
-        System.out.println("7. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("\n--- Course App ---");
+        println("1. " + Translator.translate(UIMessage.COURSE_CREATE));
+        println("2. Get course by id");
+        println("3. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
+        println("4. Delete course");
+        println("5. " + "Add teacher to a course");
+        println("6. " + "Get list of teachers for a course");
+        println("7. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
-    private static void createCourse(Scanner scanner) {
+    private static void createCourse() {
         String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COURSE_NAME);
         String description = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COURSE_DESC);
         int credits = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_CREDITS);
-        CourseType type = askCourseType(scanner);
+        CourseType type = askCourseType();
 
         Course course = new Course(name, description, credits, type);
         courseService.create(course);
 
-        System.out.println(Translator.translate(UIMessage.MSG_CREATED));
-        System.out.println("Created: " + course);
-        System.out.println("All courses: " + courseService.getAll());
+        println(Translator.translate(UIMessage.MSG_CREATED));
+        println(courseService.getDTO(course.getId()));
     }
 
-    private static CourseType askCourseType(Scanner scanner) {
+    private static CourseType askCourseType() {
         while (true) {
-            System.out.println(Translator.translate(UIMessage.INPUT_COURSE_TYPE));
-            System.out.println("1. MAJOR");
-            System.out.println("2. MINOR");
-            System.out.println("3. ELECTIVE");
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 3);
+            println(Translator.translate(UIMessage.INPUT_COURSE_TYPE));
+            println("1. MAJOR");
+            println("2. MINOR");
+            println("3. ELECTIVE");
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 3);
 
             switch (choice) {
                 case "1":
@@ -95,78 +94,73 @@ public class CourseApp {
                 case "3":
                     return CourseType.ELECTIVE;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    printInvalidChoice();
             }
         }
     }
 
-    private static void addTeacherToCourse(Scanner scanner) {
-        printCourses();
+    private static void addTeacherToCourse() {
+        printAllCourses();
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
         printTeachers();
         int teacherId = UIForms.readInt(scanner, UIMessage.INPUT_TEACHER_ID);
-        String teacherTypeId = UIForms.readChoice(scanner, UIMessage.INPUT_COURSE_TEACHER_TYPE, 1, 2);
+        String teacherTypeId = readChoice(UIMessage.INPUT_COURSE_TEACHER_TYPE, 1, 2);
 
-        TeacherType type = teacherTypeId.equals("1")  ? TeacherType.LECTURE : TeacherType.PRACTICE;
-
-        System.out.println(type);
+        TeacherType type = teacherTypeId.equals("1") ? TeacherType.LECTURE : TeacherType.PRACTICE;
 
         courseService.addTeacher(courseId, teacherId, type);
 
-        System.out.println(courseService.get(courseId));
-        System.out.println("Lecturer IDs : " + courseService.get(courseId).getLectureTeachers());
-        System.out.println("Practice Teacher IDs : " + courseService.get(courseId).getPracticeTeachers());
+        println(courseService.getDTO(courseId));
     }
 
-    private static void getCourseById(Scanner scanner) {
-        printCourses();
+    private static void printCourseById() {
+        printAllCourses();
         int id = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
-        System.out.println(courseService.get(id));
+        println(courseService.getDTO(id));
     }
 
-    private static void getCourseTeacherList(Scanner scanner) {
-        printCourses();
+    private static void printCourseTeacherList() {
+        printAllCourses();
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
         Course course = courseService.get(courseId);
-        System.out.println("Lecturer IDs : " + course.getLectureTeachers());
-        System.out.println("Practice Teacher IDs : " + course.getPracticeTeachers());
+        println(courseService.getDTO(course.getId()));
     }
 
-    private static void printCourses() {
-        System.out.println(courseService.getAll());
+    private static void printAllCourses() {
+        println("--- Courses ---");
+        for (Course c : courseService.getAll()) {
+            println(courseService.getDTO(c).toShortString());
+        }
     }
 
     private static void printTeachers() {
-        System.out.println("--- Lecturers ---");
-        for(User u : userService.getAllByClass(Teacher.class)){
+        println("--- Lecturers ---");
+        for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
-            if(t.isLecturer()){
-                System.out.println(t);
+            if (t.isLecturer()) {
+                println(userService.getDTO(t).toShortString());
             }
         }
-        System.out.println("--- Practice teachers ---");
-        for(User u : userService.getAllByClass(Teacher.class)){
+        println("--- Practice teachers ---");
+        for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
-            if(t.isPractice()){
-                System.out.println(t);
+            if (t.isPractice()) {
+                println(userService.getDTO(t).toShortString());
             }
         }
-        System.out.println("--- Both ---");
-        for(User u : userService.getAllByClass(Teacher.class)){
+        println("--- Both ---");
+        for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
-            if(t.isLecturer() && t.isPractice()){
-                System.out.println(t);
+            if (t.isLecturer() && t.isPractice()) {
+                println(userService.getDTO(t).toShortString());
             }
         }
     }
 
-
-    private static void deleteCourse(Scanner scanner) {
-        printCourses();
+    private static void deleteCourse() {
+        printAllCourses();
         int id = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
         courseService.delete(id);
-        System.out.println(Translator.translate(UIMessage.MSG_DELETED));
-        System.out.println(courseService.getAll());
+        println(Translator.translate(UIMessage.MSG_DELETED));
     }
-
 }

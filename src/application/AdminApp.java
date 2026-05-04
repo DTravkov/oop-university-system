@@ -1,28 +1,28 @@
 package application;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.User;
 import model.enumeration.UIMessage;
-import model.factories.ServiceFactory;
-import services.UserService;
+import settings.AppSettings;
 import settings.SessionData;
 import utils.LogEntry;
 import utils.Logger;
 import utils.Translator;
 import utils.UIForms;
 
-public class AdminApp {
+public final class AdminApp extends BaseApp {
 
-    private static final UserService userService = ServiceFactory.getInstance().getService(UserService.class);
+    private AdminApp() {
+    }
 
-    public static void startApp(Scanner scanner) {
+    public static void startApp() {
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 4);
+            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 5);
 
             try {
                 switch (choice) {
@@ -30,70 +30,72 @@ public class AdminApp {
                         printAllLogs();
                         break;
                     case "2":
-                        printLogsForUser(scanner);
+                        printLogsForUser();
                         break;
                     case "3":
                         printSessionUserLogs();
                         break;
                     case "4":
+                        printLastLogs();
+                        break;
+                    case "5":
                         return;
                     default:
-                        System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                        printInvalidChoice();
                 }
             } catch (ApplicationException e) {
-                System.out.println(e.getMessage());
+                printExceptionDetails(e);
             }
         }
     }
 
     private static void printMenu() {
-        System.out.println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ADMIN) + " ---");
-        System.out.println("1. " + Translator.translate(UIMessage.ADMIN_LOGS_ALL));
-        System.out.println("2. " + Translator.translate(UIMessage.ADMIN_LOGS_BY_USER));
-        System.out.println("3. " + Translator.translate(UIMessage.ADMIN_LOGS_SESSION));
-        System.out.println("4. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ADMIN) + " ---");
+        println("1. " + Translator.translate(UIMessage.ADMIN_LOGS_ALL));
+        println("2. " + Translator.translate(UIMessage.ADMIN_LOGS_BY_USER));
+        println("3. " + Translator.translate(UIMessage.ADMIN_LOGS_SESSION));
+        println("4. " + "Get latest logs (<= " + AppSettings.RECENT_LOG_HOURS + "h)");
+        println("5. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void printAllLogs() {
-        Map<Integer, List<LogEntry>> all = Logger.getAllLogs();
-        if (all.isEmpty()) {
-            System.out.println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
+        List<LogEntry> logList = Logger.getAllLogs();
+        if (logList.isEmpty()) {
+            println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
             return;
         }
-        for (Map.Entry<Integer, List<LogEntry>> e : all.entrySet()) {
-            User currentUser = userService.get(e.getKey());
-            System.out.println("--- " + currentUser.getClass().getSimpleName() + ", " + currentUser.getFullName() + ", id=" + e.getKey() + " ---");
-            for (LogEntry entry : e.getValue()) {
-                System.out.print(entry);
-            }
-        }
+        logList.forEach(log -> println(log));
     }
 
-    private static void printLogsForUser(Scanner scanner) {
+    private static void printLogsForUser() {
         int userId = UIForms.readInt(scanner, UIMessage.INPUT_USER_ID);
         List<LogEntry> logs = Logger.getUserLogs(userId);
         if (logs.isEmpty()) {
-            System.out.println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
+            println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
             return;
         }
-        for (LogEntry entry : logs) {
-            System.out.print(entry);
-        }
+        logs.forEach(log -> println(log));
     }
 
     private static void printSessionUserLogs() {
         User user = SessionData.getInstance().getUser();
-        if (user == null) {
-            System.out.println(Translator.translate(UIMessage.ADMIN_NO_ACTIVE_USER));
-            return;
-        }
         List<LogEntry> logs = Logger.getUserLogs(user.getId());
         if (logs.isEmpty()) {
-            System.out.println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
+            println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
             return;
         }
-        for (LogEntry entry : logs) {
-            System.out.print(entry);
+        logs.forEach(log -> println(log));
+    }
+
+    private static void printLastLogs() {
+        List<LogEntry> logs = Logger.getAllLogs();
+        if (logs.isEmpty()) {
+            println(Translator.translate(UIMessage.ADMIN_EMPTY_LOGS));
+            return;
         }
+        Instant startingPoint = Instant.now().minus(Duration.ofHours(AppSettings.RECENT_LOG_HOURS));
+        logs.stream()
+                .filter(log -> log.getTime().toInstant().isAfter(startingPoint))
+                .forEach(log -> println(log));
     }
 }

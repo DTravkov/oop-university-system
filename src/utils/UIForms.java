@@ -2,7 +2,9 @@ package utils;
 
 import model.domain.*;
 import model.enumeration.TeacherType;
+import model.enumeration.TechRequestStatus;
 import model.enumeration.UIMessage;
+import settings.AppSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,22 +104,24 @@ public class UIForms {
 
     public static Class<? extends User> readUserClass(Scanner scanner) {
 
-        List<Class<? extends User>> roles = new ArrayList<>();
-        
-        roles.add(User.class);
-        roles.add(Student.class);
-        roles.add(GraduateStudent.class);
-        roles.add(Employee.class);
-        roles.add(Teacher.class);
-        roles.add(Manager.class);
-        roles.add(Dean.class);
-        roles.add(Admin.class);
-        roles.add(TechSupportSpecialist.class);
-        roles.add(DeletedUser.class);
+        List<Class<? extends User>> roles = AppSettings.REGISTRABLE_USER_CLASSES;
 
         System.out.println(Translator.translate(UIMessage.INPUT_USER_ROLE));
         for (int i = 0; i < roles.size(); i++) {
             System.out.println((i + 1) + "." + roles.get(i).getSimpleName());
+        }
+
+        String choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, roles.size());
+        return roles.get(Integer.parseInt(choice) - 1);
+    }
+
+    public static TechRequestStatus readTechRequestStatus(Scanner scanner) {
+
+        List<TechRequestStatus> roles = List.of(TechRequestStatus.values());
+
+        System.out.println(Translator.translate(UIMessage.INPUT_USER_ROLE));
+        for (int i = 0; i < roles.size(); i++) {
+            System.out.println((i + 1) + "." + roles.get(i).toString());
         }
 
         String choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, roles.size());

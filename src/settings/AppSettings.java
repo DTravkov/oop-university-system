@@ -8,6 +8,7 @@ import model.enumeration.LanguagePreference;
 
 public class AppSettings {
 
+    public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
 
     // used as a placeholder for unauthourized account OR while testing our application layer.
     public static final int ANONYMOUS_USER_ID = -54;
@@ -17,9 +18,37 @@ public class AppSettings {
     public static final int DELETED_USER_ID = -27;
     public static final User DELETED_USER = new DeletedUser();
 
+    public static final int RECENT_LOG_HOURS = 12;
+
     public static final String DEFAULT_REPOSITORY_ROOT = "data/";
 
-    public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
+
+    public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
+        User.class,
+        AnonymousUser.class,
+        DeletedUser.class,
+        Employee.class
+    );
+
+    public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(
+        AnonymousUser.class,
+        DeletedUser.class,
+        User.class,
+        Student.class,
+        GraduateStudent.class,
+        Employee.class,
+        Teacher.class,
+        Dean.class,
+        Manager.class,
+        TechSupportSpecialist.class
+    );
+
+
+
+    public static final List<Class<? extends User>> REGISTRABLE_USER_CLASSES = ALL_USER_CLASSES.stream()
+                                                                                               .filter(cls -> !SYSTEM_CLASSES.contains(cls))
+                                                                                               .toList();
+
 
     public static final List<Class<? extends SerializableModel>> DEFAULT_RESEARCHER_CLASSES = List.of(
         GraduateStudent.class,

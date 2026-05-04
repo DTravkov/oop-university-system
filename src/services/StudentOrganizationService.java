@@ -5,8 +5,11 @@ import java.util.List;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
+
 import model.domain.StudentOrganization;
 import model.domain.User;
+import model.dto.StudentOrganizationDTO;
+import model.dto.UserDTO;
 import model.repository.StudentOrganizationRepository;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
@@ -44,7 +47,10 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     public void removeMember(int organizationId, int studentId) {
         StudentOrganization org = this.get(organizationId);
         if(!org.getMembers().contains(studentId)){
-            throw new DoesNotExist("no member with id : " + studentId + " in organization");
+            throw new DoesNotExist("member with id : " + studentId + " in organization");
+        }
+        if(org.getPresidentId() == studentId){
+            throw new OperationNotAllowed("removing president from organization member list");
         }
         org.removeMember(studentId);
         this.update(org);
@@ -55,6 +61,9 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         User user = userService.get(studentId);
         if(!AppSettings.ST_ORG_ALLOWED_PRESIDENT_CLASSES.contains(user.getClass())){
             throw new OperationNotAllowed("adding not allowed role as a Student Organization president");
+        }
+        if(org.getPresidentId() == studentId){
+            throw new AlreadyExists(" president of this organization with the same id");
         }
         org.setPresidentId(studentId);
         org.addMember(studentId);
@@ -78,6 +87,20 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
             throw new DoesNotExist("organization with name : " + name);
         }
         return org;
+    }
+
+    public StudentOrganizationDTO getDTO(int organizationId) {
+        StudentOrganization organization = get(organizationId);
+        return getDTO(organization);
+    }
+
+    public StudentOrganizationDTO getDTO(StudentOrganization organization) {
+        User president = userService.get(organization.getPresidentId());
+        List<UserDTO> memberDtos = organization.getMembers().stream()
+                .map(userService::get)
+                .map(UserDTO::new)
+                .toList();
+        return new StudentOrganizationDTO(organization, president, memberDtos);
     }
 
     

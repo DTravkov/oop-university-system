@@ -2,23 +2,20 @@ package utils;
 
 import model.domain.User;
 import settings.AppSettings;
-import settings.SessionData;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class Logger {
 
     private static final Logger INSTANCE = new Logger();
 
     private final String path = AppSettings.DEFAULT_REPOSITORY_ROOT + "Logger.ser";
-    private Map<Integer, List<LogEntry>> data = new HashMap<>();
+    private List<LogEntry> data = new ArrayList<>();
     private boolean isActive = true;
 
     private Logger() {
@@ -35,28 +32,24 @@ public final class Logger {
             return;
         }
         User user = AppSettings.getActiveUser();
-        int userId = user.getId();
-        LogEntry entry = new LogEntry(action, user.getId());
-        INSTANCE.data.computeIfAbsent(userId, logList -> new ArrayList<>()).add(entry);
+        LogEntry entry = new LogEntry(action, user);
+        INSTANCE.data.add(entry);
         INSTANCE.writeToFile();
     }
 
     public static List<LogEntry> getUserLogs(int userId) {
-        List<LogEntry> userLogs = INSTANCE.data.get(userId);
-        if (userLogs == null) {
-            return List.of();
-        }
+        List<LogEntry> userLogs = INSTANCE.data.stream().filter(log -> log.getUserId() == userId).toList();
         return List.copyOf(userLogs);
     }
     
-    public static Map<Integer, List<LogEntry>> getAllLogs() {
-        return Map.copyOf(INSTANCE.data);
+    public static List<LogEntry> getAllLogs() {
+        return List.copyOf(INSTANCE.data);
     }
 
     private void load() {
         File file = new File(path);
         if (!file.exists() || file.length() == 0) {
-            this.data = new HashMap<>();
+            this.data = new ArrayList<>();
             return;
         }
         this.data = readFromFile();
@@ -71,9 +64,9 @@ public final class Logger {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Integer, List<LogEntry>> readFromFile() {
+    private List<LogEntry> readFromFile() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
-            return (Map<Integer, List<LogEntry>>) ois.readObject();
+            return (List<LogEntry>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Error reading from file: " + path, e);
         }

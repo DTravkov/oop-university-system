@@ -1,5 +1,7 @@
 package model.repository;
 
+import java.util.List;
+
 import model.domain.Comment;
 
 public class CommentRepository extends Repository<Comment> {
@@ -13,4 +15,5 @@ public class CommentRepository extends Repository<Comment> {
     public static CommentRepository getInstance() {
         return INSTANCE;
     }
+
 }

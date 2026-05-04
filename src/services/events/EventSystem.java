@@ -20,7 +20,6 @@ public class EventSystem {
         FieldValidator.requireNonNull(eventType, "Event type");
         FieldValidator.requireNonNull(handler, "Handler");
 
-
         @SuppressWarnings("unchecked")
         Consumer<Event> eventHandler = (Consumer<Event>) handler;
         

@@ -7,24 +7,23 @@ import java.util.UUID;
 
 import exceptions.*;
 import model.domain.*;
-import model.factories.*;
 import services.*;
 import settings.*;
 import utils.*;
 import model.enumeration.*;
 
-public class TestApp {
+public class TestApp extends BaseApp {
 
-    private static final ServiceFactory serviceFactory = ServiceFactory.getInstance();
-    private static final UserService userService = serviceFactory.getService(UserService.class);
-    private static final CourseService courseService = serviceFactory.getService(CourseService.class);
-    private static final EnrollmentService enrollmentService = serviceFactory.getService(EnrollmentService.class);
-    private static final CommentService commentService = serviceFactory.getService(CommentService.class);
-    private static final MessageService messageService = serviceFactory.getService(MessageService.class);
-    private static final ComplaintService complaintService = serviceFactory.getService(ComplaintService.class);
-    private static final NewsService newsService = serviceFactory.getService(NewsService.class);
-    private static final StudentOrganizationService studentOrganizationService = serviceFactory.getService(StudentOrganizationService.class);
-    private static final ResearchService researchService = serviceFactory.getService(ResearchService.class);
+    private static final UserService userService = services.userService;
+    private static final CourseService courseService = services.courseService;
+    private static final EnrollmentService enrollmentService = services.enrollmentService;
+    private static final CommentService commentService = services.commentService;
+    private static final MessageService messageService = services.messageService;
+    private static final ComplaintService complaintService = services.complaintService;
+    private static final NewsService newsService = services.newsService;
+    private static final StudentOrganizationService studentOrganizationService =
+            services.studentOrganizationService;
+    private static final ResearchService researchService = services.researchService;
 
     public static void main(String[] args) {
         runAllTests();
@@ -67,9 +66,9 @@ public class TestApp {
         }
 
         int total = tests.size();
-        System.out.println("\n=== TEST RESULT ===");
-        System.out.println("Passed: " + passed + "/" + total);
-        System.out.println("Failed: " + (total - passed) + "/" + total);
+        println("\n=== TEST RESULT ===");
+        println("Passed: " + passed + "/" + total);
+        println("Failed: " + (total - passed) + "/" + total);
 
 
         Logger.setIsActive(true);
@@ -522,13 +521,14 @@ public class TestApp {
     private static boolean runTest(String name, TestCase testCase) {
         try {
             boolean result = testCase.run();
-            System.out.println((result ? "[PASS] " : "[FAIL] ") + name);
+            println((result ? "[PASS] " : "[FAIL] ") + name);
             return result;
         } catch (ApplicationException e) {
-            System.out.println("[FAIL] " + name + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            print("[FAIL] " + name + " -> " + e.getClass().getSimpleName() + ": ");
+            printExceptionDetails(e);
             return false;
         } catch (Exception e) {
-            System.out.println("[FAIL] " + name + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            println("[FAIL] " + name + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return false;
         }
     }

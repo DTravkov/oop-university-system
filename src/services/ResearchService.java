@@ -9,6 +9,9 @@ import model.domain.ResearchProject;
 import model.domain.ResearcherProfile;
 import model.domain.SerializableModel;
 import model.domain.User;
+import model.dto.ResearchPaperDTO;
+import model.dto.ResearchProjectDTO;
+import model.dto.ResearcherProfileDTO;
 import model.repository.ResearchRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
@@ -69,6 +72,40 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
     public boolean isResearcher(int userId) {
         return repository.researcherProfileExists(userId);
+    }
+
+    public ResearchProjectDTO getProjectDTO(int id) {
+        SerializableModel model = get(id);
+        if (!(model instanceof ResearchProject project)) {
+            throw new DoesNotExist("ResearchProject record with id=" + id);
+        }
+        return getDTO(project);
+    }
+
+    public ResearchProjectDTO getDTO(ResearchProject project) {
+        return new ResearchProjectDTO(project);
+    }
+
+    public ResearchPaperDTO getPaperDTO(int id) {
+        SerializableModel model = get(id);
+        if (!(model instanceof ResearchPaper paper)) {
+            throw new DoesNotExist("ResearchPaper record with id=" + id);
+        }
+        return getDTO(paper);
+    }
+
+    public ResearchPaperDTO getDTO(ResearchPaper paper) {
+        return new ResearchPaperDTO(paper);
+    }
+
+    public ResearcherProfileDTO getResearcherProfileDTO(int userId) {
+        ResearcherProfile profile = getResearcherProfile(userId);
+        return getDTO(profile);
+    }
+
+    public ResearcherProfileDTO getDTO(ResearcherProfile profile) {
+        User user = userService.get(profile.getUserId());
+        return new ResearcherProfileDTO(profile, user);
     }
 
     @Override

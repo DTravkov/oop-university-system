@@ -2,9 +2,13 @@ package services;
 
 import exceptions.AlreadyExists;
 import exceptions.OperationNotAllowed;
+import java.util.List;
+
 import model.domain.Course;
 import model.domain.Teacher;
 import model.domain.User;
+import model.dto.CourseDTO;
+import model.dto.UserDTO;
 import model.enumeration.TeacherType;
 import model.repository.CourseRepository;
 import services.events.UserDeleteEvent;
@@ -25,6 +29,23 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
             throw new AlreadyExists("course with the '" +  course.getName() + "' name");
         }
         return super.create(course);
+    }
+
+    public CourseDTO getDTO(int courseId) {
+        Course course = get(courseId);
+        return getDTO(course);
+    }
+
+    public CourseDTO getDTO(Course course) {
+        List<UserDTO> lecture = course.getLectureTeachers().stream()
+                .map(userService::get)
+                .map(UserDTO::new)
+                .toList();
+        List<UserDTO> practice = course.getPracticeTeachers().stream()
+                .map(userService::get)
+                .map(UserDTO::new)
+                .toList();
+        return new CourseDTO(course, lecture, practice);
     }
 
     public void addTeacher(int courseId, int teacherId, TeacherType type){

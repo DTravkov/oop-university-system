@@ -1,0 +1,45 @@
+package application;
+
+import java.util.Scanner;
+
+import exceptions.ApplicationException;
+import model.enumeration.UIMessage;
+import model.factories.ServiceRegistry;
+import utils.Translator;
+import utils.UIForms;
+
+public abstract class BaseApp {
+
+    protected static final Scanner scanner = new Scanner(System.in);
+    protected static final ServiceRegistry services = ServiceRegistry.getInstance();
+
+    protected BaseApp() {
+    }
+    protected static void print(String data) {
+        System.out.print(data);
+    }
+
+    protected static void print(Object data) {
+        System.out.print(data);
+    }
+
+    protected static void println(String data) {
+        System.out.println(data);
+    }
+
+    protected static void println(Object data) {
+        System.out.println(data);
+    }
+
+    protected static void printExceptionDetails(ApplicationException exc) {
+        println(exc.getMessage());
+    }
+
+    protected static void printInvalidChoice() {
+        println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+    }
+
+    protected static String readChoice(UIMessage prompt, int min, int max) {
+        return UIForms.readChoice(scanner, prompt, min, max);
+    }
+}

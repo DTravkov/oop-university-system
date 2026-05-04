@@ -12,7 +12,6 @@ public abstract class ApplicationException extends RuntimeException {
 
 
     protected ApplicationException(UIMessage message, Object... args) {
-        super(message.getKey());
         this.message = message;
         this.args = (args != null) ? args : new Object[0];
             

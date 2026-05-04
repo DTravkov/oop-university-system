@@ -3,6 +3,8 @@ package services;
 import java.util.List;
 
 import model.domain.Comment;
+import model.domain.User;
+import model.dto.CommentDTO;
 import model.repository.CommentRepository;
 import services.events.CommentDeleteEvent;
 import services.events.UserDeleteEvent;
@@ -28,6 +30,16 @@ public class CommentService extends BaseService<Comment, CommentRepository> {
         Comment toDelete = this.get(commentId);
         eventSystem.publish(new CommentDeleteEvent(toDelete));
         super.delete(commentId);
+    }
+
+    public CommentDTO getDTO(int commentId) {
+        Comment comment = get(commentId);
+        return getDTO(comment);
+    }
+
+    public CommentDTO getDTO(Comment comment) {
+        User author = userService.get(comment.getSenderId());
+        return new CommentDTO(comment, author);
     }
 
 

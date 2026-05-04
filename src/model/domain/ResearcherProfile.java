@@ -12,6 +12,4 @@ public class ResearcherProfile extends SerializableModel {
         return userId;
     }
 
-    
-
 }
