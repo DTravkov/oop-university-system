@@ -55,7 +55,7 @@ public final class CourseApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- Course App ---");
+        println("\n|||  Course App |||");
         println("1. " + Translator.translate(UIMessage.COURSE_CREATE));
         println("2. Get course by id");
         println("3. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
@@ -127,28 +127,28 @@ public final class CourseApp extends BaseApp {
     }
 
     private static void printAllCourses() {
-        println("--- Courses ---");
+        println("|||  Courses |||");
         for (Course c : courseService.getAll()) {
             println(courseService.getDTO(c).toShortString());
         }
     }
 
     private static void printTeachers() {
-        println("--- Lecturers ---");
+        println("|||  Lecturers |||");
         for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
             if (t.isLecturer()) {
                 println(userService.getDTO(t).toShortString());
             }
         }
-        println("--- Practice teachers ---");
+        println("|||  Practice teachers |||");
         for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
             if (t.isPractice()) {
                 println(userService.getDTO(t).toShortString());
             }
         }
-        println("--- Both ---");
+        println("|||  Both |||");
         for (User u : userService.getAllByClass(Teacher.class)) {
             Teacher t = (Teacher) u;
             if (t.isLecturer() && t.isPractice()) {

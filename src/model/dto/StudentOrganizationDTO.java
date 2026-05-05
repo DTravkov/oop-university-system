@@ -14,25 +14,13 @@ public final class StudentOrganizationDTO extends BaseViewDTO {
     private final UserDTO president;
     private final List<UserDTO> members;
 
-    public StudentOrganizationDTO(int id, String name, String description, UserDTO president,
-                                  List<UserDTO> members) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.name = name;
-        this.description = description;
-        this.president = president;
-        this.members = members == null ? List.of() : List.copyOf(members);
-    }
-
     public StudentOrganizationDTO(StudentOrganization organization, User president, List<UserDTO> members) {
-        this(
-                organization.getId(),
-                organization.getName(),
-                organization.getDescription(),
-                new UserDTO(president),
-                members);
+        super();
+        setId(organization.getId());
+        this.name = organization.getName();
+        this.description = organization.getDescription();
+        this.president = new UserDTO(president);
+        this.members = members == null ? List.of() : List.copyOf(members);
     }
 
     public String getName() {

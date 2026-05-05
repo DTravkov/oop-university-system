@@ -72,7 +72,20 @@ public class TestApp extends BaseApp {
                 new TestEntry("Research profile duplicate create", TestApp::testResearchProfileDuplicateCreateGuard),
                 new TestEntry("Research profile auto create", TestApp::testResearchProfileAutoCreateOnGraduateCreate),
                 new TestEntry("Research profile delete", TestApp::testResearchProfileManualDeleteFlow),
-                new TestEntry("Research profile auto delete", TestApp::testResearchProfileAutoDeleteOnUserDelete)
+                new TestEntry("Research profile auto delete", TestApp::testResearchProfileAutoDeleteOnUserDelete),
+                new TestEntry("Research paper CRUD", TestApp::testResearchPaperCrud),
+                new TestEntry("Research project CRUD", TestApp::testResearchProjectCrud),
+                new TestEntry("Research join project syncs profile", TestApp::testResearchJoinProjectSyncsProfileAndProject),
+                new TestEntry("Research duplicate project participant", TestApp::testResearchDuplicateProjectParticipant),
+                new TestEntry("Research add paper to project", TestApp::testResearchAddPaperToProject),
+                new TestEntry("Research duplicate paper in project", TestApp::testResearchDuplicatePaperInProject),
+                new TestEntry("Research duplicate paper participant", TestApp::testResearchDuplicatePaperParticipant),
+                new TestEntry("Research assign supervisor rejects non graduate", TestApp::testResearchAssignSupervisorRejectsNonGraduate),
+                new TestEntry("Research assign supervisor rejects low h-index", TestApp::testResearchAssignSupervisorRejectsLowHIndex),
+                new TestEntry("Research assign supervisor success", TestApp::testResearchAssignSupervisorSuccess),
+                new TestEntry("Research delete researcher removed from project", TestApp::testResearchDeleteResearcherRemovedFromProject),
+                new TestEntry("Research delete researcher removed from paper", TestApp::testResearchDeleteResearcherRemovedFromPaper),
+                new TestEntry("Research delete supervisor clears graduate", TestApp::testResearchDeleteResearcherClearsGraduateSupervisor)
         );
 
         int passed = 0;
@@ -903,7 +916,7 @@ public class TestApp extends BaseApp {
                 return false;
             }
 
-            ResearcherProfile profile = researchService.makeResearcher(student.getId());
+            ResearcherProfile profile = researchService.createResearcher(student.getId());
             return profile.getUserId() == student.getId() && researchService.isResearcher(student.getId());
         } finally {
             cleanupBin.cleanup();
@@ -918,10 +931,10 @@ public class TestApp extends BaseApp {
                     Student.class, "tc.research.dup." + suffix, "12345", "Research", "Dup", new Date(), null
             );
             cleanupBin.trackUser(student.getId());
-            researchService.makeResearcher(student.getId());
+            researchService.createResearcher(student.getId());
 
             try {
-                researchService.makeResearcher(student.getId());
+                researchService.createResearcher(student.getId());
                 return false;
             } catch (AlreadyExists e) {
                 return true;
@@ -935,6 +948,11 @@ public class TestApp extends BaseApp {
         CleanupBin cleanupBin = new CleanupBin();
         String suffix = uniqueSuffix();
         try {
+            Teacher supervisor = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.supervisor." + suffix, "12345", "Research", "Supervisor", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(supervisor.getId());
+
             Student graduateStudent = (Student) userService.registerUser(
                     model.domain.GraduateStudent.class, "tc.research.event.create." + suffix, "12345", "Research", "Event", new Date(), null
             );
@@ -953,15 +971,15 @@ public class TestApp extends BaseApp {
                     Student.class, "tc.research.delete." + suffix, "12345", "Research", "Delete", new Date(), null
             );
             cleanupBin.trackUser(student.getId());
-            researchService.makeResearcher(student.getId());
-            researchService.deleteResearcherProfile(student.getId());
+            researchService.createResearcher(student.getId());
+            researchService.deleteResearcher(student.getId());
 
             if (researchService.isResearcher(student.getId())) {
                 return false;
             }
 
             try {
-                researchService.getResearcherProfile(student.getId());
+                researchService.getResearcher(student.getId());
                 return false;
             } catch (DoesNotExist e) {
                 return true;
@@ -988,6 +1006,268 @@ public class TestApp extends BaseApp {
             return !researchService.isResearcher(teacher.getId());
         } finally {
             cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchPaperCrud() {
+        CleanupBin cleanupBin = new CleanupBin();
+        try {
+            ResearchPaper created = researchService.createPaper(new ResearchPaper());
+            cleanupBin.trackResearchPaper(created.getId());
+            ResearchPaper loaded = researchService.getPaper(created.getId());
+            if (loaded.getId() != created.getId() || loaded.getCitations() != 0) {
+                return false;
+            }
+            researchService.deletePaper(created.getId());
+            cleanupBin.untrackResearchPaper(created.getId());
+            return expectThrows(DoesNotExist.class, () -> researchService.getPaper(created.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchProjectCrud() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            ResearchProject created = researchService.createProject(new ResearchProject("tc-proj-crud-" + suffix));
+            cleanupBin.trackResearchProject(created.getId());
+            ResearchProject loaded = researchService.getProject(created.getId());
+            if (!loaded.getTopic().equals("tc-proj-crud-" + suffix) || !loaded.getParticipants().isEmpty()) {
+                return false;
+            }
+            researchService.deleteProject(created.getId());
+            cleanupBin.untrackResearchProject(created.getId());
+            return expectThrows(DoesNotExist.class, () -> researchService.getProject(created.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchJoinProjectSyncsProfileAndProject() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher researcher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.join.r." + suffix, "12345", "Research", "Join", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(researcher.getId());
+            ResearchProject project = researchService.createProject(new ResearchProject("tc-proj-join-" + suffix));
+            cleanupBin.trackResearchProject(project.getId());
+
+            researchService.addParticipantToProject(project.getId(), researcher.getId());
+            ResearchProject updatedProject = researchService.getProject(project.getId());
+            ResearcherProfile profile = researchService.getResearcher(researcher.getId());
+            return updatedProject.getParticipants().contains(researcher.getId())
+                    && profile.getResearchProjects().contains(project.getId());
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDuplicateProjectParticipant() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher researcher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.dupproj.r." + suffix, "12345", "Research", "DupProj", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(researcher.getId());
+            ResearchProject project = researchService.createProject(new ResearchProject("tc-proj-dup-" + suffix));
+            cleanupBin.trackResearchProject(project.getId());
+            researchService.addParticipantToProject(project.getId(), researcher.getId());
+            return expectThrows(AlreadyExists.class, () ->
+                    researchService.addParticipantToProject(project.getId(), researcher.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchAddPaperToProject() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            ResearchProject project = researchService.createProject(new ResearchProject("tc-proj-paper-" + suffix));
+            cleanupBin.trackResearchProject(project.getId());
+            ResearchPaper paper = researchService.createPaper(new ResearchPaper());
+            cleanupBin.trackResearchPaper(paper.getId());
+            researchService.addPaperToProject(project.getId(), paper.getId());
+            return researchService.getProject(project.getId()).getPapers().contains(paper.getId());
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDuplicatePaperInProject() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            ResearchProject project = researchService.createProject(new ResearchProject("tc-proj-duppaper-" + suffix));
+            cleanupBin.trackResearchProject(project.getId());
+            ResearchPaper paper = researchService.createPaper(new ResearchPaper());
+            cleanupBin.trackResearchPaper(paper.getId());
+            researchService.addPaperToProject(project.getId(), paper.getId());
+            return expectThrows(AlreadyExists.class, () ->
+                    researchService.addPaperToProject(project.getId(), paper.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDuplicatePaperParticipant() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher researcher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.duppaper.r." + suffix, "12345", "Research", "DupPaper", null, TeacherType.PRACTICE
+            );
+            cleanupBin.trackUser(researcher.getId());
+            ResearchPaper paper = researchService.createPaper(new ResearchPaper());
+            cleanupBin.trackResearchPaper(paper.getId());
+            researchService.addParticipantToPaper(paper.getId(), researcher.getId());
+            return expectThrows(AlreadyExists.class, () ->
+                    researchService.addParticipantToPaper(paper.getId(), researcher.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchAssignSupervisorRejectsNonGraduate() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Student student = (Student) userService.registerUser(
+                    Student.class, "tc.research.nongrad." + suffix, "12345", "Research", "Undergrad", new Date(), null
+            );
+            cleanupBin.trackUser(student.getId());
+            Teacher supervisor = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.nongrad.sup." + suffix, "12345", "Research", "Supervisor", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(supervisor.getId());
+            qualifyTeacherAsSupervisorForTests(cleanupBin, supervisor.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    researchService.assignSupervisor(student.getId(), supervisor.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchAssignSupervisorRejectsLowHIndex() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            GraduateStudent grad = (GraduateStudent) userService.registerUser(
+                    GraduateStudent.class, "tc.research.lowh.grad." + suffix, "12345", "Research", "GradLow", new Date(), null
+            );
+            cleanupBin.trackUser(grad.getId());
+            Teacher supervisor = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.lowh.sup." + suffix, "12345", "Research", "SupLow", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(supervisor.getId());
+            return expectThrows(OperationNotAllowed.class, () ->
+                    researchService.assignSupervisor(grad.getId(), supervisor.getId()));
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchAssignSupervisorSuccess() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            GraduateStudent grad = (GraduateStudent) userService.registerUser(
+                    GraduateStudent.class, "tc.research.ok.grad." + suffix, "12345", "Research", "GradOk", new Date(), null
+            );
+            cleanupBin.trackUser(grad.getId());
+            Teacher supervisor = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.ok.sup." + suffix, "12345", "Research", "SupOk", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(supervisor.getId());
+            qualifyTeacherAsSupervisorForTests(cleanupBin, supervisor.getId());
+            researchService.assignSupervisor(grad.getId(), supervisor.getId());
+            GraduateStudent loaded = (GraduateStudent) userService.get(grad.getId());
+            return loaded.getSupervisorId() == supervisor.getId();
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDeleteResearcherRemovedFromProject() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher researcher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.delproj.r." + suffix, "12345", "Research", "DelProj", null, TeacherType.BOTH
+            );
+            cleanupBin.trackUser(researcher.getId());
+            ResearchProject project = researchService.createProject(new ResearchProject("tc-proj-delr-" + suffix));
+            cleanupBin.trackResearchProject(project.getId());
+            researchService.addParticipantToProject(project.getId(), researcher.getId());
+            int researcherId = researcher.getId();
+            userService.delete(researcherId);
+            cleanupBin.untrackUser(researcherId);
+            ResearchProject updated = researchService.getProject(project.getId());
+            return !updated.getParticipants().contains(researcherId);
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDeleteResearcherRemovedFromPaper() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            Teacher researcher = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.delpaper.r." + suffix, "12345", "Research", "DelPaper", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(researcher.getId());
+            ResearchPaper paper = researchService.createPaper(new ResearchPaper());
+            cleanupBin.trackResearchPaper(paper.getId());
+            researchService.addParticipantToPaper(paper.getId(), researcher.getId());
+            int researcherId = researcher.getId();
+            userService.delete(researcherId);
+            cleanupBin.untrackUser(researcherId);
+            ResearchPaper updated = researchService.getPaper(paper.getId());
+            return !updated.getParticipants().contains(researcherId);
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    public static boolean testResearchDeleteResearcherClearsGraduateSupervisor() {
+        CleanupBin cleanupBin = new CleanupBin();
+        String suffix = uniqueSuffix();
+        try {
+            GraduateStudent grad = (GraduateStudent) userService.registerUser(
+                    GraduateStudent.class, "tc.research.delsup.grad." + suffix, "12345", "Research", "GradSup", new Date(), null
+            );
+            cleanupBin.trackUser(grad.getId());
+            Teacher supervisor = (Teacher) userService.registerUser(
+                    Teacher.class, "tc.research.delsup.sup." + suffix, "12345", "Research", "SupDel", null, TeacherType.LECTURE
+            );
+            cleanupBin.trackUser(supervisor.getId());
+            qualifyTeacherAsSupervisorForTests(cleanupBin, supervisor.getId());
+            researchService.assignSupervisor(grad.getId(), supervisor.getId());
+            int supervisorId = supervisor.getId();
+            userService.delete(supervisorId);
+            cleanupBin.untrackUser(supervisorId);
+            GraduateStudent updated = (GraduateStudent) userService.get(grad.getId());
+            return updated.getSupervisorId() == AppSettings.DELETED_USER_ID;
+        } finally {
+            cleanupBin.cleanup();
+        }
+    }
+
+    private static void qualifyTeacherAsSupervisorForTests(CleanupBin bin, int supervisorTeacherId) {
+        for (int i = 0; i < 3; i++) {
+            ResearchPaper paper = researchService.createPaper(new ResearchPaper());
+            bin.trackResearchPaper(paper.getId());
+            researchService.addParticipantToPaper(paper.getId(), supervisorTeacherId);
+            ResearchPaper loaded = researchService.getPaper(paper.getId());
+            for (int c = 0; c < 3; c++) {
+                loaded.addCitation();
+            }
+            researchService.update(loaded);
         }
     }
 
@@ -1044,6 +1324,8 @@ public class TestApp extends BaseApp {
         private final List<Integer> newsIds = new java.util.ArrayList<>();
         private final List<Integer> organizationIds = new java.util.ArrayList<>();
         private final List<Integer> techRequestIds = new java.util.ArrayList<>();
+        private final List<Integer> researchProjectIds = new java.util.ArrayList<>();
+        private final List<Integer> researchPaperIds = new java.util.ArrayList<>();
 
         void trackUser(int id) { userIds.add(id); }
         void untrackUser(int id) { userIds.remove(Integer.valueOf(id)); }
@@ -1055,6 +1337,10 @@ public class TestApp extends BaseApp {
         void trackNews(int id) { newsIds.add(id); }
         void trackOrganization(int id) { organizationIds.add(id); }
         void trackTechRequest(int id) { techRequestIds.add(id); }
+        void trackResearchProject(int id) { researchProjectIds.add(id); }
+        void untrackResearchProject(int id) { researchProjectIds.remove(Integer.valueOf(id)); }
+        void trackResearchPaper(int id) { researchPaperIds.add(id); }
+        void untrackResearchPaper(int id) { researchPaperIds.remove(Integer.valueOf(id)); }
 
         void cleanup() {
             deleteAll(organizationIds, id -> studentOrganizationService.delete(id));
@@ -1065,6 +1351,8 @@ public class TestApp extends BaseApp {
             deleteAll(newsIds, id -> newsService.delete(id));
             deleteAll(techRequestIds, id -> techRequestService.delete(id));
             deleteAll(courseIds, id -> courseService.delete(id));
+            deleteAll(researchProjectIds, id -> researchService.deleteProject(id));
+            deleteAll(researchPaperIds, id -> researchService.deletePaper(id));
             deleteAll(userIds, id -> userService.delete(id));
         }
 

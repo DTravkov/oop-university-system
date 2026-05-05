@@ -76,7 +76,7 @@ public class NewsService extends BaseService<News, NewsRepository>{
 
     @Override
     public List<News> getAll() {
-        return super.getAll().stream().sorted(Comparators.getNewsResearchComparator()).toList();
+        return super.getAll().stream().sorted(Comparators.NEWS_RESEARCH_PRIORITIZED).toList();
     }
 
 

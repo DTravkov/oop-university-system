@@ -48,7 +48,7 @@ public final class AdminApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ADMIN) + " ---");
+        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_ADMIN) + " |||");
         println("1. " + Translator.translate(UIMessage.ADMIN_LOGS_ALL));
         println("2. " + Translator.translate(UIMessage.ADMIN_LOGS_BY_USER));
         println("3. " + Translator.translate(UIMessage.ADMIN_LOGS_SESSION));

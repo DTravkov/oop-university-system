@@ -52,7 +52,7 @@ public final class ComplaintApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- Complaints ---");
+        println("\n|||  Complaints |||");
         println("1. Send complaint");
         println("2. Delete complaint by id");
         println("3. List complaints by teacher id");
@@ -137,21 +137,21 @@ public final class ComplaintApp extends BaseApp {
     }
 
     private static void printTeachers() {
-        println("--- Teachers ---");
+        println("|||  Teachers |||");
         for (User user : userService.getAllByClass(Teacher.class)) {
             println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printDeans() {
-        println("--- Deans ---");
+        println("|||  Deans |||");
         for (User user : userService.getAllByClass(Dean.class)) {
             println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printStudents() {
-        println("--- Students ---");
+        println("|||  Students |||");
         for (User user : userService.getAllByClass(Student.class)) {
             println(userService.getDTO(user).toShortString());
         }

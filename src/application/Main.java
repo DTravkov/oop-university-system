@@ -64,9 +64,9 @@ public class Main extends BaseApp {
     }
 
     private static void printMenu() {
-        print("\nCurrent active user : "
-                + services.userService.getDTO(AppSettings.getActiveUser()).toShortString());
-        println("\n=== University System ===");
+        print("\n Welcome, s" + AppSettings.getActiveUser().getFullName() + "!" 
+        + "\n(" + services.userService.getDTO(AppSettings.getActiveUser()).toShortString() + ")");
+        println("\n|||  University System |||");
         println("1. User App");
         println("2. Course App");
         println("3. Enrollment App");
@@ -82,7 +82,7 @@ public class Main extends BaseApp {
     }
 
     private static void askLanguage() {
-        println("\n=== Choose preferable language ===");
+        println("\n|||  Choose preferable language |||");
         println("1. English language");
         println("2. Қазақ тілі");
         println("3. Русский язык");

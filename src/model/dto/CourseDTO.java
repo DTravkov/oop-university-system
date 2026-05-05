@@ -16,29 +16,15 @@ public final class CourseDTO extends BaseViewDTO {
     private final List<UserDTO> lectureTeachers;
     private final List<UserDTO> practiceTeachers;
 
-    public CourseDTO(int id, String name, String description, int credits, CourseType type,
-                     List<UserDTO> lectureTeachers, List<UserDTO> practiceTeachers) {
+    public CourseDTO(Course course, List<UserDTO> lectureTeachers, List<UserDTO> practiceTeachers) {
         super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.name = name;
-        this.description = description;
-        this.credits = credits;
-        this.type = type;
+        setId(course.getId());
+        this.name = course.getName();
+        this.description = course.getDescription();
+        this.credits = course.getCredits();
+        this.type = course.getType();
         this.lectureTeachers = lectureTeachers == null ? List.of() : List.copyOf(lectureTeachers);
         this.practiceTeachers = practiceTeachers == null ? List.of() : List.copyOf(practiceTeachers);
-    }
-
-    public CourseDTO(Course course, List<UserDTO> lectureTeachers, List<UserDTO> practiceTeachers) {
-        this(
-                course.getId(),
-                course.getName(),
-                course.getDescription(),
-                course.getCredits(),
-                course.getType(),
-                lectureTeachers,
-                practiceTeachers);
     }
 
     public String getName() {

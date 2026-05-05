@@ -12,26 +12,14 @@ public final class UserDTO extends BaseViewDTO {
     private final String surname;
     private final boolean banned;
 
-    public UserDTO(int id, String role, String login, String name, String surname, boolean banned) {
-        super();
-        this.role = role;
-        this.login = login;
-        this.name = name;
-        this.surname = surname;
-        this.banned = banned;
-        if (id != 0) {
-            setId(id);
-        }
-    }
-
     public UserDTO(User user) {
-        this(
-                user.getId(),
-                user.getClass().getSimpleName(),
-                user.getLogin(),
-                user.getName(),
-                user.getSurname(),
-                user.isBanned());
+        super();
+        setId(user.getId());
+        this.role = user.getClass().getSimpleName();
+        this.login = user.getLogin();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.banned = user.isBanned();
     }
 
     public String getRole() {

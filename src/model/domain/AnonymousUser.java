@@ -8,7 +8,7 @@ public class AnonymousUser extends User{
 	private static final long serialVersionUID = 1L;
 
 	public AnonymousUser() {
-		super("ANONYMOUS", "hello, anonymous!", "N/A", "N/A");
+		super("ANONYMOUS", "hello, anonymous!", "Anonymous", "User");
 		this.id = AppSettings.ANONYMOUS_USER_ID;
 	}
 

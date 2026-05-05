@@ -22,40 +22,20 @@ public final class EnrollmentDTO extends BaseViewDTO {
     private final UserDTO lectureTeacher;
     private final UserDTO practiceTeacher;
 
-    public EnrollmentDTO(int id, String courseName, int courseId, UserDTO student,
-                         Date enrollmentDate, double firstAttestationPoint, double secondAttestationPoint,
-                         double finalExamPoint, double totalPoint, double gpa, UserDTO lectureTeacher, UserDTO practiceTeacher) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.courseName = courseName;
-        this.courseId = courseId;
-        this.student = student;
-        this.enrollmentDate = enrollmentDate;
-        this.firstAttestationPoint = firstAttestationPoint;
-        this.secondAttestationPoint = secondAttestationPoint;
-        this.finalExamPoint = finalExamPoint;
-        this.totalPoint = totalPoint;
-        this.gpa = gpa;
-        this.lectureTeacher = lectureTeacher;
-        this.practiceTeacher = practiceTeacher;
-    }
-
     public EnrollmentDTO(Enrollment enrollment, Course course, User student, User lectureTeacher, User practiceTeacher) {
-        this(
-                enrollment.getId(),
-                course.getName(),
-                course.getId(),
-                new UserDTO(student),
-                enrollment.getEnrollmentDate(),
-                enrollment.getFirstAttestationPoint(),
-                enrollment.getSecondAttestationPoint(),
-                enrollment.getFinalExamPoint(),
-                enrollment.getTotalPoint(),
-                enrollment.getGpa(),
-                new UserDTO(lectureTeacher),
-                new UserDTO(practiceTeacher));
+        super();
+        setId(enrollment.getId());
+        this.courseName = course.getName();
+        this.courseId = course.getId();
+        this.student = new UserDTO(student);
+        this.enrollmentDate = enrollment.getEnrollmentDate();
+        this.firstAttestationPoint = enrollment.getFirstAttestationPoint();
+        this.secondAttestationPoint = enrollment.getSecondAttestationPoint();
+        this.finalExamPoint = enrollment.getFinalExamPoint();
+        this.totalPoint = enrollment.getTotalPoint();
+        this.gpa = enrollment.getGpa();
+        this.lectureTeacher = new UserDTO(lectureTeacher);
+        this.practiceTeacher = new UserDTO(practiceTeacher);
     }
 
     public String getCourseName() {
@@ -93,8 +73,6 @@ public final class EnrollmentDTO extends BaseViewDTO {
     public double getGpa() {
         return gpa;
     }
-
-    
 
     public UserDTO getLectureTeacher() {
         return lectureTeacher;

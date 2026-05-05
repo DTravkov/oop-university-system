@@ -8,7 +8,7 @@ public class DeletedUser extends User{
 	private static final long serialVersionUID = 1L;
 
     public DeletedUser() {
-		super("DELETED", "DELETED", "DELETED", "USER");
+		super("DELETED", "DELETED", "Deleted", "User");
 		this.setBanned(true);
 		this.id = AppSettings.DELETED_USER_ID;
 	}    

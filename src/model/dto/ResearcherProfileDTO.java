@@ -1,33 +1,34 @@
 package model.dto;
 
+import java.util.List;
+
 import model.domain.ResearcherProfile;
-import model.domain.User;
 
 public final class ResearcherProfileDTO extends BaseViewDTO {
 
     private static final long serialVersionUID = 1L;
 
     private final UserDTO user;
+    private final List<ResearchProjectDTO> researchProjects;
 
-    public ResearcherProfileDTO(int id, UserDTO user) {
+    public ResearcherProfileDTO(ResearcherProfile profile, UserDTO user, List<ResearchProjectDTO> researchProjects) {
         super();
-        if (id != 0) {
-            setId(id);
-        }
+        setId(profile.getId());
         this.user = user;
-    }
-
-    public ResearcherProfileDTO(ResearcherProfile profile, User user) {
-        this(profile.getId(), new UserDTO(user));
+        this.researchProjects = List.copyOf(researchProjects);
     }
 
     public UserDTO getUser() {
         return user;
     }
 
+    public List<ResearchProjectDTO> getResearchProjects() {
+        return researchProjects;
+    }
+
     @Override
     public String toShortString() {
-        return "ID: " + getId() + " | User: " + formatUser(user);
+        return "ID: " + getId() + " | User: " + formatUser(user) + " | Projects: " + researchProjects.size();
     }
 
     @Override
@@ -35,6 +36,9 @@ public final class ResearcherProfileDTO extends BaseViewDTO {
         StringBuilder body = new StringBuilder();
         body.append("\nID: ").append(getId());
         body.append("\nUser: ").append(formatUser(user));
+        body.append("\nResearchProjects: ").append(researchProjects.isEmpty() ? "_" : researchProjects.stream()
+                .map(ResearchProjectDTO::toShortString)
+                .toList());
         return section("ResearcherProfile", body.toString());
     }
 }

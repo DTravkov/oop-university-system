@@ -62,7 +62,7 @@ public final class StudentOrganizationApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ORG) + " ---");
+        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_ORG) + " |||");
         println("1. " + Translator.translate(UIMessage.ORG_CREATE));
         println("2. " + Translator.translate(UIMessage.ORG_GET_BY_ID));
         println("3. " + Translator.translate(UIMessage.MENU_VIEW_ALL));

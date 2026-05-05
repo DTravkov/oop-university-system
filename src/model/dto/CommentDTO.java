@@ -12,18 +12,12 @@ public final class CommentDTO extends BaseViewDTO {
     private final Date sentDate;
     private final String content;
 
-    public CommentDTO(int id, UserDTO author, Date sentDate, String content) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.author = author;
-        this.sentDate = sentDate;
-        this.content = content;
-    }
-
     public CommentDTO(Comment comment, User author) {
-        this(comment.getId(), new UserDTO(author), comment.getSentDate(), comment.getContent());
+        super();
+        setId(comment.getId());
+        this.author = new UserDTO(author);
+        this.sentDate = comment.getSentDate();
+        this.content = comment.getContent();
     }
 
     public UserDTO getAuthor() {
@@ -48,9 +42,10 @@ public final class CommentDTO extends BaseViewDTO {
 
     @Override
     public String toString() {
-        return "\nID: " + getId()
+        String body = "\nID: " + getId()
                 + "\nAuthor: " + formatUser(author)
                 + "\nDate: " + formatDate(sentDate)
                 + "\n ' " + content + " ' ";
+        return section("Comment", body);
     }
 }

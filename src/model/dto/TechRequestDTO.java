@@ -16,27 +16,14 @@ public final class TechRequestDTO extends BaseViewDTO {
     private final TechRequestStatus status;
     private final Date sentDate;
 
-    public TechRequestDTO(int id, UserDTO sender, UserDTO receiver, String content,
-                          TechRequestStatus status, Date sentDate) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.sender = sender;
-        this.receiver = receiver;
-        this.content = content;
-        this.status = status;
-        this.sentDate = sentDate;
-    }
-
     public TechRequestDTO(TechRequest request, User sender, User receiver) {
-        this(
-                request.getId(),
-                new UserDTO(sender),
-                new UserDTO(receiver),
-                request.getContent(),
-                request.getStatus(),
-                request.getSentDate());
+        super();
+        setId(request.getId());
+        this.sender = new UserDTO(sender);
+        this.receiver = new UserDTO(receiver);
+        this.content = request.getContent();
+        this.status = request.getStatus();
+        this.sentDate = request.getSentDate();
     }
 
     public UserDTO getSender() {

@@ -85,6 +85,8 @@ public class User extends SerializableModel{
 		isBanned = banned;
 	}
 
+	
+
 
 	@Override
 	public boolean equals(Object o) {

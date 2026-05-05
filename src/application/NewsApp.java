@@ -59,7 +59,7 @@ public final class NewsApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- News ---");
+        println("\n|||  News |||");
         println("1. Add news");
         println("2. Delete news");
         println("3. Add comment");
@@ -127,7 +127,7 @@ public final class NewsApp extends BaseApp {
         printAllNews();
         int newsId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         News news = newsService.get(newsId);
-        println("--- Comments ---");
+        println("|||  Comments |||");
         for (Integer commentId : news.getComments()) {
             println(commentService.getDTO(commentId));
         }
@@ -157,14 +157,14 @@ public final class NewsApp extends BaseApp {
     }
 
     private static void printManagers() {
-        println("--- Managers ---");
+        println("|||  Managers |||");
         for (User user : userService.getAllByClass(Manager.class)) {
             println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printAllCommentIds() {
-        println("--- Comment IDs by News ---");
+        println("|||  Comment IDs by News |||");
         for (News news : newsService.getAll()) {
             println("ID: " + news.getId() + " | Comment ids: " + news.getComments());
             for (Integer commentId : news.getComments()) {

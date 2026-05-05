@@ -14,24 +14,13 @@ public final class MessageDTO extends BaseViewDTO {
     private final String content;
     private final Date sentDate;
 
-    public MessageDTO(int id, UserDTO sender, UserDTO receiver, String content, Date sentDate) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.sender = sender;
-        this.receiver = receiver;
-        this.content = content;
-        this.sentDate = sentDate;
-    }
-
     public MessageDTO(Message message, User sender, User receiver) {
-        this(
-                message.getId(),
-                new UserDTO(sender),
-                new UserDTO(receiver),
-                message.getContent(),
-                message.getSentDate());
+        super();
+        setId(message.getId());
+        this.sender = new UserDTO(sender);
+        this.receiver = new UserDTO(receiver);
+        this.content = message.getContent();
+        this.sentDate = message.getSentDate();
     }
 
     public UserDTO getSender() {

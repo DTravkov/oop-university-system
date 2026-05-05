@@ -1,9 +1,12 @@
 package services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
+import exceptions.OperationNotAllowed;
+import model.domain.GraduateStudent;
 import model.domain.ResearchPaper;
 import model.domain.ResearchProject;
 import model.domain.ResearcherProfile;
@@ -12,10 +15,12 @@ import model.domain.User;
 import model.dto.ResearchPaperDTO;
 import model.dto.ResearchProjectDTO;
 import model.dto.ResearcherProfileDTO;
+import model.dto.UserDTO;
 import model.repository.ResearchRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
+import utils.Comparators;
 
 public class ResearchService extends BaseService<SerializableModel, ResearchRepository> {
 
@@ -27,85 +32,236 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         subscribeToEvents();
     }
 
-    public SerializableModel createPaper(ResearchPaper paper) {
-        return super.create(paper);
+    public ResearchPaper createPaper(ResearchPaper paper) {
+        return (ResearchPaper) super.create(paper);
     }
 
-    public SerializableModel createProject(ResearchProject project) {
-        return super.create(project);
+    public ResearchProject createProject(ResearchProject project) {
+        return (ResearchProject) super.create(project);
     }
 
-    public ResearcherProfile makeResearcher(int userId) {
-        return createResearcherProfile(userId);
+    public void deleteProject(int projectId) {
+        getProject(projectId);
+        super.delete(projectId);
     }
 
-    public ResearcherProfile createResearcherProfile(int userId) {
+    public void deletePaper(int paperId) {
+        getPaper(paperId);
+        super.delete(paperId);
+    }
+
+    public ResearcherProfile createResearcher(int userId) {
         userService.get(userId);
 
-        if(repository.researcherProfileExists(userId))
-            throw new AlreadyExists("researcher profile for user with id : " + userId);
+        if(repository.isResearcher(userId))
+            throw new AlreadyExists("researcher profile for user with id=" + userId);
 
         return (ResearcherProfile) super.create(new ResearcherProfile(userId));
     }
 
-    public void deleteResearcherProfile(int userId) {
-        ResearcherProfile profileToDelete = getResearcherProfile(userId);
+    public void deleteResearcher(int userId) {
+        ResearcherProfile profileToDelete = getResearcher(userId);
         super.delete(profileToDelete.getId());
     }
 
-
-    public ResearcherProfile getResearcherProfile(int userId) {
-        return repository.findResearcherProfile(userId)
-                         .orElseThrow(() -> new DoesNotExist("researcher profile for user with id=" + userId));
+    public void joinProject(int projectId, int userId){
+        ResearchProject project = getProject(projectId);
+        ResearcherProfile profile = getResearcher(userId);
+        if(project.getParticipants().contains(userId)){
+            throw new AlreadyExists(" researcher with id="+userId + " in project with id=" + projectId);
+        }
+        project.addParticipant(userId);
+        profile.addResearchProject(projectId);
+        super.update(profile);
+        super.update(project);
     }
 
-    public List<ResearcherProfile> getAllResearcherProfiles() {
-        return repository.findAllResearcherProfiles();
+    public void removeFromProject(int projectId, int researcherId){
+        ResearchProject project = getProject(projectId);
+        ResearcherProfile profile = getResearcher(researcherId);
+        if(!project.getParticipants().contains(researcherId)){
+            throw new DoesNotExist(" researcher with id="+researcherId + "in project with id=" + projectId);
+        }
+        project.removeParticipant(researcherId);
+        profile.removeResearchProject(projectId);
+        super.update(profile);
+        super.update(project);
     }
 
-    public List<User> getAllResearchersBasicAccounts() {
-        return repository.findAllResearcherUserIds()
-                         .stream()
-                         .map(userService::get)
-                         .toList();
+    public void addParticipantToProject(int projectId, int researcherId){
+        joinProject(projectId, researcherId);
     }
+
+    public void removeParticipantFromProject(int projectId, int researcherId){
+        removeFromProject(projectId, researcherId);
+    }
+
+    public void addPaperToProject(int projectId, int paperId){
+        ResearchProject project = getProject(projectId);
+        getPaper(paperId);
+        if(project.getPapers().contains(paperId)){
+            throw new AlreadyExists(" paper with id=" + paperId + " in project with id=" + projectId);
+        }
+        project.addPaper(paperId);
+        super.update(project);
+    }
+
+    public void removePaperFromProject(int projectId, int paperId){
+        ResearchProject project = getProject(projectId);
+        getPaper(paperId);
+        if(!project.getPapers().contains(paperId)){
+            throw new DoesNotExist(" paper with id=" + paperId + " in project with id=" + projectId);
+        }
+        project.removePaper(paperId);
+        super.update(project);
+    }
+
+    public void addParticipantToPaper(int paperId, int researcherId){
+        ResearchPaper paper = getPaper(paperId);
+        getResearcher(researcherId);
+        if(paper.getParticipants().contains(researcherId)){
+            throw new AlreadyExists(" researcher with id="+researcherId + " in paper with id=" + paperId);
+        }
+        paper.addParticipant(researcherId);
+        super.update(paper);
+    }
+
+    public void removeParticipantFromPaper(int paperId, int researcherId){
+        ResearchPaper paper = getPaper(paperId);
+        getResearcher(researcherId);
+        if(!paper.getParticipants().contains(researcherId)){
+            throw new DoesNotExist(" researcher with id="+researcherId + " in paper with id=" + paperId);
+        }
+        paper.removeParticipant(researcherId);
+        super.update(paper);
+    }
+
+    public int calculateHIndex(int userId) {
+        List<ResearchPaper> papers = new ArrayList<>(getResearcherPapers(userId));
+        papers.sort(Comparators.RESEARCH_PAPER_BY_CITATIONS_DESC);
+        
+        int hIndex = 0;
+        for (int i = 0; i <papers.size();i++) {
+            if (papers.get(i).getCitations() >= i + 1) {
+                hIndex = i + 1;
+            } else {
+                break;
+            }
+        }
+        return hIndex;
+    }
+
+    public void assignSupervisor(int gradStudentId, int supervisorId){
+        User user = userService.get(gradStudentId);
+        if (user.getId() == supervisorId){
+            throw new OperationNotAllowed("assigning a user as his own supervisor");
+        }
+        if(!(user instanceof GraduateStudent castedGraduateStudent)){
+            throw new OperationNotAllowed("assignment of supervisor to " + user.getClass().getSimpleName());
+        }
+        if(calculateHIndex(supervisorId) < 3){
+            throw new OperationNotAllowed("assginment of supervisor whose h-index is lower than 3 (" + calculateHIndex(supervisorId) +")");
+        }
+        
+        castedGraduateStudent.setSupervisorId(supervisorId);
+        userService.update(castedGraduateStudent);
+    }
+
+    public void removeSupervisor(int gradStudentId){
+        User user = userService.get(gradStudentId);
+        if(!(user instanceof GraduateStudent castedGraduateStudent)){
+            throw new OperationNotAllowed("removal of supervisor from " + user.getClass().getSimpleName());
+        }
+        castedGraduateStudent.setSupervisorId(AppSettings.DELETED_USER_ID);
+        userService.update(castedGraduateStudent);
+    }
+
+    
+    
+    public ResearchProject getProject(int projectId){
+        return repository.findProject(projectId)
+                         .orElseThrow(()->new DoesNotExist("project with id=" + projectId));
+    }
+
+    public List<ResearchPaper> getResearcherPapers(int userId){
+        return getAllPapers().stream().filter(p -> p.getParticipants().contains(userId)).toList();
+    }
+
+    public List<ResearchProject> getResearcherProjects(int userId){
+        ResearcherProfile profile = getResearcher(userId);
+        return profile.getResearchProjects().stream().map(id -> getProject(id)).toList();
+    }
+
+    public ResearchPaper getPaper(int paperId){
+        return repository.findPaper(paperId)
+                         .orElseThrow(()->new DoesNotExist("paper with id=" + paperId));
+    }
+
+    public List<ResearchProject> getAllProjects() {
+        return repository.findAllProjects();
+    }
+
+    public List<ResearchPaper> getAllPapers() {
+        return repository.findAllPapers();
+    }
+
+    public ResearcherProfile getResearcher(int userId){
+        return repository.findResearcher(userId)
+                         .orElseThrow(()->new DoesNotExist("researcher with userId=" + userId));
+    }
+
+    public List<ResearcherProfile> getAllResearchers(){
+        return repository.findAllResearchers();
+    }
+
+    public User getSupervisorByStudentId(int gradStudentId){
+        User gradStudent = userService.get(gradStudentId);
+        if(!(gradStudent instanceof GraduateStudent castedGraduateStudent)){
+            throw new OperationNotAllowed("search supervisor of a non-graduate-student user with id=" + gradStudentId);
+        }
+        return userService.get(castedGraduateStudent.getSupervisorId());
+    }
+
+    public List<GraduateStudent> getStudentsBySupervisorId(int supervisorId){
+        return userService.getAllByClassOrSubclass(GraduateStudent.class)
+                          .stream()
+                          .map(st -> (GraduateStudent) st)
+                          .filter(st -> ((GraduateStudent) st).getSupervisorId() == supervisorId)
+                          .toList();
+    }
+
+    // DTOs
+    public ResearchProjectDTO getProjectDTO(int projectId) {
+        ResearchProject project = repository.findProject(projectId)
+                                            .orElseThrow(() -> new DoesNotExist("project with id=" + projectId));
+        List<UserDTO> participantDTOs = project.getParticipants().stream().map(userService::getDTO).toList();
+        List<ResearchPaperDTO> paperDTOs = project.getPapers().stream().map(this::getPaperDTO).toList();
+        return new ResearchProjectDTO(project, participantDTOs, paperDTOs);
+    }
+
+    public ResearchPaperDTO getPaperDTO(int paperId) {
+        ResearchPaper paper = repository.findPaper(paperId)
+                                        .orElseThrow(() -> new DoesNotExist("paper with id=" + paperId));
+        List<UserDTO> participantDTOs = paper.getParticipants().stream().map(userService::getDTO).toList();
+        return new ResearchPaperDTO(paper, participantDTOs);
+    }
+
+    public ResearcherProfileDTO getResearcherDTO(int userId) {
+        ResearcherProfile profile = repository.findResearcher(userId)
+                                              .orElseThrow(() -> new DoesNotExist("researcher with userId=" + userId));
+        UserDTO userDTO = userService.getDTO(profile.getUserId());
+        List<ResearchProjectDTO> projectDTOs = profile.getResearchProjects()
+                                                      .stream()
+                                                      .map(this::getProjectDTO)
+                                                      .toList();
+        return new ResearcherProfileDTO(profile, userDTO, projectDTOs);
+    }
+
+
+
 
     public boolean isResearcher(int userId) {
-        return repository.researcherProfileExists(userId);
-    }
-
-    public ResearchProjectDTO getProjectDTO(int id) {
-        SerializableModel model = get(id);
-        if (!(model instanceof ResearchProject project)) {
-            throw new DoesNotExist("ResearchProject record with id=" + id);
-        }
-        return getDTO(project);
-    }
-
-    public ResearchProjectDTO getDTO(ResearchProject project) {
-        return new ResearchProjectDTO(project);
-    }
-
-    public ResearchPaperDTO getPaperDTO(int id) {
-        SerializableModel model = get(id);
-        if (!(model instanceof ResearchPaper paper)) {
-            throw new DoesNotExist("ResearchPaper record with id=" + id);
-        }
-        return getDTO(paper);
-    }
-
-    public ResearchPaperDTO getDTO(ResearchPaper paper) {
-        return new ResearchPaperDTO(paper);
-    }
-
-    public ResearcherProfileDTO getResearcherProfileDTO(int userId) {
-        ResearcherProfile profile = getResearcherProfile(userId);
-        return getDTO(profile);
-    }
-
-    public ResearcherProfileDTO getDTO(ResearcherProfile profile) {
-        User user = userService.get(profile.getUserId());
-        return new ResearcherProfileDTO(profile, user);
+        return repository.isResearcher(userId);
     }
 
     @Override
@@ -123,20 +279,32 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
             Class<? extends User> userClass = eventData.getUserClass();
 
             if(AppSettings.DEFAULT_RESEARCHER_CLASSES.contains(userClass))
-                this.createResearcherProfile(eventData.getUserId());
-            
+                createResearcher(eventData.getUserId());
 
         });
 
-        //deletes researcher profile when :
-        // a user with researcher profile is deleted from a system
+        //deletes researcher profile, his membership in projects, membership in papers, and supervisor record from his students when :
+        // a user being researcher is deleted from system.
         eventSystem.subscribe(UserDeleteEvent.class, (eventData) -> {
 
             int deletedUserId = eventData.getUserId();
+            if(isResearcher(deletedUserId)){
+                for(int projectId : getResearcher(deletedUserId).getResearchProjects()){
+                    ResearchProject project = getProject(projectId);
+                    project.removeParticipant(deletedUserId);
+                    super.update(project);
+                }
+                for(var graduateStudent : getStudentsBySupervisorId(deletedUserId)){
+                    graduateStudent.setSupervisorId(AppSettings.DELETED_USER_ID);
+                    userService.update(graduateStudent);
+                }
+                for(var paper : getResearcherPapers(deletedUserId)){
+                    paper.removeParticipant(deletedUserId);
+                    super.update(paper);
+                }
+                deleteResearcher(deletedUserId);
+            }
 
-            if(isResearcher(deletedUserId))
-                deleteResearcherProfile(deletedUserId);
-            
         });
     }
 

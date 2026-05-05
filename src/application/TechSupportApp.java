@@ -55,7 +55,7 @@ public final class TechSupportApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- Tech support panel ---");
+        println("\n|||  Tech support panel |||");
         println("1. Send technical request");
         println("2. Delete technical request by id");
         println("3. List technical requests by specialist id");
@@ -157,14 +157,14 @@ public final class TechSupportApp extends BaseApp {
     }
 
     private static void printEmployees() {
-        println("--- Employees ---");
+        println("|||  Employees |||");
         for (User user : userService.getAllByClassOrSubclass(Employee.class)) {
             println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printTechSupportSpecialists() {
-        println("--- Tech support specialists ---");
+        println("|||  Tech support specialists |||");
         for (User user : userService.getAllByClass(TechSupportSpecialist.class)) {
             println(userService.getDTO(user).toShortString());
         }

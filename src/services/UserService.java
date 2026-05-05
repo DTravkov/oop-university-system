@@ -19,6 +19,7 @@ public class UserService extends BaseService<User, UserRepository> {
 
     public UserService() {
         super(UserRepository.getInstance());
+
     }
 
     static {
@@ -35,7 +36,7 @@ public class UserService extends BaseService<User, UserRepository> {
         this.eventSystem.publish(new UserCreateEvent(savedUser));
         return savedUser;
     }
-
+    
     @Override
     public void delete(int id) {
         User userToDelete = this.get(id);

@@ -17,29 +17,15 @@ public final class TeacherComplaintDTO extends BaseViewDTO {
     private final String content;
     private final Date sentDate;
 
-    public TeacherComplaintDTO(int id, UserDTO sender, UserDTO receiver, UserDTO student,
-                               ComplaintUrgencyLevel urgencyLevel, String content, Date sentDate) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.sender = sender;
-        this.receiver = receiver;
-        this.student = student;
-        this.urgencyLevel = urgencyLevel;
-        this.content = content;
-        this.sentDate = sentDate;
-    }
-
     public TeacherComplaintDTO(TeacherComplaint complaint, User sender, User receiver, User student) {
-        this(
-                complaint.getId(),
-                new UserDTO(sender),
-                new UserDTO(receiver),
-                new UserDTO(student),
-                complaint.getUrgencyLevel(),
-                complaint.getContent(),
-                complaint.getSentDate());
+        super();
+        setId(complaint.getId());
+        this.sender = new UserDTO(sender);
+        this.receiver = new UserDTO(receiver);
+        this.student = new UserDTO(student);
+        this.urgencyLevel = complaint.getUrgencyLevel();
+        this.content = complaint.getContent();
+        this.sentDate = complaint.getSentDate();
     }
 
     public UserDTO getSender() {

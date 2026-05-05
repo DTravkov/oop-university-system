@@ -21,7 +21,7 @@ public class TechRequestRepository extends Repository<TechRequest> {
     @Override
     public List<TechRequest> findAll() {
         return super.findAll().stream()
-                              .sorted(Comparators.getTechRequestComparator())
+                              .sorted(Comparators.TECH_REQUEST_BY_STAGE)
                               .toList();
     }
 

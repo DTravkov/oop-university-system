@@ -84,7 +84,7 @@ public class UserFactory {
                 if (admissionDate == null) {
                     throw new FieldNullException("Date of admission");
                 }
-                return new Student(login, password, name, surname, admissionDate);
+                return new GraduateStudent(login, password, name, surname, admissionDate);
             case TEACHER:
                 if (teacherType == null) {
                     throw new FieldNullException("Teacher type");

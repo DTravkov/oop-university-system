@@ -31,8 +31,16 @@ public abstract class BaseApp {
         System.out.println(data);
     }
 
+    protected static void printSuccess(String data) {
+        System.out.println(Translator.translate(UIMessage.SUCCESS) + " " + data);
+    }
+
+    protected static void printFail(String data) {
+        System.out.println("[" + Translator.translate(UIMessage.FAIL) + "] " + data);
+    }
+
     protected static void printExceptionDetails(ApplicationException exc) {
-        println(exc.getMessage());
+        printFail(exc.getMessage());
     }
 
     protected static void printInvalidChoice() {

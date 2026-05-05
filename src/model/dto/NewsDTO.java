@@ -18,29 +18,15 @@ public final class NewsDTO extends BaseViewDTO {
     private final String content;
     private final List<CommentDTO> comments;
 
-    public NewsDTO(int id, String title, UserDTO publisher, NewsUrgencyLevel urgencyLevel,
-                   Date publishedDate, String content, List<CommentDTO> comments) {
-        super();
-        if (id != 0) {
-            setId(id);
-        }
-        this.title = title;
-        this.publisher = publisher;
-        this.urgencyLevel = urgencyLevel;
-        this.publishedDate = publishedDate;
-        this.content = content;
-        this.comments = comments == null ? List.of() : List.copyOf(comments);
-    }
-
     public NewsDTO(News news, User publisher, List<CommentDTO> comments) {
-        this(
-                news.getId(),
-                news.getTitle(),
-                new UserDTO(publisher),
-                news.getUrgencyLevel(),
-                news.getPublishedDate(),
-                news.getContent(),
-                comments);
+        super();
+        setId(news.getId());
+        this.title = news.getTitle();
+        this.publisher = new UserDTO(publisher);
+        this.urgencyLevel = news.getUrgencyLevel();
+        this.publishedDate = news.getPublishedDate();
+        this.content = news.getContent();
+        this.comments = comments == null ? List.of() : List.copyOf(comments);
     }
 
     public String getTitle() {

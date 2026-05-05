@@ -58,7 +58,7 @@ public final class EnrollmentApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_ENROLL) + " ---");
+        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_ENROLL) + " |||");
         println("1. " + Translator.translate(UIMessage.ENROLL_CREATE));
         println("2. " + Translator.translate(UIMessage.ENROLL_DROP));
         println("3. " + Translator.translate(UIMessage.ENROLL_VIEW_STUDENT));
@@ -134,14 +134,14 @@ public final class EnrollmentApp extends BaseApp {
     }
 
     private static void printStudents() {
-        println("--- Students ---");
+        println("|||  Students |||");
         for (User user : userService.getAllByClassOrSubclass(Student.class)) {
             println(userService.getDTO(user).toShortString());
         }
     }
 
     private static void printCourses() {
-        println("--- Courses ---");
+        println("|||  Courses |||");
         for (Course course : courseService.getAll()) {
             println(courseService.getDTO(course).toShortString());
         }

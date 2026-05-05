@@ -25,16 +25,14 @@ public abstract class BaseViewDTO implements Serializable {
 
     public abstract String toShortString();
 
-    protected static String section(String typeName, String body) {
-        String b = body.startsWith("\n") ? body.substring(1) : body;
-        return "/// " + typeName + "\n" + b;
+    protected static String section(String dtoName, String body) {
+        return "/// " + dtoName + "///" + "\n" + body;
     }
 
     protected static String formatDate(Date date) {
         return StringUtils.formatLogTime(date);
     }
 
-    /** Wraps a user's one-line summary in parentheses for readability next to labels. */
     protected static String formatUser(UserDTO user) {
         return "(" + user.toShortString() + ")";
     }

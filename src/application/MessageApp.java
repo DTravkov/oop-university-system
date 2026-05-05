@@ -50,7 +50,7 @@ public final class MessageApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " ---");
+        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " |||");
         println("1. " + Translator.translate(UIMessage.MSG_SEND));
         println("2. Delete message by id");
         println("3. List messages by sender id");
@@ -91,7 +91,7 @@ public final class MessageApp extends BaseApp {
     private static void printMessagesBySender() {
         printEmployees();
         int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
-        println("--- Messages ---");
+        println("|||  Messages |||");
         for (Message m : messageService.getAllBySenderId(senderId)) {
             println(messageService.getDTO(m).toShortString());
         }
@@ -100,21 +100,21 @@ public final class MessageApp extends BaseApp {
     private static void printMessagesByReceiver() {
         printEmployees();
         int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-        println("--- Messages ---");
+        println("|||  Messages |||");
         for (Message m : messageService.getAllByReceiverId(receiverId)) {
             println(messageService.getDTO(m).toShortString());
         }
     }
 
     private static void getAllMessages() {
-        println("--- Messages ---");
+        println("|||  Messages |||");
         for (Message m : messageService.getAll()) {
             println(messageService.getDTO(m).toShortString());
         }
     }
 
     private static void printEmployees() {
-        println("--- Employees ---");
+        println("|||  Employees |||");
         for (User user : userService.getAllByClassOrSubclass(Employee.class)) {
             println(userService.getDTO(user).toShortString());
         }

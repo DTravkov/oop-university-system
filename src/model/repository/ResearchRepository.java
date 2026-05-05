@@ -19,35 +19,51 @@ public class ResearchRepository extends Repository<SerializableModel> {
         return INSTANCE;
     }
 
-    public Optional<ResearcherProfile> findResearcherProfile(int userId) {
-        return this.findAllByClass(ResearcherProfile.class)
+    public List<ResearchPaper> findAllPapers() {
+        return this.findAllByClass(ResearchPaper.class)
                    .stream()
-                   .map(entity -> (ResearcherProfile) entity)
-                   .filter(profile -> profile.getUserId() == userId)
-                   .findFirst();
+                   .map(entity -> (ResearchPaper) entity)
+                   .toList();
     }
 
-    public boolean researcherProfileExists(int userId) {
-        return this.findResearcherProfile(userId).isPresent();
+    public List<ResearchProject> findAllProjects() {
+        return this.findAllByClass(ResearchProject.class)
+                   .stream()
+                   .map(entity -> (ResearchProject) entity)
+                   .toList();
     }
 
-    public List<ResearcherProfile> findAllResearcherProfiles() {
+    public List<ResearcherProfile> findAllResearchers() {
         return this.findAllByClass(ResearcherProfile.class)
                    .stream()
                    .map(entity -> (ResearcherProfile) entity)
                    .toList();
     }
+    
 
-    public List<Integer> findAllResearcherUserIds() {
-        return findAllResearcherProfiles().stream()
-                                          .map(ResearcherProfile::getUserId)
-                                          .toList();
+    public Optional<ResearcherProfile> findResearcher(int userId) {
+        return this.findAllResearchers().stream()
+                                        .filter(researcher -> researcher.getUserId() == userId)
+                                        .findFirst();
     }
-    public List<SerializableModel> findAllResearchPapers() {
-        return this.findAllByClass(ResearchPaper.class);
+
+    public Optional<ResearchProject> findProject(int projectId) {
+        return this.findAllProjects().stream()
+                                     .filter(project -> project.getId() == projectId)
+                                     .findFirst();
     }
-    public List<SerializableModel> findAllResearchProjects() {
-        return this.findAllByClass(ResearchProject.class);
+
+    public Optional<ResearchPaper> findPaper(int paperId) {
+        return this.findAllPapers().stream()
+                                   .filter(paper -> paper.getId() == paperId)
+                                   .findFirst();
+    }
+
+    public boolean isResearcher(int userId){
+        return this.findAllResearchers().stream()
+                                        .filter(researcher -> researcher.getUserId() == userId)
+                                        .findFirst()
+                                        .isPresent();
     }
     
     private List<SerializableModel> findAllByClass(Class<? extends SerializableModel> dotClass) {

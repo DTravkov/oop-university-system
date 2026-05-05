@@ -1,11 +1,17 @@
 package application;
 
 import java.util.Date;
+import java.util.List;
 
 import exceptions.ApplicationException;
+import exceptions.DoesNotExist;
+import exceptions.FieldOutOfRangeException;
+import exceptions.OperationNotAllowed;
 import model.domain.*;
+import model.dto.UserDTO;
 import model.enumeration.TeacherType;
 import model.enumeration.UIMessage;
+import services.ResearchService;
 import services.UserService;
 import utils.Translator;
 import utils.UIForms;
@@ -13,6 +19,7 @@ import utils.UIForms;
 public final class UserApp extends BaseApp {
 
     private static final UserService userService = services.userService;
+    private static final ResearchService researchService = services.researchService;
 
     private UserApp() {
     }
@@ -54,7 +61,7 @@ public final class UserApp extends BaseApp {
     }
 
     private static void printMenu() {
-        println("\n--- " + Translator.translate(UIMessage.MENU_TITLE_USER) + " ---");
+        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_USER) + " |||");
         println("1. " + Translator.translate(UIMessage.AUTH_SIGN_UP));
         println("2. Get user by id");
         println("3. List all users by role");
