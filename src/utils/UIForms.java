@@ -2,6 +2,7 @@ package utils;
 
 import model.domain.*;
 import model.enumeration.AttestationType;
+import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.CourseType;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
@@ -153,6 +154,18 @@ public class UIForms {
 
         int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 2);
         return choice == 1 ? TeacherType.LECTURE : TeacherType.PRACTICE;
+    }
+
+    public static ComplaintUrgencyLevel readComplaintUrgencyLevel(Scanner scanner) {
+        List<ComplaintUrgencyLevel> levels = List.of(ComplaintUrgencyLevel.values());
+
+        System.out.println(Translator.translate(UIMessage.INPUT_COMPLAINT_LEVEL));
+        for (int i = 0; i < levels.size(); i++) {
+            System.out.println((i + 1) + ". " + levels.get(i).name());
+        }
+
+        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, levels.size());
+        return levels.get(choice - 1);
     }
 
     public static AttestationType readAttestationType(Scanner scanner) {

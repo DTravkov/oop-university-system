@@ -7,14 +7,18 @@ import java.util.Map;
 
 import exceptions.OperationNotAllowed;
 import model.domain.Course;
+import model.domain.Dean;
 import model.domain.Enrollment;
 import model.domain.Teacher;
+import model.domain.TeacherComplaint;
 import model.domain.User;
 import model.dto.CourseDTO;
 import model.dto.EnrollmentDTO;
 import model.dto.UserDTO;
 import model.enumeration.AttestationType;
+import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.UIMessage;
+import services.ComplaintService;
 import services.CourseService;
 import services.EnrollmentService;
 import services.UserService;
@@ -25,6 +29,7 @@ public final class TeacherApp extends BaseApp {
     private static final CourseService courseService = services.courseService;
     private static final EnrollmentService enrollmentService = services.enrollmentService;
     private static final UserService userService = services.userService;
+    private static final ComplaintService complaintService = services.complaintService;
 
     private TeacherApp() {
     }
@@ -40,8 +45,49 @@ public final class TeacherApp extends BaseApp {
         menu.addAction("View my courses", () -> handleExceptions(() -> viewMyCourses(teacher.getId())));
         menu.addAction("Increase student points", () -> handleExceptions(() -> increaseStudentPoints(teacher.getId())));
         menu.addAction("View my students", () -> handleExceptions(() -> viewMyStudents(teacher.getId())));
+        menu.addAction("Send complaint to dean", () -> handleExceptions(() -> sendComplaintToDean(teacher.getId())));
         menu.addAction("Exit", menu::stop);
         menu.start();
+    }
+
+    private static void sendComplaintToDean(int teacherId) {
+        List<User> deans = userService.getAllByClass(Dean.class);
+        if (deans.isEmpty()) {
+            printFail("No deans available to receive complaints.");
+            return;
+        }
+
+        List<Integer> myStudentIds = enrollmentService.getAllByTeacherId(teacherId).stream()
+                .map(Enrollment::getStudentId)
+                .distinct()
+                .toList();
+        if (myStudentIds.isEmpty()) {
+            printFail("You have no students to file a complaint about.");
+            return;
+        }
+
+        println("\n||| Deans |||");
+        deans.forEach(dean -> println(userService.getDTO(dean).toShortString()));
+        int deanId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
+        if (deans.stream().noneMatch(dean -> dean.getId() == deanId)) {
+            throw new OperationNotAllowed("sending complaint to a non-dean user");
+        }
+
+        println("\n||| My Students |||");
+        myStudentIds.forEach(studentId -> println(userService.getDTO(studentId).toShortString()));
+        int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
+        if (!myStudentIds.contains(studentId)) {
+            throw new OperationNotAllowed("filing a complaint about a student not enrolled with you");
+        }
+
+        ComplaintUrgencyLevel urgency = UIForms.readComplaintUrgencyLevel(scanner);
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
+
+        TeacherComplaint complaint = new TeacherComplaint(urgency, teacherId, deanId, studentId, content);
+        complaintService.sendComplaint(complaint);
+
+        printSuccess("Complaint sent.");
+        println(complaintService.getDTO(complaint));
     }
 
     private static List<Course> getCoursesOf(int teacherId) {
