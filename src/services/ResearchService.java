@@ -42,6 +42,7 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
     public void deleteProject(int projectId) {
         getProject(projectId);
+        cleanUpProjectData(projectId);
         super.delete(projectId);
     }
 
@@ -61,7 +62,7 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
     public void deleteResearcher(int userId) {
         ResearcherProfile profileToDelete = getResearcher(userId);
-        super.delete(profileToDelete.getId());
+        super.delete(profileToDelete);
     }
 
     public void joinProject(int projectId, int userId){
@@ -94,26 +95,6 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
     public void removeParticipantFromProject(int projectId, int researcherId){
         removeFromProject(projectId, researcherId);
-    }
-
-    public void addPaperToProject(int projectId, int paperId){
-        ResearchProject project = getProject(projectId);
-        getPaper(paperId);
-        if(project.getPapers().contains(paperId)){
-            throw new AlreadyExists(" paper with id=" + paperId + " in project with id=" + projectId);
-        }
-        project.addPaper(paperId);
-        super.update(project);
-    }
-
-    public void removePaperFromProject(int projectId, int paperId){
-        ResearchProject project = getProject(projectId);
-        getPaper(paperId);
-        if(!project.getPapers().contains(paperId)){
-            throw new DoesNotExist(" paper with id=" + paperId + " in project with id=" + projectId);
-        }
-        project.removePaper(paperId);
-        super.update(project);
     }
 
     public void addParticipantToPaper(int paperId, int researcherId){
@@ -235,8 +216,7 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         ResearchProject project = repository.findProject(projectId)
                                             .orElseThrow(() -> new DoesNotExist("project with id=" + projectId));
         List<UserDTO> participantDTOs = project.getParticipants().stream().map(userService::getDTO).toList();
-        List<ResearchPaperDTO> paperDTOs = project.getPapers().stream().map(this::getPaperDTO).toList();
-        return new ResearchProjectDTO(project, participantDTOs, paperDTOs);
+        return new ResearchProjectDTO(project, participantDTOs);
     }
 
     public ResearchPaperDTO getPaperDTO(int paperId) {
@@ -264,6 +244,24 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         return repository.isResearcher(userId);
     }
 
+    public void cleanUpResearcherData(int userId){
+        var papers = repository.findAllPapers().stream().filter(paper -> paper.getParticipants().contains(userId)).toList();
+        var projects = repository.findAllProjects().stream().filter(project -> project.getParticipants().contains(userId)).toList();
+        var students = getStudentsBySupervisorId(userId);
+        papers.forEach(paper -> paper.removeParticipant(userId));
+        projects.forEach(project -> project.removeParticipant(userId));
+        students.forEach(gradStudent -> gradStudent.removeSupervisor());
+
+        userService.saveAll();
+        super.saveAll();
+    }
+
+    public void cleanUpProjectData(int projectId){
+        var researchers = repository.findAllResearchers().stream().filter(researcher -> researcher.getResearchProjects().contains(projectId)).toList();
+        researchers.forEach(researcher -> researcher.removeResearchProject(projectId));
+        super.saveAll();
+    }
+
     @Override
     public void subscribeToEvents() {
         //creates researcher profile when :
@@ -289,19 +287,7 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
 
             int deletedUserId = eventData.getUserId();
             if(isResearcher(deletedUserId)){
-                for(int projectId : getResearcher(deletedUserId).getResearchProjects()){
-                    ResearchProject project = getProject(projectId);
-                    project.removeParticipant(deletedUserId);
-                    super.update(project);
-                }
-                for(var graduateStudent : getStudentsBySupervisorId(deletedUserId)){
-                    graduateStudent.setSupervisorId(AppSettings.DELETED_USER_ID);
-                    userService.update(graduateStudent);
-                }
-                for(var paper : getResearcherPapers(deletedUserId)){
-                    paper.removeParticipant(deletedUserId);
-                    super.update(paper);
-                }
+                cleanUpResearcherData(deletedUserId);
                 deleteResearcher(deletedUserId);
             }
 

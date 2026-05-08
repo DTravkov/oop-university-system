@@ -1,11 +1,19 @@
 package application;
 
-import exceptions.ApplicationException;
-import model.domain.*;
+import java.util.List;
+import java.util.Map;
+
+import exceptions.DoesNotExist;
+import exceptions.OperationNotAllowed;
+import model.domain.Employee;
+import model.domain.Message;
+import model.domain.User;
+import model.dto.MessageDTO;
+import model.dto.UserDTO;
 import model.enumeration.UIMessage;
 import services.MessageService;
 import services.UserService;
-import utils.Translator;
+import settings.AppSettings;
 import utils.UIForms;
 
 public final class MessageApp extends BaseApp {
@@ -17,106 +25,76 @@ public final class MessageApp extends BaseApp {
     }
 
     public static void startApp() {
-        while (true) {
-            printMenu();
-            String choice = readChoice(UIMessage.MENU_CHOOSE, 1, 6);
-
-            try {
-                switch (choice) {
-                    case "1":
-                        sendMessage();
-                        break;
-                    case "2":
-                        deleteMessage();
-                        break;
-                    case "3":
-                        printMessagesBySender();
-                        break;
-                    case "4":
-                        printMessagesByReceiver();
-                        break;
-                    case "5":
-                        getAllMessages();
-                        break;
-                    case "6":
-                        return;
-                    default:
-                        printInvalidChoice();
-                }
-            } catch (ApplicationException e) {
-                printExceptionDetails(e);
-            }
-        }
+        ActionMenu menu = new ActionMenu("Messenger");
+        menu.addAction("View my chats", () -> handleExceptions(MessageApp::viewChats));
+        menu.addAction("Start new chat", () -> handleExceptions(MessageApp::startNewChat));
+        menu.addAction("Exit from Messenger", menu::stop);
+        menu.start();
     }
 
-    private static void printMenu() {
-        println("\n|||  " + Translator.translate(UIMessage.MENU_TITLE_MSG) + " |||");
-        println("1. " + Translator.translate(UIMessage.MSG_SEND));
-        println("2. Delete message by id");
-        println("3. List messages by sender id");
-        println("4. List messages by receiver id");
-        println("5. " + Translator.translate(UIMessage.MENU_VIEW_ALL));
-        println("6. " + Translator.translate(UIMessage.MENU_EXIT));
-    }
-
-    private static void sendMessage() {
+    private static void startNewChat() {
+        User activeUser = getActiveUser();
         printEmployees();
-        int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
-        int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
-        userService.get(senderId);
+        int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
+        if (activeUser.getId() == receiverId) {
+            throw new OperationNotAllowed("you cannot start a chat with yourself");
+        }
+
         userService.get(receiverId);
+        sendMessageTo(receiverId);
+    }
 
-        Message message = new Message(senderId, receiverId, content);
+    private static void viewChats() {
+        User activeUser = getActiveUser();
+        Map<Integer, List<MessageDTO>> chats = messageService.getChatsDTOs(activeUser.getId());
+
+        if (chats.isEmpty()) {
+            throw new DoesNotExist("chats for user id=" + activeUser.getId());
+        }
+
+        println("\n||| Chats |||");
+        for (var entry : chats.entrySet()) {
+            List<MessageDTO> chatMessages = entry.getValue();
+            UserDTO chatUser = chatMessages.get(0).getOtherUser(activeUser.getId());
+            println(entry.getKey() + ". " + chatUser.getName() + " " + chatUser.getSurname()
+                    + " | Message count: " + chatMessages.size());
+        }
+
+        int chatId = UIForms.readInt(scanner, UIMessage.INPUT_CHAT_ID);
+        if (!chats.containsKey(chatId)) {
+            throw new DoesNotExist("chat with id=" + chatId);
+        }
+
+        List<MessageDTO> selectedChat = chats.get(chatId);
+        selectedChat.forEach(messageDTO -> println(messageDTO.toShortString()));
+
+        ActionMenu chatMenu = new ActionMenu("Chat actions");
+        chatMenu.addAction("Send new message", () -> handleExceptions(() -> sendReply(selectedChat)));
+        chatMenu.addAction("Back", chatMenu::stop);
+        chatMenu.start();
+    }
+
+    private static void sendReply(List<MessageDTO> selectedChat) {
+        User activeUser = getActiveUser();
+        UserDTO receiver = selectedChat.get(0).getOtherUser(activeUser.getId());
+        sendMessageTo(receiver.getId());
+    }
+
+    private static void sendMessageTo(int receiverId) {
+        User activeUser = getActiveUser();
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
+        Message message = new Message(activeUser.getId(), receiverId, content);
         messageService.sendMessage(message);
-
-        println(Translator.translate(UIMessage.MSG_SENT));
-        Message saved = messageService.get(message.getId());
-        println(messageService.getDTO(saved));
-        println("Receiver inbox:");
-        for (Message m : messageService.getAllByReceiverId(receiverId)) {
-            println(messageService.getDTO(m));
-        }
-    }
-
-    private static void deleteMessage() {
-        getAllMessages();
-        int messageId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
-        messageService.delete(messageId);
-
-        println(Translator.translate(UIMessage.MSG_DELETED));
-    }
-
-    private static void printMessagesBySender() {
-        printEmployees();
-        int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
-        println("|||  Messages |||");
-        for (Message m : messageService.getAllBySenderId(senderId)) {
-            println(messageService.getDTO(m).toShortString());
-        }
-    }
-
-    private static void printMessagesByReceiver() {
-        printEmployees();
-        int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-        println("|||  Messages |||");
-        for (Message m : messageService.getAllByReceiverId(receiverId)) {
-            println(messageService.getDTO(m).toShortString());
-        }
-    }
-
-    private static void getAllMessages() {
-        println("|||  Messages |||");
-        for (Message m : messageService.getAll()) {
-            println(messageService.getDTO(m).toShortString());
-        }
+        printSuccess("Message sent.");
     }
 
     private static void printEmployees() {
-        println("|||  Employees |||");
+        println("||| Employees |||");
         for (User user : userService.getAllByClassOrSubclass(Employee.class)) {
-            println(userService.getDTO(user).toShortString());
+            if (user.getId() != AppSettings.getActiveUser().getId()) {
+                println(userService.getDTO(user).toShortString());
+            }
         }
     }
 }

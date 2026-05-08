@@ -1,7 +1,6 @@
 package model.dto;
 
 import model.domain.News;
-import model.domain.User;
 import model.enumeration.NewsUrgencyLevel;
 
 import java.util.Date;
@@ -18,11 +17,11 @@ public final class NewsDTO extends BaseViewDTO {
     private final String content;
     private final List<CommentDTO> comments;
 
-    public NewsDTO(News news, User publisher, List<CommentDTO> comments) {
+    public NewsDTO(News news, UserDTO publisher, List<CommentDTO> comments) {
         super();
         setId(news.getId());
         this.title = news.getTitle();
-        this.publisher = new UserDTO(publisher);
+        this.publisher = publisher;
         this.urgencyLevel = news.getUrgencyLevel();
         this.publishedDate = news.getPublishedDate();
         this.content = news.getContent();
@@ -72,7 +71,7 @@ public final class NewsDTO extends BaseViewDTO {
         body.append("\nContent: ' ").append(content).append(" '");
         body.append("\nComments:");
         for (CommentDTO c : comments) {
-            body.append(c.toString());
+            body.append( "\n   " + c.getAuthor().getName() + " " +c.getAuthor().getSurname()  + "(" + c.getAuthor().getId() + ")"+ " : " + c.getContent());
         }
         return section("News", body.toString());
     }

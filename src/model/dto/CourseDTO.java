@@ -53,7 +53,10 @@ public final class CourseDTO extends BaseViewDTO {
 
     @Override
     public String toShortString() {
-        return "ID: " + getId() + " | Name: " + name;
+        return "ID: " + getId() 
+                + " | Name: " + name 
+                + " | Credits: " + credits 
+                + " | Type: " + type;
     }
 
     @Override

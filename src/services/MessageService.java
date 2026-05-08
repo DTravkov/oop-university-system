@@ -1,6 +1,9 @@
 package services;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import exceptions.OperationNotAllowed;
 import model.domain.IMessagable;
@@ -32,56 +35,54 @@ public class MessageService extends BaseService<Message, MessageRepository>{
         if (!(sender instanceof IMessagable) || !(receiver instanceof IMessagable)) {
             throw new OperationNotAllowed(" sending messages to/from non-employee account");
         }
-
+        
         this.create(message);
     }
 
-    public List<Message> getAllByReceiverId(int receiverId) {
-        return repository.findAllByReceiverId(receiverId);
+
+    public Map<Integer, List<MessageDTO>> getChatsDTOs(int userId){
+        Map<Integer, List<Message>> chatMap = getUserChats(userId);
+        Map<Integer, List<MessageDTO>> dtoMap = new HashMap<>();
+        for(var entry : chatMap.entrySet()){
+            List<MessageDTO> messageDTOs = new ArrayList<>();
+            entry.getValue().forEach(msg -> {
+                messageDTOs.add(getMessageDTO(msg));
+            });
+            dtoMap.put(entry.getKey(), messageDTOs);
+        }
+        return dtoMap;
     }
 
-    public List<Message> getAllBySenderId(int senderId) {
-        return repository.findAllBySenderId(senderId);
+    public MessageDTO getMessageDTO(Message msg){
+        return new MessageDTO(msg, userService.getDTO(msg.getSenderId()), userService.getDTO(msg.getReceiverId()));
     }
 
-    public MessageDTO getDTO(int messageId) {
-        Message message = get(messageId);
-        return getDTO(message);
+    public Map<Integer, List<Message>> getUserChats(int userId){
+        Map<Integer, List<Message>> chatMap = new HashMap<>();
+        for(Message msg : this.getAll()){
+            if(msg.getReceiverId() == userId || msg.getSenderId() == userId){
+                int otherUserId = msg.getReceiverId() == userId ? msg.getSenderId() : msg.getReceiverId();
+                chatMap.computeIfAbsent(otherUserId, (k) -> new ArrayList<>()).add(msg);
+            }
+        }
+        return chatMap;
     }
 
-    public MessageDTO getDTO(Message message) {
-        User sender = userService.get(message.getSenderId());
-        User receiver = userService.get(message.getReceiverId());
-        return new MessageDTO(message, sender, receiver);
-    }
+
 
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-
-            int deletedUserId = event.getUserId();
-            boolean changed = false;
-            List<Message> list = this.getAll();
-
-            for(Message msg : list){
-
-                if(msg.getSenderId() == deletedUserId){
-                    msg.setSenderId(AppSettings.DELETED_USER_ID);
-                    changed = true;
-                }
-
-                if(msg.getReceiverId() == deletedUserId){
-                    msg.setReceiverId(AppSettings.DELETED_USER_ID);
-                    changed = true;
-                }
-
-                if(changed){
-                    this.update(msg);
-                    changed = false;
-                }
-
-            }
-            
+            cleanUpUserMessageData(event.getUserId());
         });
+    }
+
+    public void cleanUpUserMessageData(int deletedUserId) {
+        List<Message> list = this.getAll();
+        for (Message msg : list) {
+            if (msg.getSenderId() == deletedUserId || msg.getReceiverId() == deletedUserId) {
+                this.delete(msg);
+            }
+        }
     }
 }

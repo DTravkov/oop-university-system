@@ -557,7 +557,7 @@ public class TestApp extends BaseApp {
             messageService.sendMessage(message);
             cleanupBin.trackMessage(message.getId());
             userService.delete(sender.getId());
-            List<Message> messagesByReceiver = messageService.getAllByReceiverId(receiver.getId());
+            List<Message> messagesByReceiver = messageService.getAll().stream().filter(msg -> msg.getReceiverId() == message.getReceiverId()).toList();
             return messagesByReceiver.stream().anyMatch(msg ->
                     msg.getContent().equals("delete user message mapping") && msg.getSenderId() == AppSettings.DELETED_USER_ID);
         } finally {

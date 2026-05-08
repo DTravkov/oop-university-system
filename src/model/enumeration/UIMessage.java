@@ -2,13 +2,6 @@ package model.enumeration;
 
 public enum UIMessage {
 
-    MENU_TITLE_AUTH("menu.title_auth"),
-    MENU_TITLE_ADMIN("menu.title_admin"),
-    MENU_TITLE_USER("menu.title_user"),
-    MENU_TITLE_ENROLL("menu.title_enroll"),
-    MENU_TITLE_MSG("menu.title_msg"),
-    MENU_TITLE_ORG("menu.title_org"),
-
     ADMIN_LOGS_ALL("admin.logs_all"),
     ADMIN_LOGS_BY_USER("admin.logs_by_user"),
     ADMIN_LOGS_SESSION("admin.logs_session"),
@@ -60,6 +53,8 @@ public enum UIMessage {
     INPUT_SENDER_ID("input.sender_id"),
     INPUT_RECEIVER_ID("input.receiver_id"),
     INPUT_MESSAGE_ID("input.message_id"),
+    INPUT_NEWS_ID("input.news_id"),
+    INPUT_CHAT_ID("input.chat_id"),
     INPUT_REQUEST_ID("input.request_id"),
     INPUT_MESSAGE_CONTENT("input.message_content"),
 

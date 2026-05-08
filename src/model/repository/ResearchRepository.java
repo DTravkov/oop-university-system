@@ -65,13 +65,5 @@ public class ResearchRepository extends Repository<SerializableModel> {
                                         .findFirst()
                                         .isPresent();
     }
-    
-    private List<SerializableModel> findAllByClass(Class<? extends SerializableModel> dotClass) {
-        return super.findAll((entity) -> entity.getClass().equals(dotClass));
-    }
-
-    private List<SerializableModel> findAllByClassOrSubclass(Class<? extends SerializableModel> dotClass) {
-        return super.findAll((entity) -> dotClass.isAssignableFrom(entity.getClass()));
-    }
 
 }

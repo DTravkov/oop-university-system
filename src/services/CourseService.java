@@ -1,6 +1,7 @@
 package services;
 
 import exceptions.AlreadyExists;
+import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import java.util.List;
 
@@ -87,19 +88,45 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
 
         this.update(course);
     }
-    
+
+    public void removeTeacher(int courseId, int teacherId, TeacherType type){
+        if(type == TeacherType.BOTH)
+            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
+
+        Course course = this.get(courseId);
+
+        if(type == TeacherType.LECTURE){
+            if(!course.getLectureTeachers().contains(teacherId)){
+                throw new DoesNotExist(" teacher " + teacherId + " as a lecturer of course " + courseId);
+            }
+            course.removeLectureTeacher(teacherId);
+        }
+        else if(type == TeacherType.PRACTICE){
+            if(!course.getPracticeTeachers().contains(teacherId)){
+                throw new DoesNotExist(" teacher " + teacherId + " as a practice teacher of course " + courseId);
+            }
+            course.removePracticeTeacher(teacherId);
+        }
+
+        this.update(course);
+    }
+
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
             int deletedUserId = event.getUserId();
-            this.getAll().forEach(course -> {
-                course.removePracticeTeacher(deletedUserId);
-                course.removeLectureTeacher(deletedUserId);
-                this.update(course);
-            });
+            cleanUpDeletedTeacherReferences(deletedUserId);
         });
     }
-    
+
+    public void cleanUpDeletedTeacherReferences(int deletedUserId) {
+        this.getAll().forEach(course -> {
+            course.removePracticeTeacher(deletedUserId);
+            course.removeLectureTeacher(deletedUserId);
+        });
+        this.saveAll();
+    }
+
 
 
 

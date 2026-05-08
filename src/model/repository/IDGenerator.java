@@ -1,6 +1,7 @@
 package model.repository;
 
 import java.io.*;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class IDGenerator {
@@ -18,6 +19,19 @@ public class IDGenerator {
         return next;
     }
 
+
+    public synchronized void synchronizeIds(Map<Integer, ?> data) {
+        int max = 0;
+        for (int id :data.keySet()) {
+            if (id > max) max = id;
+        }
+        int newLast = Math.max(lastId.get(), max);
+        if (newLast != lastId.get()) {
+            lastId.set(newLast);
+            save(lastId);
+        }
+    }
+
     private void save(AtomicInteger id) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(idPath))) {
             oos.writeObject(id);
@@ -25,6 +39,8 @@ public class IDGenerator {
             throw new RuntimeException(e);
         }
     }
+
+    
 
     private AtomicInteger load() {
         File file = new File(idPath);
@@ -39,4 +55,6 @@ public class IDGenerator {
             return new AtomicInteger(0);
         }
     }
+
+    
 }

@@ -2,7 +2,6 @@ package model.dto;
 
 import model.domain.Course;
 import model.domain.Enrollment;
-import model.domain.User;
 
 import java.util.Date;
 
@@ -10,8 +9,7 @@ public final class EnrollmentDTO extends BaseViewDTO {
 
     private static final long serialVersionUID = 1L;
 
-    private final String courseName;
-    private final int courseId;
+    private final CourseDTO course;
     private final UserDTO student;
     private final Date enrollmentDate;
     private final double firstAttestationPoint;
@@ -22,28 +20,20 @@ public final class EnrollmentDTO extends BaseViewDTO {
     private final UserDTO lectureTeacher;
     private final UserDTO practiceTeacher;
 
-    public EnrollmentDTO(Enrollment enrollment, Course course, User student, User lectureTeacher, User practiceTeacher) {
+    public EnrollmentDTO(Enrollment enrollment, CourseDTO course, UserDTO student, UserDTO lectureTeacher, UserDTO practiceTeacher) {
         super();
         setId(enrollment.getId());
-        this.courseName = course.getName();
-        this.courseId = course.getId();
-        this.student = new UserDTO(student);
+        this.course = course;
+
+        this.student = student;
         this.enrollmentDate = enrollment.getEnrollmentDate();
         this.firstAttestationPoint = enrollment.getFirstAttestationPoint();
         this.secondAttestationPoint = enrollment.getSecondAttestationPoint();
         this.finalExamPoint = enrollment.getFinalExamPoint();
         this.totalPoint = enrollment.getTotalPoint();
         this.gpa = enrollment.getGpa();
-        this.lectureTeacher = new UserDTO(lectureTeacher);
-        this.practiceTeacher = new UserDTO(practiceTeacher);
-    }
-
-    public String getCourseName() {
-        return courseName;
-    }
-
-    public int getCourseId() {
-        return courseId;
+        this.lectureTeacher = lectureTeacher;
+        this.practiceTeacher = practiceTeacher;
     }
 
     public UserDTO getStudent() {
@@ -82,10 +72,14 @@ public final class EnrollmentDTO extends BaseViewDTO {
         return practiceTeacher;
     }
 
+    public CourseDTO getCourse() {
+        return course;
+    }
+
     @Override
     public String toShortString() {
         return "ID: " + getId()
-                + " | Course: " + courseName + " (id=" + courseId + ")"
+                + " | Course: " + course.toShortString()
                 + " | Student: " + formatUser(student)
                 + " | Lecture Teacher: " + formatUser(lectureTeacher)
                 + " | Practice Teacher: " + formatUser(practiceTeacher)
@@ -96,7 +90,7 @@ public final class EnrollmentDTO extends BaseViewDTO {
     public String toString() {
         StringBuilder body = new StringBuilder();
         body.append("\nID: ").append(getId());
-        body.append("\nCourse: ").append(courseName).append(" (id=").append(courseId).append(")");
+        body.append("\nCourse: ").append(course.toShortString());
         body.append("\nStudent: ").append(formatUser(student));
         body.append("\nLecture Teacher: ").append(formatUser(lectureTeacher));
         body.append("\nPractice Teacher: ").append(formatUser(practiceTeacher));

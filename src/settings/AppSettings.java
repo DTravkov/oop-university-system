@@ -18,6 +18,8 @@ public class AppSettings {
     public static final int DELETED_USER_ID = -27;
     public static final User DELETED_USER = new DeletedUser();
 
+    public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "admin", "superuserovich");
+
     public static final int RECENT_LOG_HOURS = 12;
 
     public static final String DEFAULT_REPOSITORY_ROOT = "data/";

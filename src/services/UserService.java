@@ -60,12 +60,14 @@ public class UserService extends BaseService<User, UserRepository> {
         return user;
     }
     
+    @SuppressWarnings("unchecked")
     public List<User> getAllByClass(Class<? extends User> dotClass) {
-        return repository.findAllByClass(dotClass);
+        return (List<User>) repository.findAllByClass(dotClass);
     }
 
+    @SuppressWarnings("unchecked")
     public List<User> getAllByClassOrSubclass(Class<? extends User> dotClass) {
-        return repository.findAllByClassOrSubclass(dotClass);
+        return (List<User>) repository.findAllByClassOrSubclass(dotClass);
     }
 
 
@@ -84,12 +86,16 @@ public class UserService extends BaseService<User, UserRepository> {
 
         User deletedUser = AppSettings.DELETED_USER;
         User systemUser = AppSettings.ANONYMOUS_USER;
+        User defaultAdminUser = AppSettings.DEFAULT_ADMIN;
 
         if(!userRepository.exists(deletedUser.getId())){
             userRepository.save(deletedUser);
         }
         if(!userRepository.exists(systemUser.getId())){
             userRepository.save(systemUser);
+        }
+        if(!userRepository.existsByLogin("admin")){
+            userRepository.save(defaultAdminUser);
         }
     }
 

@@ -30,12 +30,5 @@ public class UserRepository extends Repository<User> {
         return this.exists(user -> user.getLogin().equals(login));
     }
 
-    public List<User> findAllByClass(Class<? extends User> dotClass) {
-        return this.findAll(user -> user.getClass().equals(dotClass));
-    }
-
-    public List<User> findAllByClassOrSubclass(Class<? extends User> dotClass) {
-        return this.findAll(user -> dotClass.isAssignableFrom(user.getClass()));
-    }
 
 }

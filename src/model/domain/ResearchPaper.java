@@ -7,11 +7,12 @@ import java.util.List;
 public class ResearchPaper extends SerializableModel {
     private static final long serialVersionUID = 1L;
 
-    private List<Integer> participants = new ArrayList<>();
     private List<String> pages = new ArrayList<>();
+    private List<Integer> participants = new ArrayList<>();
     private int views = 0;
     private int citations = 0;
     private Date publishDate = new Date();
+    
 
     public ResearchPaper() {
     }
@@ -63,8 +64,6 @@ public class ResearchPaper extends SerializableModel {
     public void removePage(int pageNumber){
         this.pages.remove(pageNumber);
     }
-
-    
     
     
 }

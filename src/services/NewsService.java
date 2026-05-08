@@ -59,11 +59,10 @@ public class NewsService extends BaseService<News, NewsRepository>{
     }
 
     public NewsDTO getDTO(News news) {
-        User publisher = userService.get(news.getPublisherId());
         List<CommentDTO> commentDtos = getAllCommentsById(news.getId()).stream()
-                .map(c -> new CommentDTO(c, userService.get(c.getSenderId())))
+                .map(commentService::getDTO)
                 .toList();
-        return new NewsDTO(news, publisher, commentDtos);
+        return new NewsDTO(news, userService.getDTO(news.getPublisherId()), commentDtos);
     }
 
     public void assignComment(int newsId, int commentId) {
@@ -84,30 +83,32 @@ public class NewsService extends BaseService<News, NewsRepository>{
     public void subscribeToEvents(){
         
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-
-            int deletedUserId = event.getUserId();
-            List<News> list = this.getAll();
-            for(News news : list){
-                if(news.getPublisherId() == deletedUserId){
-                    news.setPublisherId(AppSettings.DELETED_USER_ID);
-                    this.update(news);
-                }
-            }
-            
+            cleanUpDeletedPublisherData(event.getUserId());
         });
 
 
         eventSystem.subscribe(CommentDeleteEvent.class, event -> {
-
-            int deletedCommentId = event.getCommentId();
-            List<News> list = this.getAll();
-            for(News news : list){
-                if(news.getComments().contains(Integer.valueOf(deletedCommentId))){
-                    news.removeComment(deletedCommentId);
-                    this.update(news);
-                }
-            }
-
+            cleanUpDeletedCommentData(event.getCommentId());
         });
+    }
+
+    public void cleanUpDeletedPublisherData(int deletedUserId) {
+        List<News> list = this.getAll();
+        for (News news : list) {
+            if (news.getPublisherId() == deletedUserId) {
+                news.setPublisherId(AppSettings.DELETED_USER_ID);
+            }
+        }
+        this.saveAll();
+    }
+
+    public void cleanUpDeletedCommentData(int deletedCommentId) {
+        List<News> list = this.getAll();
+        for (News news : list) {
+            if (news.getComments().contains(Integer.valueOf(deletedCommentId))) {
+                news.removeComment(deletedCommentId);
+            }
+        }
+        this.saveAll();
     }
 }

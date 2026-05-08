@@ -26,7 +26,7 @@ public abstract class BaseViewDTO implements Serializable {
     public abstract String toShortString();
 
     protected static String section(String dtoName, String body) {
-        return "/// " + dtoName + "///" + "\n" + body;
+        return "\n/// " + dtoName + " ///" + body;
     }
 
     protected static String formatDate(Date date) {
@@ -47,6 +47,27 @@ public abstract class BaseViewDTO implements Serializable {
                 sb.append(", ");
             }
             sb.append(formatUser(u));
+        }
+        return sb.toString();
+    }
+
+    protected static String formatResearchProjectList(List<ResearchProjectDTO> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return "_";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (ResearchProjectDTO p : projects) {
+            sb.append(p.toShortString() + "\n");
+        }
+        return sb.toString();
+    }
+    protected static String formatResearchPaperList(List<ResearchPaperDTO> papers) {
+        if (papers == null || papers.isEmpty()) {
+            return "_";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (ResearchPaperDTO p : papers) {
+            sb.append(p.toShortString() + "\n");
         }
         return sb.toString();
     }

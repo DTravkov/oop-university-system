@@ -16,6 +16,8 @@ public class EnrollmentRepository extends Repository<Enrollment> {
     }
 
 
+
+    
     public Enrollment findByStudentIdAndCourseId(int studentId, int courseId) {
         return this.findFirst(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId)
                 .orElse(null);

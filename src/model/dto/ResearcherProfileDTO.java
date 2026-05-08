@@ -36,9 +36,7 @@ public final class ResearcherProfileDTO extends BaseViewDTO {
         StringBuilder body = new StringBuilder();
         body.append("\nID: ").append(getId());
         body.append("\nUser: ").append(formatUser(user));
-        body.append("\nResearchProjects: ").append(researchProjects.isEmpty() ? "_" : researchProjects.stream()
-                .map(ResearchProjectDTO::toShortString)
-                .toList());
+        body.append("\nResearchProjects: ").append(formatResearchProjectList(researchProjects));
         return section("ResearcherProfile", body.toString());
     }
 }

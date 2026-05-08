@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 
-public class Repository<T extends SerializableModel> {
+public abstract class Repository<T extends SerializableModel> {
 
     private final String PATH;
     private IDGenerator idGenerator;
@@ -43,6 +43,10 @@ public class Repository<T extends SerializableModel> {
         return entity;
     }
 
+    public void saveAll(){
+        this.writeToFile();
+    }
+
     
     public void load() {
         File file = new File(PATH);
@@ -53,6 +57,7 @@ public class Repository<T extends SerializableModel> {
         }
 
         this.data = readFromFile();
+        idGenerator.synchronizeIds(this.data);
     }
 
     
@@ -66,6 +71,16 @@ public class Repository<T extends SerializableModel> {
             .orElseThrow(() -> new DoesNotExist(baseName + " record with id=" + id));
 
         this.save(entity);
+    }
+
+    public void delete(T entity) {
+        if (entity == null) {
+            throw new DoesNotExist("Cannot delete: " + baseName + " null entity");
+        }
+        if (entity.isNewRecord()) {
+            throw new OperationNotAllowed("Cannot delete: " + baseName + " with id=0");
+        }
+        this.delete(entity.getId());
     }
 
     
@@ -105,8 +120,23 @@ public class Repository<T extends SerializableModel> {
         return findAll(enitity -> true);
     }
 
+    public List<?> findAllByClass(Class<? extends SerializableModel> dotClass) {
+        return this.findAll(user -> user.getClass().equals(dotClass));
+    }
+
+    public List<?> findAllByClassOrSubclass(Class<? extends SerializableModel> dotClass) {
+        return this.findAll(user -> dotClass.isAssignableFrom(user.getClass()));
+    }
+
     public boolean exists(int id){
         return findFirst(entity -> entity.getId() == id).isPresent();
+    }
+
+    public boolean exists(T entity) {
+        if (entity == null || entity.isNewRecord()) {
+            return false;
+        }
+        return exists(entity.getId());
     }
 
 
@@ -140,6 +170,8 @@ public class Repository<T extends SerializableModel> {
             throw new RuntimeException("Could not initialize storage file: " + PATH, e);
         }
     }
+
+
 
     
 }

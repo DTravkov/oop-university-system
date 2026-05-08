@@ -27,6 +27,7 @@ public class TechRequestService extends BaseService<TechRequest, TechRequestRepo
 
         User from = userService.get(request.getSenderId());
         User to = userService.get(request.getReceiverId());
+
         if(from == to){
             throw new OperationNotAllowed(" sending a technical request to yourself");
         }
@@ -52,49 +53,52 @@ public class TechRequestService extends BaseService<TechRequest, TechRequestRepo
         return repository.findAllBySpecialistId(specialistId);
     }
 
+    public List<TechRequest> getAllBySenderId(int senderId){
+        return repository.findAllBySenderId(senderId);
+    }
+
     public List<TechRequest> getAllByStatus(TechRequestStatus status){
         return repository.findAllByStatus(status);
     }
 
     public TechRequestDTO getDTO(int requestId){
         TechRequest request = get(requestId);
-        User sender = userService.get(request.getSenderId());
-        User receiver = userService.get(request.getReceiverId());
-        return new TechRequestDTO(request, sender, receiver);
+        return new TechRequestDTO(
+                request,
+                userService.getDTO(request.getSenderId()),
+                userService.getDTO(request.getReceiverId())
+        );
     }
 
     public TechRequestDTO getDTO(TechRequest request){
-        User sender = userService.get(request.getSenderId());
-        User receiver = userService.get(request.getReceiverId());
-        return new TechRequestDTO(request, sender, receiver);
+        return new TechRequestDTO(
+                request,
+                userService.getDTO(request.getSenderId()),
+                userService.getDTO(request.getReceiverId())
+        );
     }
 
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
+            cleanUpUserTechRequestData(eventData.getUserId());
+        });
 
-                int deletedId = eventData.getUserId();
+    }
 
-                this.getAll().forEach((req) -> {
-                    boolean isChanged = false;
-                    if(req.getSenderId() == deletedId){
-                        req.setSenderId(AppSettings.DELETED_USER_ID);
-                        isChanged = true;
-                    }
-                    if(req.getReceiverId() == deletedId){
-                        if(req.getStatus() != TechRequestStatus.DONE){
-                            req.setStatus(TechRequestStatus.PENDING);
-                        }
-                        req.setReceiverId(AppSettings.DELETED_USER_ID);
-                        isChanged = true;
-                    }
-
-                    if(isChanged) this.update(req);
-                });
-
-        }
-    );
-
+    public void cleanUpUserTechRequestData(int deletedUserId) {
+        this.getAll().forEach((req) -> {
+            if (req.getSenderId() == deletedUserId) {
+                req.setSenderId(AppSettings.DELETED_USER_ID);
+            }
+            if (req.getReceiverId() == deletedUserId) {
+                if (req.getStatus() != TechRequestStatus.DONE) {
+                    req.setStatus(TechRequestStatus.PENDING);
+                }
+                req.setReceiverId(AppSettings.DELETED_USER_ID);
+            }
+        });
+        this.saveAll();
     }
 
 }

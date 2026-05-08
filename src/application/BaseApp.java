@@ -1,10 +1,15 @@
 package application;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import exceptions.ApplicationException;
+import model.domain.User;
+import model.dto.UserDTO;
 import model.enumeration.UIMessage;
 import model.factories.ServiceRegistry;
+import settings.AppSettings;
 import utils.Translator;
 import utils.UIForms;
 
@@ -15,6 +20,11 @@ public abstract class BaseApp {
 
     protected BaseApp() {
     }
+
+    protected static void shutdown() {
+        System.exit(0);
+    }
+
     protected static void print(String data) {
         System.out.print(data);
     }
@@ -32,7 +42,7 @@ public abstract class BaseApp {
     }
 
     protected static void printSuccess(String data) {
-        System.out.println(Translator.translate(UIMessage.SUCCESS) + " " + data);
+        System.out.println( "[" + Translator.translate(UIMessage.SUCCESS) + "] " + data);
     }
 
     protected static void printFail(String data) {
@@ -43,11 +53,89 @@ public abstract class BaseApp {
         printFail(exc.getMessage());
     }
 
+    protected static void handleExceptions(Runnable action) {
+        try {
+            action.run();
+        } catch (ApplicationException exc) {
+            printExceptionDetails(exc);
+        }
+    }
+
     protected static void printInvalidChoice() {
         println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
     }
 
-    protected static String readChoice(UIMessage prompt, int min, int max) {
-        return UIForms.readChoice(scanner, prompt, min, max);
+    protected static User getActiveUser(){
+        return AppSettings.getActiveUser();
+    }
+
+    protected static boolean isAuthenticated() {
+        return AppSettings.getActiveUser().getId() != AppSettings.ANONYMOUS_USER_ID;
+    }
+
+    public static void logout() {
+        AppSettings.clearActiveUser();
+    }
+
+
+
+    protected static class ActionMenu {
+
+        private final List<Action> actions = new ArrayList<>();
+        private String menuTitle;
+        private boolean isRunning;
+
+        protected ActionMenu(String menuTitle) {
+            this.menuTitle = "\n||| " + menuTitle + " |||";
+        }
+
+        protected ActionMenu(UIMessage msg, Object... args) {
+            this(Translator.translate(msg, args));
+        }
+
+        protected void start(){
+            isRunning = true;
+            while(isRunning){
+                println(menuTitle);
+                for(int i = 0; i < actions.size(); i++){
+                    String actionNumber = i+1 + ".";
+                    String actionTitle = actions.get(i).title;
+                    println(actionNumber + " " + actionTitle);
+                }
+                int choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, actions.size());
+                actions.get(choice-1).run();
+            }
+
+        }
+
+        protected void stop() {
+            isRunning = false;
+        }
+
+        protected ActionMenu addUserLabel(UserDTO user){
+            this.menuTitle += "\n" + "Welcome, " + user.getName() + " " + user.getSurname() + "! (Role: " + user.getRole() + " | ID : " + user.getId() + ")";
+            return this;
+        }
+
+        protected ActionMenu addAction(String actionTitle, Runnable callback){
+            actions.add(new Action(actionTitle, callback));
+            return this;
+        }
+
+        private final class Action{
+            public final String title;
+            public final Runnable callback;
+
+            public Action(String title, Runnable callback){
+                this.title = title;
+                this.callback = callback;
+            }
+
+            public void run(){
+                callback.run();
+            }
+
+        }
+
     }
 }

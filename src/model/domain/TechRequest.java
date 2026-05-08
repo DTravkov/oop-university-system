@@ -6,8 +6,8 @@ public class TechRequest extends Message {
 
     private TechRequestStatus status;
 
-    public TechRequest(int senderId, int receiverId, String content) {
-        super(senderId, receiverId, content);
+    public TechRequest(int senderId, int techSpecId, String content) {
+        super(senderId, techSpecId, content);
         this.status = TechRequestStatus.PENDING;
     }
 
@@ -18,6 +18,7 @@ public class TechRequest extends Message {
     public void setStatus(TechRequestStatus status) {
         this.status = status;
     }
+
 
     @Override
     public String toString() {

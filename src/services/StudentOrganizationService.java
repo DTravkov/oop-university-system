@@ -29,7 +29,11 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         if(repository.existsByName(org.getName())){
             throw new AlreadyExists("organization with name : "+ org.getName());
         }
+        if(getByPresidentId(org.getPresidentId()) != null){
+            throw new AlreadyExists("organization led by student " + org.getPresidentId()); 
+        }
         userService.get(org.getPresidentId());
+
         org.addMember(org.getPresidentId());
         return super.create(org);
     }
@@ -65,6 +69,9 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
         if(org.getPresidentId() == studentId){
             throw new AlreadyExists(" president of this organization with the same id");
         }
+        if(getByPresidentId(studentId) != null){
+            throw new AlreadyExists(" this student as a president of other organization");
+        }
         org.setPresidentId(studentId);
         org.addMember(studentId);
         this.update(org);
@@ -95,10 +102,9 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     }
 
     public StudentOrganizationDTO getDTO(StudentOrganization organization) {
-        User president = userService.get(organization.getPresidentId());
+        UserDTO president = userService.getDTO(organization.getPresidentId());
         List<UserDTO> memberDtos = organization.getMembers().stream()
-                .map(userService::get)
-                .map(UserDTO::new)
+                .map(userService::getDTO)
                 .toList();
         return new StudentOrganizationDTO(organization, president, memberDtos);
     }
@@ -107,23 +113,21 @@ public class StudentOrganizationService extends BaseService<StudentOrganization,
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-
-            int deletedUserId = event.getUserId();
-            List<StudentOrganization> list = repository.findAll();
-            
-            for(StudentOrganization organization : list){
-                if(organization.getPresidentId() == deletedUserId){
-                    this.removePresident(organization.getId());
-                }
-                else if(organization.getMembers().contains(deletedUserId)){
-                    organization.removeMember(deletedUserId);
-                    this.update(organization);
-                }
-            }
-
-            
-
+            cleanUpOrganizationData(event.getUserId());
         });
+    }
+
+    public void cleanUpOrganizationData(int deletedUserId) {
+        List<StudentOrganization> list = repository.findAll();
+        for (StudentOrganization organization : list) {
+            if (organization.getPresidentId() == deletedUserId) {
+                organization.removeMember(deletedUserId);
+                organization.setPresidentId(AppSettings.DELETED_USER_ID);
+            } else if (organization.getMembers().contains(deletedUserId)) {
+                organization.removeMember(deletedUserId);
+            }
+        }
+        this.saveAll();
     }
 
         

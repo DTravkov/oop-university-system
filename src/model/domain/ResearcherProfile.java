@@ -25,7 +25,7 @@ public class ResearcherProfile extends SerializableModel {
     }
     
     public void removeResearchProject(int reserachProjectId) {
-        this.researchProjects.remove(reserachProjectId);
+        this.researchProjects.remove(Integer.valueOf(reserachProjectId));
     }
 
 

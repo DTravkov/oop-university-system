@@ -55,6 +55,6 @@ public final class ResearchPaperDTO extends BaseViewDTO {
         body.append("\nViews: ").append(views);
         body.append("\nCitations: ").append(citations);
         body.append("\nPublished: ").append(publishDate == null ? "_" : formatDate(publishDate));
-        return section("ResearchPaper", body.toString());
+        return section("Research Paper", body.toString());
     }
 }

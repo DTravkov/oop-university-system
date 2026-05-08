@@ -1,7 +1,6 @@
 package model.dto;
 
 import model.domain.TechRequest;
-import model.domain.User;
 import model.enumeration.TechRequestStatus;
 
 import java.util.Date;
@@ -16,11 +15,11 @@ public final class TechRequestDTO extends BaseViewDTO {
     private final TechRequestStatus status;
     private final Date sentDate;
 
-    public TechRequestDTO(TechRequest request, User sender, User receiver) {
+    public TechRequestDTO(TechRequest request, UserDTO sender, UserDTO receiver) {
         super();
         setId(request.getId());
-        this.sender = new UserDTO(sender);
-        this.receiver = new UserDTO(receiver);
+        this.sender = sender;
+        this.receiver = receiver;
         this.content = request.getContent();
         this.status = request.getStatus();
         this.sentDate = request.getSentDate();

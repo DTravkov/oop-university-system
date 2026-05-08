@@ -29,6 +29,10 @@ public class TechRequestRepository extends Repository<TechRequest> {
         return super.findAll(req -> req.getReceiverId() == specialistId);
     }
 
+    public List<TechRequest> findAllBySenderId(int senderId) {
+        return super.findAll(req -> req.getSenderId() == senderId);
+    }
+
     public List<TechRequest> findAllByStatus(TechRequestStatus status) {
         return super.findAll(req -> req.getStatus().getStage() == status.getStage());
     }

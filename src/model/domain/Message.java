@@ -22,7 +22,6 @@ public class Message extends SerializableModel {
 
         this.senderId = senderId;
         this.receiverId = receiverId;
-
         this.content = content;
         this.sentDate = new Date();
     }
@@ -59,7 +58,10 @@ public class Message extends SerializableModel {
         if (id != 0 || message.getId() != 0) {
             return id != 0 && id == message.getId();
         }
-        return receiverId == message.receiverId && senderId == message.senderId && Objects.equals(content, message.content) && Objects.equals(sentDate, message.sentDate);
+        return receiverId == message.receiverId
+                && senderId == message.senderId
+                && Objects.equals(content, message.content)
+                && Objects.equals(sentDate, message.sentDate);
     }
 
     @Override

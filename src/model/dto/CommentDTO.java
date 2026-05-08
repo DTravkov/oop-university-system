@@ -12,10 +12,10 @@ public final class CommentDTO extends BaseViewDTO {
     private final Date sentDate;
     private final String content;
 
-    public CommentDTO(Comment comment, User author) {
+    public CommentDTO(Comment comment, UserDTO author) {
         super();
         setId(comment.getId());
-        this.author = new UserDTO(author);
+        this.author = author;
         this.sentDate = comment.getSentDate();
         this.content = comment.getContent();
     }

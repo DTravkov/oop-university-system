@@ -10,14 +10,12 @@ public final class ResearchProjectDTO extends BaseViewDTO {
 
     private final String topic;
     private final List<UserDTO> participants;
-    private final List<ResearchPaperDTO> papers;
 
-    public ResearchProjectDTO(ResearchProject project, List<UserDTO> participantDTOs, List<ResearchPaperDTO> paperDTOs) {
+    public ResearchProjectDTO(ResearchProject project, List<UserDTO> participantDTOs) {
         super();
         setId(project.getId());
         this.topic = project.getTopic();
         this.participants = participantDTOs == null ? List.of() : List.copyOf(participantDTOs);
-        this.papers = paperDTOs == null ? List.of() : List.copyOf(paperDTOs);
     }
 
     public String getTopic() {
@@ -28,17 +26,12 @@ public final class ResearchProjectDTO extends BaseViewDTO {
         return participants;
     }
 
-    public List<ResearchPaperDTO> getPapers() {
-        return papers;
-    }
-
     @Override
     public String toShortString() {
         String topicLabel = topic == null || topic.isEmpty() ? "_" : topic;
         return "ID: " + getId()
                 + " | Topic: " + topicLabel
-                + " | Participants: " + participants.size()
-                + " | Papers: " + papers.size();
+                + " | Participants: " + participants.size();
     }
 
     @Override
@@ -47,9 +40,6 @@ public final class ResearchProjectDTO extends BaseViewDTO {
         body.append("\nID: ").append(getId());
         body.append("\nTopic: ").append(topic == null || topic.isEmpty() ? "_" : topic);
         body.append("\nParticipants: ").append(participants.isEmpty() ? "_" : formatUserList(participants));
-        body.append("\nPapers: ").append(papers.isEmpty() ? "_" : papers.stream()
-                .map(ResearchPaperDTO::toShortString)
-                .toList());
-        return section("ResearchProject", body.toString());
+        return section("Research Project", body.toString());
     }
 }

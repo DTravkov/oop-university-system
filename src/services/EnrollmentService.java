@@ -11,7 +11,9 @@ import model.domain.IEnrollable;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
+import model.dto.CourseDTO;
 import model.dto.EnrollmentDTO;
+import model.enumeration.AttestationType;
 import model.repository.EnrollmentRepository;
 import services.events.CourseDeleteEvent;
 import services.events.UserDeleteEvent;
@@ -65,6 +67,10 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new OperationNotAllowed(" assign non-practice teacher as a practice teacher.");
         }
 
+        if(getStudentCredits(student.getId()) + course.getCredits() > 21){
+            throw new OperationNotAllowed("having more than 21 credits total.");
+        }
+
         return super.create(enrollment);
     }
 
@@ -74,6 +80,19 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
             throw new DoesNotExist("Enrollment for student id " + studentId + " and course id " + courseId);
         }
         return enrollment;
+    }
+
+    public int getStudentCredits(int studentId){
+        User user = userService.get(studentId);
+        if(!(user instanceof Student)){
+            throw new OperationNotAllowed("viewing credits of a non-student account");
+        }
+        List<Enrollment> studentEnrollments = getAllByStudentId(studentId);
+        int credits = 0;
+        for(var enr : studentEnrollments){
+            credits += courseService.get(enr.getCourseId()).getCredits();
+        }
+        return credits;
     }
 
     public List<Enrollment> getAllByStudentId(int studentId) {
@@ -94,35 +113,37 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     }
 
     public EnrollmentDTO getDTO(Enrollment enrollment) {
-        Course course = courseService.get(enrollment.getCourseId());
-        User student = userService.get(enrollment.getStudentId());
-        User lectureTeacher = userService.get(enrollment.getLectureTeacherId());
-        User practiceTeacher = userService.get(enrollment.getPracticeTeacherId());
-        return new EnrollmentDTO(enrollment, course, student, lectureTeacher, practiceTeacher);
+        CourseDTO course = courseService.getDTO(enrollment.getCourseId());
+        return new EnrollmentDTO(
+                enrollment,
+                course,
+                userService.getDTO(enrollment.getStudentId()),
+                userService.getDTO(enrollment.getLectureTeacherId()),
+                userService.getDTO(enrollment.getPracticeTeacherId())
+        );
     }
 
-    public void increasePoints(int enrollmentId, int pointTypeChoice, double pointsToAdd) {
+    public void increasePoints(int enrollmentId, AttestationType type, double pointsToAdd) {
         FieldValidator.requirePositive(pointsToAdd, "Points increment");
+        FieldValidator.requireNonNull(type, "Attestation type");
 
         Enrollment enrollment = this.get(enrollmentId);
 
-        switch (pointTypeChoice) {
-            case 1:
+        switch (type) {
+            case FIRST_ATTESTATION:
                 enrollment.setFirstAttestationPoint(enrollment.getFirstAttestationPoint() + pointsToAdd);
-                super.update(enrollment);
                 break;
-            case 2:
+            case SECOND_ATTESTATION:
                 enrollment.setSecondAttestationPoint(enrollment.getSecondAttestationPoint() + pointsToAdd);
-                super.update(enrollment);
                 break;
-            case 3:
+            case FINAL_EXAM:
                 enrollment.setFinalExamPoint(enrollment.getFinalExamPoint() + pointsToAdd);
-                super.update(enrollment);
                 break;
             default:
                 throw new OperationNotAllowed(" choosing invalid point type");
         }
 
+        super.update(enrollment);
     }
 
 
@@ -130,32 +151,37 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
     public void subscribeToEvents(){
         
         eventSystem.subscribe(CourseDeleteEvent.class, event -> {
-            int deletedId = event.getCourseId();
-            this.getAllByCourseId(deletedId).forEach(enr -> this.delete(enr.getId()));
+            cleanUpCourseEnrollments(event.getCourseId());
         });
 
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            int deletedId = event.getUserId();
-            User deletedUser = userService.get(deletedId);
-            if(deletedUser instanceof Student){
-                this.getAllByStudentId(deletedId).forEach(enr -> {
-                    this.delete(enr.getId());
-                });
-            }
-            else if(deletedUser instanceof Teacher){
-                this.getAllByTeacherId(deletedUser.getId()).forEach(enr -> {
-                    if(enr.getLectureTeacherId() == deletedId){
-                        enr.setLectureTeacherId(AppSettings.DELETED_USER_ID);
-                        this.update(enr);
-                    }
-                    if(enr.getPracticeTeacherId() == deletedId){
-                        enr.setPracticeTeacherId(AppSettings.DELETED_USER_ID);
-                        this.update(enr);
-                    }
-                
-                });
-            }
+            cleanUpUserEnrollments(event.getUserId());
         });
+    }
+
+    public void cleanUpCourseEnrollments(int courseId) {
+        List<Enrollment> toDelete = this.getAllByCourseId(courseId);
+        toDelete.forEach(this::delete);
+    }
+
+    public void cleanUpUserEnrollments(int deletedUserId) {
+        User deletedUser = userService.get(deletedUserId);
+        if (deletedUser instanceof Student) {
+            List<Enrollment> toDelete = this.getAllByStudentId(deletedUserId);
+            toDelete.forEach(this::delete);
+            return;
+        }
+        if (deletedUser instanceof Teacher) {
+            this.getAllByTeacherId(deletedUser.getId()).forEach(enr -> {
+                if (enr.getLectureTeacherId() == deletedUserId) {
+                    enr.setLectureTeacherId(AppSettings.DELETED_USER_ID);
+                }
+                if (enr.getPracticeTeacherId() == deletedUserId) {
+                    enr.setPracticeTeacherId(AppSettings.DELETED_USER_ID);
+                }
+            });
+            this.saveAll();
+        }
     }
 
 

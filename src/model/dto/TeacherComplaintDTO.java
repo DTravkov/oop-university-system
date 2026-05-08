@@ -1,7 +1,6 @@
 package model.dto;
 
 import model.domain.TeacherComplaint;
-import model.domain.User;
 import model.enumeration.ComplaintUrgencyLevel;
 
 import java.util.Date;
@@ -17,12 +16,12 @@ public final class TeacherComplaintDTO extends BaseViewDTO {
     private final String content;
     private final Date sentDate;
 
-    public TeacherComplaintDTO(TeacherComplaint complaint, User sender, User receiver, User student) {
+    public TeacherComplaintDTO(TeacherComplaint complaint, UserDTO sender, UserDTO receiver, UserDTO student) {
         super();
         setId(complaint.getId());
-        this.sender = new UserDTO(sender);
-        this.receiver = new UserDTO(receiver);
-        this.student = new UserDTO(student);
+        this.sender = sender;
+        this.receiver = receiver;
+        this.student = student;
         this.urgencyLevel = complaint.getUrgencyLevel();
         this.content = complaint.getContent();
         this.sentDate = complaint.getSentDate();

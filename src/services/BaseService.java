@@ -24,8 +24,12 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
         this.baseName = this.getClass().getSimpleName().replace("Service", "");
     }
 
+    public void saveAll(){
+        repository.saveAll();
+    }
+
     public T create(T entity){
-        if(repository.exists(entity.getId())){
+        if(repository.exists(entity)){
             throw new AlreadyExists(baseName + " with id " + entity.getId());
         }
         T saved = repository.save(entity);
@@ -39,11 +43,15 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
         return entity;
     }
 
+    public boolean exists(T entity) {
+        return repository.exists(entity);
+    }
+
     public void update(T entity){
         // used to save changes of ALREADY existing object.
         // this will not throw any excpetions only if (T entity) argument is existing one.
         
-        if(!repository.exists(entity.getId())){
+        if(!repository.exists(entity)){
             throw new DoesNotExist(baseName + " object with id : " + entity.getId());
         }
         if(entity.getId() <= 0){
@@ -61,6 +69,13 @@ public abstract class BaseService<T extends SerializableModel, R extends Reposit
                 .orElseThrow(() -> new DoesNotExist(baseName + " object with id " + id));
         Logger.log("Deleted " + baseName + " id=" + entity.getId());
         repository.delete(id);
+    }
+
+    public void delete(T entity){
+        if(entity == null){
+            throw new DoesNotExist(baseName + " object is null");
+        }
+        this.delete(entity.getId());
     }
 
 

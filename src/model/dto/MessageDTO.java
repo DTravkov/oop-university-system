@@ -1,7 +1,6 @@
 package model.dto;
 
 import model.domain.Message;
-import model.domain.User;
 
 import java.util.Date;
 
@@ -14,11 +13,11 @@ public final class MessageDTO extends BaseViewDTO {
     private final String content;
     private final Date sentDate;
 
-    public MessageDTO(Message message, User sender, User receiver) {
+    public MessageDTO(Message message, UserDTO sender, UserDTO receiver) {
         super();
         setId(message.getId());
-        this.sender = new UserDTO(sender);
-        this.receiver = new UserDTO(receiver);
+        this.sender = sender;
+        this.receiver = receiver;
         this.content = message.getContent();
         this.sentDate = message.getSentDate();
     }
@@ -27,13 +26,24 @@ public final class MessageDTO extends BaseViewDTO {
         return sender;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     public UserDTO getReceiver() {
         return receiver;
     }
 
-    public String getContent() {
-        return content;
+    public UserDTO getOtherUser(int mainUserId) {
+        if(this.getSender().getId() != mainUserId){
+            return this.getSender();
+        }
+        if(this.getReceiver().getId() != mainUserId){
+            return this.getReceiver();
+        }
+        return null;
     }
+
 
     public Date getSentDate() {
         return sentDate;
@@ -41,11 +51,9 @@ public final class MessageDTO extends BaseViewDTO {
 
     @Override
     public String toShortString() {
-        return  "ID: " + getId()
-                + " | From: " + formatUser(sender)
-                + " | To: " + formatUser(receiver)
-                + " | Sent: " + formatDate(sentDate)
-                + " | Text: " + content;
+        return 
+                " -|" +sender.getName() + " " + sender.getSurname() + " (" + formatDate(sentDate) + "): "
+                + "\n" + content;
     }
 
     @Override

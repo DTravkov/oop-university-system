@@ -59,37 +59,29 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
     }
 
     public TeacherComplaintDTO getDTO(TeacherComplaint complaint) {
-        User sender = userService.get(complaint.getSenderId());
-        User receiver = userService.get(complaint.getReceiverId());
-        User student = userService.get(complaint.getStudentId());
-        return new TeacherComplaintDTO(complaint, sender, receiver, student);
+        return new TeacherComplaintDTO(
+                complaint,
+                userService.getDTO(complaint.getSenderId()),
+                userService.getDTO(complaint.getReceiverId()),
+                userService.getDTO(complaint.getStudentId())
+        );
     }
 
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
+            cleanUpUserComplaintData(eventData.getUserId());
+        });
 
-                int deletedId = eventData.getUserId();
-                List<TeacherComplaint> list = repository.findAll();
-                
-                for(TeacherComplaint comp : list){
-                    if(comp.getSenderId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
-                    if(comp.getReceiverId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
-                    if(comp.getStudentId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
-                }
+    }
 
-        }
-    );
-
+    public void cleanUpUserComplaintData(int deletedUserId) {
+        List<TeacherComplaint> complaintsToDelete = repository.findAll().stream()
+                .filter(comp -> comp.getSenderId() == deletedUserId
+                        || comp.getReceiverId() == deletedUserId
+                        || comp.getStudentId() == deletedUserId)
+                .toList();
+        complaintsToDelete.forEach(this::delete);
     }
 
 }

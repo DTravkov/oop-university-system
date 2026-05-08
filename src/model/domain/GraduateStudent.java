@@ -23,6 +23,10 @@ public class GraduateStudent extends Student {
 		this.supervisorId = supervisorId;
 	}
 
+	public void removeSupervisor() {
+		this.supervisorId = AppSettings.DELETED_USER_ID;
+	}
+
 
 
 

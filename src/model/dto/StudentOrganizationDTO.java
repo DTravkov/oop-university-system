@@ -1,7 +1,6 @@
 package model.dto;
 
 import model.domain.StudentOrganization;
-import model.domain.User;
 
 import java.util.List;
 
@@ -14,12 +13,12 @@ public final class StudentOrganizationDTO extends BaseViewDTO {
     private final UserDTO president;
     private final List<UserDTO> members;
 
-    public StudentOrganizationDTO(StudentOrganization organization, User president, List<UserDTO> members) {
+    public StudentOrganizationDTO(StudentOrganization organization, UserDTO president, List<UserDTO> members) {
         super();
         setId(organization.getId());
         this.name = organization.getName();
         this.description = organization.getDescription();
-        this.president = new UserDTO(president);
+        this.president = president;
         this.members = members == null ? List.of() : List.copyOf(members);
     }
 

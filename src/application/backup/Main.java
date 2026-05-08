@@ -18,7 +18,7 @@ public class Main extends BaseApp {
 
         while (true) {
             printMenu();
-            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 12);
+            String choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 13);
 
             switch (choice) {
                 case "1":
@@ -34,7 +34,7 @@ public class Main extends BaseApp {
                     MessageApp.startApp();
                     break;
                 case "5":
-                    TechSupportApp.startApp();
+                    TechRequestApp.startApp();
                     break;
                 case "6":
                     ComplaintApp.startApp();
@@ -55,6 +55,9 @@ public class Main extends BaseApp {
                     TestApp.runAllTests();
                     break;
                 case "12":
+                    MainMenuApp.startApp();
+                    break;
+                case "13":
                     println(Translator.translate(UIMessage.AUTH_GOODBYE));
                     return;
                 default:
@@ -64,21 +67,22 @@ public class Main extends BaseApp {
     }
 
     private static void printMenu() {
-        print("\n Welcome, s" + AppSettings.getActiveUser().getFullName() + "!" 
+        print("\n Welcome, " + AppSettings.getActiveUser().getFullName() + "!"
         + "\n(" + services.userService.getDTO(AppSettings.getActiveUser()).toShortString() + ")");
         println("\n|||  University System |||");
         println("1. User App");
         println("2. Course App");
         println("3. Enrollment App");
         println("4. Message App");
-        println("5. Tech Support App");
+        println("5. Tech Request App");
         println("6. Teacher Complaint App");
         println("7. Student Org. App");
         println("8. News App");
         println("9. Research App");
         println("10. " + Translator.translate(UIMessage.MENU_TITLE_ADMIN));
         println("11. Run tests");
-        println("12. " + Translator.translate(UIMessage.MENU_EXIT));
+        println("12. Main Menu App (auth + role-based)");
+        println("13. " + Translator.translate(UIMessage.MENU_EXIT));
     }
 
     private static void askLanguage() {
