@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import model.domain.ResearchPaper;
-import model.domain.ResearchProject;
 import model.domain.ResearcherProfile;
 import model.domain.SerializableModel;
 
@@ -46,10 +45,7 @@ public class ResearchRepository extends Repository<SerializableModel> {
     public List<SerializableModel> findAllResearchPapers() {
         return this.findAllByClass(ResearchPaper.class);
     }
-    public List<SerializableModel> findAllResearchProjects() {
-        return this.findAllByClass(ResearchProject.class);
-    }
-    
+
     private List<SerializableModel> findAllByClass(Class<? extends SerializableModel> dotClass) {
         return super.findAll((entity) -> entity.getClass().equals(dotClass));
     }

@@ -19,7 +19,7 @@ public class CommentService extends BaseService<Comment, CommentRepository> {
 
     @Override
     public Comment create(Comment comment) {
-        userService.get(comment.getSenderId());
+        userService.get(comment.getSender().getId());
         return super.create(comment);
     }
 
@@ -39,7 +39,7 @@ public class CommentService extends BaseService<Comment, CommentRepository> {
             List<Comment> list = this.getAll();
 
             for(Comment comment : list){
-                if(comment.getSenderId() == deletedUserId){
+                if(comment.getSender().getId() == deletedUserId){
                     this.delete(comment.getId());
                 }
             }

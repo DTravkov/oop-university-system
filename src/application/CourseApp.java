@@ -114,8 +114,8 @@ public class CourseApp {
         courseService.addTeacher(courseId, teacherId, type);
 
         System.out.println(courseService.get(courseId));
-        System.out.println("Lecturer IDs : " + courseService.get(courseId).getLectureTeachers());
-        System.out.println("Practice Teacher IDs : " + courseService.get(courseId).getPracticeTeachers());
+        System.out.println("Lecturers : " + courseService.get(courseId).getLectureTeachers());
+        System.out.println("Practice teachers : " + courseService.get(courseId).getPracticeTeachers());
     }
 
     private static void getCourseById(Scanner scanner) {
@@ -128,8 +128,8 @@ public class CourseApp {
         printCourses();
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
         Course course = courseService.get(courseId);
-        System.out.println("Lecturer IDs : " + course.getLectureTeachers());
-        System.out.println("Practice Teacher IDs : " + course.getPracticeTeachers());
+        System.out.println("Lecturers : " + course.getLectureTeachers());
+        System.out.println("Practice teachers : " + course.getPracticeTeachers());
     }
 
     private static void printCourses() {

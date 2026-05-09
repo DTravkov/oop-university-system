@@ -12,7 +12,7 @@ import model.repository.ComplaintRepository;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
 
-public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRepository>{
+public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRepository> {
 
     private final UserService userService;
 
@@ -24,22 +24,26 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
 
     public void sendComplaint(TeacherComplaint complaint) {
 
-        User from = userService.get(complaint.getSenderId());
-        User to = userService.get(complaint.getReceiverId());
-        User about = userService.get(complaint.getStudentId());
+        User from = userService.get(complaint.getSender().getId());
+        User to = userService.get(complaint.getReceiver().getId());
+        User about = userService.get(complaint.getStudent().getId());
 
-        if(from.getId() == AppSettings.DELETED_USER_ID || to.getId() == AppSettings.DELETED_USER_ID){
+        if (from.getId() == AppSettings.DELETED_USER_ID || to.getId() == AppSettings.DELETED_USER_ID) {
             throw new OperationNotAllowed(" sending complaints to/from deleted account");
         }
-        if(!(from instanceof Teacher)){
+        if (!(from instanceof Teacher)) {
             throw new OperationNotAllowed(" sending complaints from " + from.getClass().getSimpleName() + " +account");
         }
-        if(!(to instanceof Dean)){
+        if (!(to instanceof Dean)) {
             throw new OperationNotAllowed(" sending complaints to " + to.getClass().getSimpleName() + " account");
         }
-        if(!(about instanceof Student)){
+        if (!(about instanceof Student)) {
             throw new OperationNotAllowed(" sending complaints about person who is " + about.getClass().getSimpleName());
         }
+
+        complaint.setSender(from);
+        complaint.setReceiver(to);
+        complaint.setStudent(about);
 
         this.create(complaint);
     }
@@ -53,30 +57,25 @@ public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRep
     }
 
     @Override
-    public void subscribeToEvents(){
+    public void subscribeToEvents() {
         eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
+            int deletedId = eventData.getUserId();
+            List<TeacherComplaint> list = this.getAll();
 
-                int deletedId = eventData.getUserId();
-                List<TeacherComplaint> list = repository.findAll();
-                
-                for(TeacherComplaint comp : list){
-                    if(comp.getSenderId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
-                    if(comp.getReceiverId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
-                    if(comp.getStudentId() == deletedId){
-                        this.delete(comp.getId());
-                        continue;
-                    }
+            for (TeacherComplaint comp : list) {
+                if (comp.getSender().getId() == deletedId) {
+                    this.delete(comp.getId());
+                    continue;
                 }
-
-        }
-    );
-
+                if (comp.getReceiver().getId() == deletedId) {
+                    this.delete(comp.getId());
+                    continue;
+                }
+                if (comp.getStudent().getId() == deletedId) {
+                    this.delete(comp.getId());
+                }
+            }
+        });
     }
 
 }

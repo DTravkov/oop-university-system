@@ -74,9 +74,9 @@ public class ComplaintApp {
         int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
-        userService.get(teacherId);
-        userService.get(deanId);
-        userService.get(studentId);
+        User teacher = userService.get(teacherId);
+        User dean = userService.get(deanId);
+        User aboutStudent = userService.get(studentId);
 
         ComplaintUrgencyLevel urgencyLevel;
 
@@ -94,7 +94,7 @@ public class ComplaintApp {
                 throw new OperationNotAllowed(" entering invalid urgency level");
         }
 
-        TeacherComplaint complaint = new TeacherComplaint(urgencyLevel,teacherId, deanId, studentId, content);
+        TeacherComplaint complaint = new TeacherComplaint(urgencyLevel, teacher, dean, aboutStudent, content);
         complaintService.sendComplaint(complaint);
 
         System.out.println(Translator.translate(UIMessage.MSG_SENT));

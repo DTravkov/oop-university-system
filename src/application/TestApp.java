@@ -180,7 +180,7 @@ public class TestApp {
             courseService.addTeacher(course.getId(), teacher.getId(), TeacherType.LECTURE);
             userService.delete(teacher.getId());
             Course updatedCourse = courseService.get(course.getId());
-            return !updatedCourse.getLectureTeachers().contains(teacher.getId());
+            return !updatedCourse.getLectureTeachers().contains(teacher);
         } finally {
             cleanupBin.cleanup();
         }
@@ -196,7 +196,7 @@ public class TestApp {
             cleanupBin.trackUser(student.getId());
             Course course = courseService.create(new Course("tc-enr-course-" + suffix, "enrollment relation", 4, CourseType.MAJOR));
             cleanupBin.trackCourse(course.getId());
-            Enrollment enrollment = enrollmentService.create(new Enrollment(course.getId(), student.getId()));
+            Enrollment enrollment = enrollmentService.create(new Enrollment(course, student));
             cleanupBin.trackEnrollment(enrollment.getId());
             userService.delete(student.getId());
             return enrollmentService.getAllByStudentId(student.getId()).isEmpty();
@@ -250,7 +250,7 @@ public class TestApp {
             cleanupBin.trackUser(teacher.getId());
             Course course = courseService.create(new Course("tc-non-student-course-" + suffix, "should fail", 2, CourseType.MINOR));
             cleanupBin.trackCourse(course.getId());
-            return expectThrows(OperationNotAllowed.class, () -> enrollmentService.create(new Enrollment(course.getId(), teacher.getId())));
+            return expectThrows(OperationNotAllowed.class, () -> enrollmentService.create(new Enrollment(course, teacher)));
         } finally {
             cleanupBin.cleanup();
         }
@@ -269,7 +269,7 @@ public class TestApp {
             );
             cleanupBin.trackUser(teacher.getId());
             return expectThrows(OperationNotAllowed.class, () ->
-                    messageService.sendMessage(new Message(student.getId(), teacher.getId(), "should not send")));
+                    messageService.sendMessage(new Message(student, teacher, "should not send")));
         } finally {
             cleanupBin.cleanup();
         }
@@ -300,10 +300,10 @@ public class TestApp {
             cleanupBin.trackUser(student.getId());
             Course course = courseService.create(new Course("tc-dup-enr-course-" + suffix, "duplicate enrollment", 4, CourseType.MAJOR));
             cleanupBin.trackCourse(course.getId());
-            Enrollment enrollment = enrollmentService.create(new Enrollment(course.getId(), student.getId()));
+            Enrollment enrollment = enrollmentService.create(new Enrollment(course, student));
             cleanupBin.trackEnrollment(enrollment.getId());
             return expectThrows(AlreadyExists.class, () ->
-                    enrollmentService.create(new Enrollment(course.getId(), student.getId())));
+                    enrollmentService.create(new Enrollment(course, student)));
         } finally {
             cleanupBin.cleanup();
         }
@@ -338,13 +338,13 @@ public class TestApp {
                     Dean.class, "tc.msg.delete.receiver." + suffix, "12345", "Msg", "Receiver", null, null
             );
             cleanupBin.trackUser(receiver.getId());
-            Message message = new Message(sender.getId(), receiver.getId(), "delete user message mapping");
+            Message message = new Message(sender, receiver, "delete user message mapping");
             messageService.sendMessage(message);
             cleanupBin.trackMessage(message.getId());
             userService.delete(sender.getId());
             List<Message> messagesByReceiver = messageService.getAllByReceiverId(receiver.getId());
             return messagesByReceiver.stream().anyMatch(msg ->
-                    msg.getContent().equals("delete user message mapping") && msg.getSenderId() == AppSettings.DELETED_USER_ID);
+                    msg.getContent().equals("delete user message mapping") && msg.getSender().getId() == AppSettings.DELETED_USER_ID);
         } finally {
             cleanupBin.cleanup();
         }
@@ -369,9 +369,9 @@ public class TestApp {
 
             TeacherComplaint invalidComplaint = new TeacherComplaint(
                     ComplaintUrgencyLevel.HIGH,
-                    studentSender.getId(),
-                    deanReceiver.getId(),
-                    aboutStudent.getId(),
+                    studentSender,
+                    deanReceiver,
+                    aboutStudent,
                     "invalid sender role"
             );
             return expectThrows(OperationNotAllowed.class, () -> complaintService.sendComplaint(invalidComplaint));
@@ -420,11 +420,11 @@ public class TestApp {
             newsService.postNews(news);
             cleanupBin.trackNews(news.getId());
 
-            Comment comment = commentService.create(new Comment(commenter.getId(), "test news comment"));
+            Comment comment = commentService.create(new Comment(commenter, "test news comment"));
             cleanupBin.trackComment(comment.getId());
 
-            newsService.assignComment(news.getId(), comment.getId());
-            return newsService.get(news.getId()).getComments().contains(comment.getId());
+            newsService.assignComment(news.getId(), comment);
+            return newsService.get(news.getId()).getComments().contains(comment);
         } finally {
             cleanupBin.cleanup();
         }
@@ -447,12 +447,12 @@ public class TestApp {
             newsService.postNews(news);
             cleanupBin.trackNews(news.getId());
 
-            Comment comment = commentService.create(new Comment(commenter.getId(), "comment to delete"));
+            Comment comment = commentService.create(new Comment(commenter, "comment to delete"));
             cleanupBin.trackComment(comment.getId());
-            newsService.assignComment(news.getId(), comment.getId());
+            newsService.assignComment(news.getId(), comment);
 
             commentService.delete(comment.getId());
-            return !newsService.get(news.getId()).getComments().contains(comment.getId());
+            return !newsService.get(news.getId()).getComments().contains(comment);
         } finally {
             cleanupBin.cleanup();
         }

@@ -1,38 +1,37 @@
 package model.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.ArrayList;
 
 import model.enumeration.NewsUrgencyLevel;
+import settings.AppSettings;
 import utils.FieldValidator;
 
 public class News extends SerializableModel {
 
     private static final long serialVersionUID = 1L;
 
-
-    private int publisherId;
+    private User publisher;
     private String title;
     private String content;
     private NewsUrgencyLevel urgencyLevel;
     private Date publishedDate;
-    private List<Integer> comments;
+    private List<Comment> comments;
 
-    public News(int publisherId, String title, String content, NewsUrgencyLevel urgencyLevel) {
-        FieldValidator.requirePositive(publisherId, "Publisher ID");
+    public News(User publisher, String title, String content, NewsUrgencyLevel urgencyLevel) {
+        FieldValidator.requireNonNull(publisher, "Publisher");
         FieldValidator.requireNonBlank(title, "News title");
         FieldValidator.requireNonBlank(content, "News content");
         FieldValidator.requireNonNull(urgencyLevel, "News urgency level");
-        
-        this.publisherId = publisherId;
+
+        this.publisher = publisher;
         this.title = title;
         this.content = content;
         this.urgencyLevel = urgencyLevel;
         this.publishedDate = new Date();
         this.comments = new ArrayList<>();
-        
     }
 
     public String getTitle() {
@@ -67,28 +66,47 @@ public class News extends SerializableModel {
         this.publishedDate = publishedDate;
     }
 
+    public User getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(User publisher) {
+        FieldValidator.requireNonNull(publisher, "Publisher");
+        this.publisher = publisher;
+    }
+
     public int getPublisherId() {
-        return publisherId;
+        return publisher.getId();
     }
 
     public void setPublisherId(int publisherId) {
-        this.publisherId = publisherId;
-    }
-
-    public List<Integer> getComments() {
-        return List.copyOf(comments);
-    }
-
-    public void addComment(int commentId) {
-        this.comments.add(commentId);
-    }
-
-    public void removeComment(int commentId) {
-        if(this.comments.contains(Integer.valueOf(commentId))){
-            this.comments.remove(Integer.valueOf(commentId));
+        if (publisherId == AppSettings.DELETED_USER_ID) {
+            this.publisher = new DeletedUser();
+        } else {
+            throw new IllegalArgumentException("Resolve via UserService and call setPublisher(User)");
         }
     }
 
+    public List<Comment> getComments() {
+        return List.copyOf(comments);
+    }
+
+    public void addComment(Comment comment) {
+        FieldValidator.requireNonNull(comment, "Comment");
+        this.comments.add(comment);
+    }
+
+    public boolean removeComment(int commentId) {
+        return comments.removeIf(c -> c.getId() == commentId);
+    }
+
+    public boolean removeComment(Comment comment) {
+        FieldValidator.requireNonNull(comment, "Comment");
+        if (comment.getId() != 0) {
+            return removeComment(comment.getId());
+        }
+        return comments.remove(comment);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -110,7 +128,7 @@ public class News extends SerializableModel {
     public String toString() {
         return "News{" +
                 "id=" + id +
-                ",publisherId=" + publisherId  +
+                ", publisher=" + publisher +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", urgencyLevel=" + urgencyLevel +

@@ -95,8 +95,9 @@ public class NewsApp {
         int senderId = UIForms.readInt(scanner, UIMessage.INPUT_SENDER_ID);
         String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
-        Comment comment = commentService.create(new Comment(senderId, content));
-        newsService.assignComment(newsId, comment.getId());
+        User sender = userService.get(senderId);
+        Comment comment = commentService.create(new Comment(sender, content));
+        newsService.assignComment(newsId, comment);
 
         System.out.println(Translator.translate(UIMessage.MSG_CREATED));
         System.out.println(newsService.get(newsId));
@@ -123,8 +124,8 @@ public class NewsApp {
         int newsId = UIForms.readInt(scanner, UIMessage.INPUT_MESSAGE_ID);
         News news = newsService.get(newsId);
         System.out.println("--- Comments ---");
-        for (Integer commentId : news.getComments()) {
-            System.out.println(commentService.get(commentId));
+        for (Comment c : news.getComments()) {
+            System.out.println(c);
         }
     }
 

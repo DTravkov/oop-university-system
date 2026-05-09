@@ -6,21 +6,21 @@ import utils.FieldValidator;
 import java.util.Date;
 import java.util.Objects;
 
-public class Lesson extends SerializableModel{
+public class Lesson extends SerializableModel {
 
     private LessonType lessonType;
-    private int courseId;
-    private int teacherId;
+    private Course course;
+    private Teacher teacher;
     private Date startTime;
-    
-    public Lesson(LessonType lessonType, int courseId, int teacherId, Date startTime) {
+
+    public Lesson(LessonType lessonType, Course course, Teacher teacher, Date startTime) {
         FieldValidator.requireNonNull(lessonType, "Lesson type");
-        FieldValidator.requirePositive(courseId, "Course ID");
-        FieldValidator.requirePositive(teacherId, "Teacher ID");
+        FieldValidator.requireNonNull(course, "Course");
+        FieldValidator.requireNonNull(teacher, "Teacher");
         FieldValidator.requireNonNull(startTime, "Scheduled time");
         this.lessonType = lessonType;
-        this.courseId = courseId;
-        this.teacherId = teacherId;
+        this.course = course;
+        this.teacher = teacher;
         this.startTime = startTime;
     }
 
@@ -32,20 +32,30 @@ public class Lesson extends SerializableModel{
         this.lessonType = lessonType;
     }
 
-    public int getCourseId() {
-        return courseId;
+    public Course getCourse() {
+        return course;
     }
 
-    public void setCourseId(int courseId) {
-        this.courseId = courseId;
+    public void setCourse(Course course) {
+        FieldValidator.requireNonNull(course, "Course");
+        this.course = course;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        FieldValidator.requireNonNull(teacher, "Teacher");
+        this.teacher = teacher;
+    }
+
+    public int getCourseId() {
+        return course.getId();
     }
 
     public int getTeacherId() {
-        return teacherId;
-    }
-
-    public void setTeacherId(int teacherId) {
-        this.teacherId = teacherId;
+        return teacher.getId();
     }
 
     public Date getStartTime() {
@@ -66,10 +76,10 @@ public class Lesson extends SerializableModel{
             return id == lesson.id;
         }
 
-        return lessonType == lesson.lessonType &&
-                courseId == lesson.courseId &&
-                teacherId == lesson.teacherId &&
-                Objects.equals(startTime, lesson.startTime);
+        return lessonType == lesson.lessonType
+                && Objects.equals(course, lesson.course)
+                && Objects.equals(teacher, lesson.teacher)
+                && Objects.equals(startTime, lesson.startTime);
     }
 
     @Override
@@ -77,6 +87,6 @@ public class Lesson extends SerializableModel{
         if (id != 0) {
             return Integer.hashCode(id);
         }
-        return Objects.hash(lessonType, courseId, teacherId, startTime);
+        return Objects.hash(lessonType, course, teacher, startTime);
     }
 }

@@ -70,7 +70,9 @@ public class EnrollmentApp{
         int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
         int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
 
-        Enrollment enrollment = new Enrollment(courseId, studentId);
+        User student = userService.get(studentId);
+        Course course = courseService.get(courseId);
+        Enrollment enrollment = new Enrollment(course, student);
         enrollmentService.create(enrollment);
 
         System.out.println(Translator.translate(UIMessage.MSG_CREATED));
@@ -118,7 +120,7 @@ public class EnrollmentApp{
 
     private static void printStudents() {
         System.out.println("--- Students ---");
-        for (User user : userService.getAllByClass(Student.class)) {
+        for (User user : userService.getAllByClassOrSubclass(Student.class)) {
             Student student = (Student) user;
             System.out.println("ID: " + student.getId() + ", Name: " + student.getName() + ", Surname: " + student.getSurname());
         }

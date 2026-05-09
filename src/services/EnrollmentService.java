@@ -8,7 +8,6 @@ import java.util.List;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.IEnrollable;
-import model.domain.Student;
 import model.domain.User;
 import model.repository.EnrollmentRepository;
 import services.events.UserDeleteEvent;
@@ -30,8 +29,8 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
 
     @Override
     public Enrollment create(Enrollment enrollment) {
-        User student = userService.get(enrollment.getStudentId());
-        Course course = courseService.get(enrollment.getCourseId());
+        User student = userService.get(enrollment.getStudent().getId());
+        Course course = courseService.get(enrollment.getCourse().getId());
 
         if(repository.exists(student.getId(), course.getId())){
             throw new AlreadyExists(" enrollment for student id " + student.getId() + " and course id " + course.getId());
@@ -40,6 +39,9 @@ public class EnrollmentService extends BaseService<Enrollment, EnrollmentReposit
         if(!(student instanceof IEnrollable)){
             throw new OperationNotAllowed(" enrolling " + student.getClass().getSimpleName() + ". User id : "+ student.getId());
         }
+
+        enrollment.setCourse(course);
+        enrollment.setStudent(student);
 
         return super.create(enrollment);
     }

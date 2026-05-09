@@ -3,6 +3,7 @@ package services;
 import java.util.List;
 
 import exceptions.OperationNotAllowed;
+import model.domain.Comment;
 import model.domain.Comparators;
 import model.domain.Manager;
 import model.domain.News;
@@ -44,10 +45,10 @@ public class NewsService extends BaseService<News, NewsRepository>{
 
 
 
-    public void assignComment(int newsId, int commentId) {
-        News news = this.get(newsId);
+    public void assignComment(int targetNewsId, Comment comment) {
+        News news = this.get(targetNewsId);
 
-        news.addComment(commentId);
+        news.addComment(comment);
 
         this.update(news);
     }
@@ -80,8 +81,7 @@ public class NewsService extends BaseService<News, NewsRepository>{
             int deletedCommentId = event.getCommentId();
             List<News> list = this.getAll();
             for(News news : list){
-                if(news.getComments().contains(Integer.valueOf(deletedCommentId))){
-                    news.removeComment(deletedCommentId);
+                if (news.removeComment(deletedCommentId)) {
                     this.update(news);
                 }
             }

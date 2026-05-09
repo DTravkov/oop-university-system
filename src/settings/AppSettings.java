@@ -11,7 +11,7 @@ public class AppSettings {
 
     public static final int DELETED_USER_ID = -1;
 
-    public static final String DEFAULT_REPOSITORY_ROOT = "data/";
+    public static final String DEFAULT_DATA_DIRECTORY = "data/";
 
     public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
 

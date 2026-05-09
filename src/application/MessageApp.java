@@ -65,10 +65,10 @@ public class MessageApp {
         int receiverId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
         String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
-        userService.get(senderId);
-        userService.get(receiverId);
+        User sender = userService.get(senderId);
+        User receiver = userService.get(receiverId);
 
-        Message message = new Message(senderId, receiverId, content);
+        Message message = new Message(sender, receiver, content);
         messageService.sendMessage(message);
 
         System.out.println(Translator.translate(UIMessage.MSG_SENT));

@@ -8,7 +8,7 @@ public record CommentDeleteEvent(Comment comment) implements Event{
         return comment.getId();
     }
     public int getCommentSenderId(){
-        return comment.getSenderId();
+        return comment.getSender().getId();
     }
     public String getCommentContent(){
         return comment.getContent();

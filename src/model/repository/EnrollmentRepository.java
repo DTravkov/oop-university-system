@@ -17,20 +17,20 @@ public class EnrollmentRepository extends Repository<Enrollment> {
 
 
     public Enrollment findByStudentIdAndCourseId(int studentId, int courseId) {
-        return this.findFirst(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId)
+        return this.findFirst(entity -> entity.getStudent().getId() == studentId && entity.getCourse().getId() == courseId)
                 .orElse(null);
     }
 
     public List<Enrollment> findAllByStudentId(int studentId) {
-        return this.findAll(entity -> entity.getStudentId() == studentId);
+        return this.findAll(entity -> entity.getStudent().getId() == studentId);
     }
 
     public List<Enrollment> findAllByCourseId(int courseId) {
-        return this.findAll(entity -> entity.getCourseId() == courseId);
+        return this.findAll(entity -> entity.getCourse().getId() == courseId);
     }
 
     public boolean exists(int studentId, int courseId) {
-        return this.exists(entity -> entity.getStudentId() == studentId && entity.getCourseId() == courseId);
+        return this.exists(entity -> entity.getStudent().getId() == studentId && entity.getCourse().getId() == courseId);
     }
 
 }

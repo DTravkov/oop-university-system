@@ -18,12 +18,12 @@ public class ComplaintRepository extends Repository<TeacherComplaint> {
         return INSTANCE;
     }
 
-    public List<TeacherComplaint> findAllByTeacherId(int teacherId){
-        return this.findAll(entity -> entity.getSenderId() == teacherId);
+    public List<TeacherComplaint> findAllByTeacherId(int teacherId) {
+        return this.findAll(entity -> entity.getSender().getId() == teacherId);
     }
 
-    public List<TeacherComplaint> findAllByDeanId(int deanId){
-        return this.findAll(entity -> entity.getReceiverId() == deanId);
+    public List<TeacherComplaint> findAllByDeanId(int deanId) {
+        return this.findAll(entity -> entity.getReceiver().getId() == deanId);
     }
 
 }

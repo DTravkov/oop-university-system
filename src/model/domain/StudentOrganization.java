@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import settings.AppSettings;
 import utils.FieldValidator;
 
 public class StudentOrganization extends SerializableModel {
@@ -12,16 +13,16 @@ public class StudentOrganization extends SerializableModel {
 
     private String name;
     private String description;
-    private int presidentId;
-    private final List<Integer> members;
+    private User president;
+    private final List<User> members;
 
-    public StudentOrganization(String name, String description, int presidentId) {
+    public StudentOrganization(String name, String description, User president) {
         FieldValidator.requireNonBlank(name, "Organization name");
-        FieldValidator.requirePositive(presidentId, "Organization president id");
+        FieldValidator.requireNonNull(president, "President");
 
         this.name = name;
         this.description = description;
-        this.presidentId = presidentId;
+        this.president = president;
         this.members = new ArrayList<>();
     }
 
@@ -41,28 +42,45 @@ public class StudentOrganization extends SerializableModel {
         this.description = description;
     }
 
+    public User getPresident() {
+        return president;
+    }
+
+    public void setPresident(User president) {
+        FieldValidator.requireNonNull(president, "President");
+        this.president = president;
+    }
+
     public int getPresidentId() {
-        return presidentId;
+        return president.getId();
     }
 
     public void setPresidentId(int presidentId) {
-        this.presidentId = presidentId;
-    }
-
-    public List<Integer> getMembers() {
-        return List.copyOf(members);
-    }
-
-    public void addMember(int studentId) {
-        if (!this.members.contains(studentId)) {
-            this.members.add(studentId);
+        if (presidentId == AppSettings.DELETED_USER_ID) {
+            this.president = new DeletedUser();
+        } else {
+            throw new IllegalArgumentException("Resolve via UserService and call setPresident(User)");
         }
     }
 
-    public void removeMember(int studentId) {
-        this.members.remove(Integer.valueOf(studentId));
+    public List<User> getMembers() {
+        return List.copyOf(members);
     }
 
+    public void addMember(User member) {
+        FieldValidator.requireNonNull(member, "Member");
+        if (!this.members.contains(member)) {
+            this.members.add(member);
+        }
+    }
+
+    public void removeMember(int memberId) {
+        this.members.removeIf(u -> u.getId() == memberId);
+    }
+
+    public boolean removeMember(User member) {
+        return members.remove(member);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -85,7 +103,7 @@ public class StudentOrganization extends SerializableModel {
         return "StudentOrganization{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", presidentId=" + presidentId +
+                ", president=" + president +
                 ", members=" + members +
                 '}';
     }

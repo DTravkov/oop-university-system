@@ -45,16 +45,16 @@ public class CourseService extends BaseService<Course, CourseRepository>  {
         }
 
         if(type == TeacherType.LECTURE){
-            if(course.getLectureTeachers().contains(teacherId)){
+            if(course.getLectureTeachers().contains(checkedTeacher)){
                 throw new AlreadyExists(" teacher " + teacherId + " as a lecturer");
             }
-            course.addLectureTeacher(teacherId);
+            course.addLectureTeacher(checkedTeacher);
         }
         else if(type == TeacherType.PRACTICE){
-            if(course.getPracticeTeachers().contains(teacherId)){
+            if(course.getPracticeTeachers().contains(checkedTeacher)){
                 throw new AlreadyExists(" teacher " + teacherId + " as a practice teacher");
             }
-            course.addPracticeTeacher(teacherId);
+            course.addPracticeTeacher(checkedTeacher);
         }
 
         this.update(course);

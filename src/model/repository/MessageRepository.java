@@ -17,12 +17,12 @@ public class MessageRepository extends Repository<Message> {
         return INSTANCE;
     }
 
-    public List<Message> findAllBySenderId(int senderId){
-        return this.findAll(entity -> entity.getSenderId() == senderId);
+    public List<Message> findAllBySenderId(int senderId) {
+        return this.findAll(entity -> entity.getSender().getId() == senderId);
     }
 
-    public List<Message> findAllByReceiverId(int receiverId){
-        return this.findAll(entity -> entity.getReceiverId() == receiverId);
+    public List<Message> findAllByReceiverId(int receiverId) {
+        return this.findAll(entity -> entity.getReceiver().getId() == receiverId);
     }
 
 }

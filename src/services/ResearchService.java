@@ -5,7 +5,6 @@ import java.util.List;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import model.domain.ResearchPaper;
-import model.domain.ResearchProject;
 import model.domain.ResearcherProfile;
 import model.domain.SerializableModel;
 import model.domain.User;
@@ -28,21 +27,17 @@ public class ResearchService extends BaseService<SerializableModel, ResearchRepo
         return super.create(paper);
     }
 
-    public SerializableModel createProject(ResearchProject project) {
-        return super.create(project);
-    }
-
     public ResearcherProfile makeResearcher(int userId) {
         return createResearcherProfile(userId);
     }
 
     public ResearcherProfile createResearcherProfile(int userId) {
-        userService.get(userId);
+        User user = userService.get(userId);
 
         if(repository.researcherProfileExists(userId))
             throw new AlreadyExists("researcher profile for user with id : " + userId);
 
-        return (ResearcherProfile) super.create(new ResearcherProfile(userId));
+        return (ResearcherProfile) super.create(new ResearcherProfile(user));
     }
 
     public void deleteResearcherProfile(int userId) {
