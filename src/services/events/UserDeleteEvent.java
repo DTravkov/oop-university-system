@@ -4,8 +4,8 @@ import model.domain.User;
 
 public record UserDeleteEvent(User user) implements Event{
 
-    public int getUserId(){
-        return user.getId();
+    public User getUser(){
+        return user;
     }
 
 }

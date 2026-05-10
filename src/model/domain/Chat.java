@@ -1,0 +1,106 @@
+package model.domain;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import exceptions.OperationNotAllowed;
+import utils.FieldValidator;
+
+public class Chat extends SerializableModel {
+
+    private static final long serialVersionUID = 1L;
+
+    private final Set<Employee> members = new HashSet<>(); 
+    private List<Message> messages = new ArrayList<>();
+
+    public Chat(Employee memberOne, Employee memberTwo) {
+        FieldValidator.requireNonNull(memberOne, "Member one");
+        FieldValidator.requireNonNull(memberTwo, "Member two");
+        if (memberOne.equals(memberTwo)) {
+            throw new OperationNotAllowed("c hat members must be distinct users");
+        }
+        this.members.add(memberOne);
+        this.members.add(memberTwo);
+    }
+
+
+    public String getTitleFor(Employee employee){
+        return getMembers().stream()
+                    .filter(member -> member.getId() != employee.getId())
+                    .map(member -> ((Employee) member)
+                    .getFullname())
+                    .toList().toString();
+    }
+
+    public Employee getOtherMember(Employee member) {
+        for(Employee emp : members){
+            if(emp.getId() != member.getId()){
+                return emp;
+            }
+        }
+        return null;
+    }
+
+    public Set<Employee> getMembers() {
+        return members;
+    }
+
+    public boolean isMember(Employee employee) {
+        return members.contains(employee);
+    }
+
+    public List<Message> getMessages() {
+        return List.copyOf(messages);
+    }
+
+    public void sendMessage(Message message) {
+        FieldValidator.requireNonNull(message, "Message");
+        if(messages.contains(message)){
+            throw new OperationNotAllowed("adding a duplicate message to chat");
+        }
+        if(!isMember(message.getSender())){
+            throw new OperationNotAllowed("sending message to inappropriate chat");
+        }
+        this.messages.add(message);
+    }
+
+    public boolean removeMessage(int messageId) {
+        return messages.removeIf(m -> m.getId() == messageId);
+    }
+
+    public boolean removeMessage(Message message) {
+        FieldValidator.requireNonNull(message, "Message");
+        return messages.remove(message);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Chat chat = (Chat) o;
+        if (id != 0 && chat.getId() != 0) {
+            return id == chat.getId();
+        }
+        return Objects.equals(this.members, chat.members);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id != 0) {
+            return Integer.hashCode(id);
+        }
+        return Objects.hash(members);
+    }
+
+    @Override
+    public String toString() {
+        return "Chat{" +
+                "id=" + id +
+                ", members=" + members +
+                ", messages=" + messages +
+                '}';
+    }
+}

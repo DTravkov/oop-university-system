@@ -1,88 +1,93 @@
 package services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
-import model.domain.IMessagable;
+import model.domain.Chat;
+import model.domain.Employee;
 import model.domain.Message;
 import model.domain.User;
-import model.dto.MessageDTO;
-import model.repository.MessageRepository;
 import services.events.UserDeleteEvent;
-import settings.AppSettings;
 
-public class MessageService extends BaseService<Message, MessageRepository>{
+public class MessageService extends BaseService<Chat>{
 
-    private final UserService userService;
 
-    public MessageService(UserService userService) {
-        super(MessageRepository.getInstance());
-        this.userService = userService;
+    public MessageService() {
+        super(Chat.class);
         subscribeToEvents();
     }
 
-    public void sendMessage(Message message) {
-        User sender = userService.get(message.getSenderId());
-        User receiver = userService.get(message.getReceiverId());
+    public Chat sendMessage(Chat chat, Message msg) {
+        Employee sender = (Employee) msg.getSender();
+        if (!chat.isMember(sender)) {
+            throw new DoesNotExist(msg.getSender() + " is not a member of the chat");
+        }
+        chat.sendMessage(msg);
+        update(chat);
+        return chat;
+    }
 
-        if(sender.getId() == AppSettings.DELETED_USER_ID || receiver.getId() == AppSettings.DELETED_USER_ID){
-            throw new OperationNotAllowed(" sending messages to/from deleted account");
+    public Chat sendMessage(Message msg, Employee to) {
+
+        Employee sender = (Employee) msg.getSender();
+        Employee receiver = (Employee) to;
+
+        if(sender.getId() <= 0 || receiver.getId() <= 0){
+            throw new OperationNotAllowed(" sending messages to/from deleted accounts");
         }
         
-        if (!(sender instanceof IMessagable) || !(receiver instanceof IMessagable)) {
-            throw new OperationNotAllowed(" sending messages to/from non-employee account");
+        Chat chat;
+
+        if(exists(sender, receiver)){
+            chat = get(sender, receiver);
+            chat.sendMessage(msg);
+            update(chat);
+            return chat;
         }
-        
-        this.create(message);
+
+        chat = this.create(new Chat(sender, receiver));
+        chat.sendMessage(msg);
+        update(chat);
+        return chat;
     }
 
 
-    public Map<Integer, List<MessageDTO>> getChatsDTOs(int userId){
-        Map<Integer, List<Message>> chatMap = getUserChats(userId);
-        Map<Integer, List<MessageDTO>> dtoMap = new HashMap<>();
-        for(var entry : chatMap.entrySet()){
-            List<MessageDTO> messageDTOs = new ArrayList<>();
-            entry.getValue().forEach(msg -> {
-                messageDTOs.add(getMessageDTO(msg));
-            });
-            dtoMap.put(entry.getKey(), messageDTOs);
+
+    public List<Chat> getAllChats(Employee chatMember){
+        return getAll().stream().filter(ch -> ch.isMember(chatMember)).toList();
+    }
+
+    public Chat get(Employee memberOne, Employee memberTwo){
+        return getAll().stream()
+                       .filter(chat -> chat.isMember(memberOne) && chat.isMember(memberTwo))
+                       .findFirst()
+                       .orElseThrow(() -> new DoesNotExist("chat for users " + memberOne + " and " + memberTwo));
+    }
+
+    public boolean exists(Employee memberOne, Employee memberTwo){
+        try{
+            get(memberOne, memberTwo);
+            return true;
         }
-        return dtoMap;
-    }
-
-    public MessageDTO getMessageDTO(Message msg){
-        return new MessageDTO(msg, userService.getDTO(msg.getSenderId()), userService.getDTO(msg.getReceiverId()));
-    }
-
-    public Map<Integer, List<Message>> getUserChats(int userId){
-        Map<Integer, List<Message>> chatMap = new HashMap<>();
-        for(Message msg : this.getAll()){
-            if(msg.getReceiverId() == userId || msg.getSenderId() == userId){
-                int otherUserId = msg.getReceiverId() == userId ? msg.getSenderId() : msg.getReceiverId();
-                chatMap.computeIfAbsent(otherUserId, (k) -> new ArrayList<>()).add(msg);
-            }
+        catch (Exception e){
+            return false;
         }
-        return chatMap;
     }
-
 
 
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            cleanUpUserMessageData(event.getUserId());
+            onUserDelete(event.getUser());
         });
     }
 
-    public void cleanUpUserMessageData(int deletedUserId) {
-        List<Message> list = this.getAll();
-        for (Message msg : list) {
-            if (msg.getSenderId() == deletedUserId || msg.getReceiverId() == deletedUserId) {
-                this.delete(msg);
-            }
+    public void onUserDelete(User deletedUser) {
+        if(deletedUser instanceof Employee chatMember){
+            getAllChats(chatMember).forEach(chat->{
+                this.delete(chat);
+            });
         }
     }
 }

@@ -5,6 +5,9 @@ import exceptions.ImmutableFieldChanged;
 import java.io.Serializable;
 
 public abstract class SerializableModel implements Serializable {
+
+	private static final long serialVersionUID = -2924509934968665706L;
+
 	protected int id = 0;
 
 	public int getId(){
@@ -21,5 +24,29 @@ public abstract class SerializableModel implements Serializable {
 	public boolean isNewRecord(){
 		return this.id == 0;
 	}
-	
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		SerializableModel other = (SerializableModel) obj;
+		if (id == 0 || other.id == 0) return false;
+		return id == other.id;
+	}
+
+
+	@Override
+	public int hashCode() {
+		if (id != 0) {
+			return Integer.hashCode(id);
+		}
+		return super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[id=" + id + "]";
+	}
+
 }

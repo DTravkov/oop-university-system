@@ -16,7 +16,7 @@ public class LogEntry extends SerializableModel {
     public LogEntry(String action, User user){
         this.action = action;
         this.userId = user.getId();
-        this.fullname = user.getFullName();
+        this.fullname = user.getFullname();
     }
 
     public Date getTime() {

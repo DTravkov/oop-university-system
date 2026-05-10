@@ -1,9 +1,11 @@
 package model.domain;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
+import exceptions.AlreadyExists;
 import utils.FieldValidator;
 
 public class StudentOrganization extends SerializableModel {
@@ -12,17 +14,18 @@ public class StudentOrganization extends SerializableModel {
 
     private String name;
     private String description;
-    private int presidentId;
-    private final List<Integer> members;
+    private Student president;
+    private final Set<Student> members;
 
-    public StudentOrganization(String name, String description, int presidentId) {
+    public StudentOrganization(String name, String description, Student president) {
         FieldValidator.requireNonBlank(name, "Organization name");
-        FieldValidator.requirePositive(presidentId, "Organization president id");
+        FieldValidator.requireNonNull(president, "President");
 
         this.name = name;
         this.description = description;
-        this.presidentId = presidentId;
-        this.members = new ArrayList<>();
+        this.president = president;
+        this.members = new HashSet<>();
+
     }
 
     public String getName() {
@@ -41,28 +44,34 @@ public class StudentOrganization extends SerializableModel {
         this.description = description;
     }
 
-    public int getPresidentId() {
-        return presidentId;
+    public User getPresident() {
+        return president;
     }
 
-    public void setPresidentId(int presidentId) {
-        this.presidentId = presidentId;
+    public void setPresident(Student president) {
+        FieldValidator.requireNonNull(president, "President");
+        this.president = president;
     }
 
-    public List<Integer> getMembers() {
+
+    public List<User> getMembers() {
         return List.copyOf(members);
     }
 
-    public void addMember(int studentId) {
-        if (!this.members.contains(studentId)) {
-            this.members.add(studentId);
-        }
+    public void addMember(Student member) {
+        FieldValidator.requireNonNull(member, "Member");
+        if(this.members.contains(member))
+            throw new AlreadyExists("member of " + getName() + " organization with id=" + member.getId());
+        this.members.add(member);
     }
 
-    public void removeMember(int studentId) {
-        this.members.remove(Integer.valueOf(studentId));
+    public boolean removeMember(Student member) {
+        return members.remove(member);
     }
 
+    public void removeMember(int memberId) {
+        this.members.removeIf(u -> u.getId() == memberId);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -85,7 +94,7 @@ public class StudentOrganization extends SerializableModel {
         return "StudentOrganization{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", presidentId=" + presidentId +
+                ", president=" + president +
                 ", members=" + members +
                 '}';
     }

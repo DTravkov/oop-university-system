@@ -9,37 +9,25 @@ public class Message extends SerializableModel {
 
     private static final long serialVersionUID = 1L;
 
-    private int receiverId;
-    private int senderId;
+    private Employee sender;
     private final String content;
     private final Date sentDate;
 
-
-    public Message(int senderId, int receiverId, String content) {
-        FieldValidator.requirePositive(senderId, "Sender id");
-        FieldValidator.requirePositive(receiverId, "Receiver id");
+    public Message(Employee sender,  String content) {
+        FieldValidator.requireNonNull(sender, "Sender");
         FieldValidator.requireNonBlank(content, "Content");
-
-        this.senderId = senderId;
-        this.receiverId = receiverId;
+        this.sender = sender;
         this.content = content;
         this.sentDate = new Date();
     }
 
-    public int getReceiverId() {
-        return receiverId;
+    public Employee getSender() {
+        return sender;
     }
 
-    public void setReceiverId(int receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public int getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public void setSender(Employee sender) {
+        FieldValidator.requireNonNull(sender, "Sender");
+        this.sender = sender;
     }
 
     public String getContent() {
@@ -58,8 +46,7 @@ public class Message extends SerializableModel {
         if (id != 0 || message.getId() != 0) {
             return id != 0 && id == message.getId();
         }
-        return receiverId == message.receiverId
-                && senderId == message.senderId
+        return Objects.equals(sender, message.sender)
                 && Objects.equals(content, message.content)
                 && Objects.equals(sentDate, message.sentDate);
     }
@@ -69,15 +56,14 @@ public class Message extends SerializableModel {
         if (id != 0) {
             return Integer.hashCode(id);
         }
-        return Objects.hash(receiverId, senderId, content, sentDate);
+        return Objects.hash(sender, content, sentDate);
     }
 
     @Override
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                ", from=" + senderId +
-                ", to=" + receiverId +
+                ", from=" + sender +
                 ", content='" + content + '\'' +
                 '}';
     }

@@ -16,7 +16,7 @@ public final class Logger {
 
     private static final Logger INSTANCE = new Logger();
 
-    private final String path = AppSettings.DEFAULT_REPOSITORY_ROOT + "Logger.ser";
+    private final String path = AppSettings.DEFAULT_DATA_DIRECTORY + "Logger.ser";
     private List<LogEntry> data = new ArrayList<>();
     
     private boolean isActive = true;

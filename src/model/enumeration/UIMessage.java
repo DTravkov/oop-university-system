@@ -57,6 +57,7 @@ public enum UIMessage {
     INPUT_CHAT_ID("input.chat_id"),
     INPUT_REQUEST_ID("input.request_id"),
     INPUT_MESSAGE_CONTENT("input.message_content"),
+    INPUT_COMMENT("input.comment"),
 
     INPUT_COMPLAINT_LEVEL("input.complaint_level"),
 

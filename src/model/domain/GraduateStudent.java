@@ -2,33 +2,14 @@ package model.domain;
 
 import java.util.*;
 
-import settings.AppSettings;
-
 
 public class GraduateStudent extends Student {
 	
 	private static final long serialVersionUID = 1L;
 
-	private int supervisorId = AppSettings.DELETED_USER_ID;
-
     public GraduateStudent(String login, String password, String name, String surname, Date admissionDate) {
 		super(login, password, name, surname, admissionDate);
 	}
-
-	public Integer getSupervisorId() {
-		return supervisorId;
-	}
-
-	public void setSupervisorId(Integer supervisorId) {
-		this.supervisorId = supervisorId;
-	}
-
-	public void removeSupervisor() {
-		this.supervisorId = AppSettings.DELETED_USER_ID;
-	}
-
-
-
 
 	@Override
 	public boolean equals(Object o) {

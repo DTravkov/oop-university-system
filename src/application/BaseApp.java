@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.User;
-import model.dto.UserDTO;
 import model.enumeration.UIMessage;
 import model.factories.ServiceRegistry;
 import settings.AppSettings;
@@ -61,6 +60,17 @@ public abstract class BaseApp {
         }
     }
 
+    protected static void retryOnException(Runnable action) {
+        while (true) {
+            try {
+                action.run();
+                return;
+            } catch (ApplicationException exc) {
+                printExceptionDetails(exc);
+            }
+        }
+    }
+
     protected static void printInvalidChoice() {
         println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
     }
@@ -77,47 +87,44 @@ public abstract class BaseApp {
         AppSettings.clearActiveUser();
     }
 
-
-
-    protected static class ActionMenu {
+    protected static class MenuBuilder {
 
         private final List<Action> actions = new ArrayList<>();
         private String menuTitle;
         private boolean isRunning;
 
-        protected ActionMenu(String menuTitle) {
+        protected MenuBuilder(String menuTitle) {
             this.menuTitle = "\n||| " + menuTitle + " |||";
         }
 
-        protected ActionMenu(UIMessage msg, Object... args) {
+        protected MenuBuilder(UIMessage msg, Object... args) {
             this(Translator.translate(msg, args));
         }
 
-        protected void start(){
+        protected void start() {
             isRunning = true;
-            while(isRunning){
+            while (isRunning) {
                 println(menuTitle);
-                for(int i = 0; i < actions.size(); i++){
-                    String actionNumber = i+1 + ".";
+                for (int i = 0; i < actions.size(); i++) {
+                    String actionNumber = i + 1 + ".";
                     String actionTitle = actions.get(i).title;
                     println(actionNumber + " " + actionTitle);
                 }
                 int choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, actions.size());
-                actions.get(choice-1).run();
+                actions.get(choice - 1).run();
             }
-
         }
 
         protected void stop() {
             isRunning = false;
         }
 
-        protected ActionMenu addUserLabel(UserDTO user){
-            this.menuTitle += "\n" + "Welcome, " + user.getName() + " " + user.getSurname() + "! (Role: " + user.getRole() + " | ID : " + user.getId() + ")";
+        protected MenuBuilder addLabel(String label){
+            this.menuTitle += "\n" + label;
             return this;
         }
 
-        protected ActionMenu addAction(String actionTitle, Runnable callback){
+        protected MenuBuilder addAction(String actionTitle, Runnable callback){
             actions.add(new Action(actionTitle, callback));
             return this;
         }
@@ -131,8 +138,8 @@ public abstract class BaseApp {
                 this.callback = callback;
             }
 
-            public void run(){
-                callback.run();
+            public void run() {
+                BaseApp.handleExceptions(callback);
             }
 
         }

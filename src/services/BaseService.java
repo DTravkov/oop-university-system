@@ -12,81 +12,78 @@ import services.events.EventSystem;
 import services.events.IObserver;
 import utils.Logger;
 
-public abstract class BaseService<T extends SerializableModel, R extends Repository<T>> implements IService, IObserver {
+public abstract class BaseService<T extends SerializableModel> implements IService, IObserver {
 
-    protected final R repository;
+    protected final Repository<T> repository;
     protected final EventSystem eventSystem;
-    private String baseName;
+    protected String baseName;
 
-    protected BaseService(R repository) {
-        this.repository = repository;
+    protected BaseService(Class<T> className) {
+        this.repository = new Repository<T>(className);
         this.eventSystem = EventSystem.getInstance();
         this.baseName = this.getClass().getSimpleName().replace("Service", "");
-    }
 
-    public void saveAll(){
-        repository.saveAll();
     }
 
     public T create(T entity){
-        if(repository.exists(entity)){
+        if(repository.exists(entity.getId())){
             throw new AlreadyExists(baseName + " with id " + entity.getId());
         }
-        T saved = repository.save(entity);
-        Logger.log("Created " + baseName + " id=" + saved.getId());
-        return saved;
+        Logger.log("Create " + baseName + " (" + entity + ")");
+        return repository.save(entity);
     }
+    
 
     public T get(int id){
-        T entity = repository.find(id)
-                             .orElseThrow(() -> new DoesNotExist(baseName + " record with id=" + id));
-        return entity;
+        return repository.getAll().stream()
+                                .filter(entity -> entity.getId() == id)
+                                .findFirst()
+                                .orElseThrow(()-> new DoesNotExist(baseName + " with id=" + id));
     }
 
-    public boolean exists(T entity) {
-        return repository.exists(entity);
+    public T get(T entity){
+        return repository.getAll().stream()
+                                .filter(e -> e.equals(entity))
+                                .findFirst()
+                                .orElseThrow(()-> new DoesNotExist(baseName + " with id=" + entity.getId()));
     }
 
     public void update(T entity){
-        // used to save changes of ALREADY existing object.
-        // this will not throw any excpetions only if (T entity) argument is existing one.
-        
-        if(!repository.exists(entity)){
+        if(!repository.exists(entity.getId())){
             throw new DoesNotExist(baseName + " object with id : " + entity.getId());
         }
-        if(entity.getId() <= 0){
+        if(entity.getId() == 0){
             throw new OperationNotAllowed( baseName + " non-existing object can not be updated");
         }
+        Logger.log("Update " + baseName + " (" + entity + ")");
         repository.save(entity);
-        Logger.log("Updated " + baseName + " id=" + entity.getId());
+    }
+
+    public void delete(T entity){
+        if(!repository.exists(entity)){
+            throw new DoesNotExist( baseName + " object with id " + entity.getId());
+        }
+        Logger.log("Delete " + baseName + " (" + entity + ")");
+        repository.delete(entity);
     }
 
     public void delete(int id){
         if(!repository.exists(id)){
             throw new DoesNotExist( baseName + " object with id " + id);
         }
-        T entity = repository.find(id)
-                .orElseThrow(() -> new DoesNotExist(baseName + " object with id " + id));
-        Logger.log("Deleted " + baseName + " id=" + entity.getId());
+        Logger.log("Delete " + baseName + " id=" + id);
         repository.delete(id);
-    }
-
-    public void delete(T entity){
-        if(entity == null){
-            throw new DoesNotExist(baseName + " object is null");
-        }
-        this.delete(entity.getId());
     }
 
 
 
     public List<T> getAll() {
-        return repository.findAll();
+        return repository.getAll();
     }
 
     @Override
     public void subscribeToEvents() {
-        // override if needed to listen for events
+        // override and call in constructor if service needs to listen for events
     }
 
 

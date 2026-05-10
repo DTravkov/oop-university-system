@@ -11,25 +11,35 @@ public class AppSettings {
     public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
 
     // used as a placeholder for unauthourized account OR while testing our application layer.
-    public static final int ANONYMOUS_USER_ID = -54;
+    public static final int ANONYMOUS_USER_ID = -1;
     public static final User ANONYMOUS_USER = new AnonymousUser();
 
     // used as a placeholder in case user is deleted, but his data must be saved (examlpe : messages/news).
-    public static final int DELETED_USER_ID = -27;
+    public static final int DELETED_USER_ID = -2;
     public static final User DELETED_USER = new DeletedUser();
 
-    public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "admin", "superuserovich");
+    public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "Admin", "Superuserovich");
+
+
+    
+    public static final List<User> DEFAULT_SYSTEM_USERS = List.of(
+        ANONYMOUS_USER,
+        DELETED_USER,
+        DEFAULT_ADMIN
+    );
+
 
     public static final int RECENT_LOG_HOURS = 12;
 
-    public static final String DEFAULT_REPOSITORY_ROOT = "data/";
+    public static final String DEFAULT_DATA_DIRECTORY = "data/";
 
 
+    /** User subclasses that cannot be registered as normal accounts via the UI. */
     public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
-        User.class,
         AnonymousUser.class,
         DeletedUser.class,
-        Employee.class
+        Employee.class,
+        User.class
     );
 
     public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(

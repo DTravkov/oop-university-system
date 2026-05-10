@@ -73,7 +73,7 @@ public class User extends SerializableModel{
 		this.surname = surname;
 	}
 
-	public String getFullName() {
+	public String getFullname() {
 		return name + " " + surname;
 	}
 
@@ -85,20 +85,21 @@ public class User extends SerializableModel{
 		isBanned = banned;
 	}
 
-	
-
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		User user = (User) o;
-
-		if (id != 0 || user.getId() != 0) {
-			return id != 0 && id == user.getId();
+		if (super.equals(o)) {
+			return true;
 		}
-
-		return Objects.equals(login, user.login);
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		User other = (User) o;
+		
+		if (id == 0 && other.id == 0) {
+			return Objects.equals(login, other.login);
+		}
+		return false;
 	}
 
 	@Override

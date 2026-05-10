@@ -8,6 +8,7 @@ import utils.FieldValidator;
 public class Student extends User implements IEnrollable {
 	
 	private static final long serialVersionUID = 1L;
+
     protected Date admissionDate;
 
     public Student(String login, String password, String name, String surname, Date admissionDate) {

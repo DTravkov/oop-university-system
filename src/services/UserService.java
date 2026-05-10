@@ -1,102 +1,105 @@
 package services;
 
 import exceptions.AlreadyExists;
+import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
-import java.util.Date;
+
 import java.util.List;
+import java.util.Objects;
 
 import model.domain.User;
-import model.dto.UserDTO;
-import model.enumeration.TeacherType;
-import model.factories.UserFactory;
-import model.repository.UserRepository;
 import services.events.UserCreateEvent;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Logger;
 
-public class UserService extends BaseService<User, UserRepository> {
+
+public class UserService extends BaseService<User> {
 
     public UserService() {
-        super(UserRepository.getInstance());
-
+        super(User.class);
+        
     }
 
-    static {
-        initializeSystemUsers();
-    }
-
-
-    public User registerUser(Class<? extends User> userClass, String login, String password, String name, String surname, Date admissionDate, TeacherType teacherType) {
-        if(repository.existsByLogin(login)){
-            throw new AlreadyExists(" user with login " + login);
+    {
+        // Register system basic users (anonymous, deleted, default adming etc).
+        for (User user : AppSettings.DEFAULT_SYSTEM_USERS) {
+            if(!existsByLogin(user.getLogin()))
+                repository.save(user);
         }
-        User user = UserFactory.createFromClass(userClass, login, password, name, surname, admissionDate, teacherType);
+    }
+
+    @Override
+    public User create(User user) {
+        if(existsByLogin(user.getLogin())){
+            throw new AlreadyExists("User with login=" + user.getLogin());
+        }
         User savedUser = super.create(user);
         this.eventSystem.publish(new UserCreateEvent(savedUser));
         return savedUser;
     }
-    
+
     @Override
-    public void delete(int id) {
-        User userToDelete = this.get(id);
-        this.eventSystem.publish(new UserDeleteEvent(userToDelete));
-        super.delete(id);
-        if(AppSettings.getActiveUser().getId() == userToDelete.getId()){
-            AppSettings.clearActiveUser();
-        }
+    public void delete(User user) {
+        super.delete(user);
+        eventSystem.publish(new UserDeleteEvent(user));
     }
 
-    public User authenticate(String login, String password) {
-        User user = repository.findByLogin(login);
+    public User ban(User user) {
+        user.setBanned(true);
+        repository.save(user);
+        Logger.log("Ban " + baseName + "(" + user + ")");
+        return user;
+    }
 
-        if (user == null || !user.getPassword().equals(password)) {
+
+
+    public User authenticate(String login, String password) {
+        User user = getByLogin(login);
+
+        if (!user.getPassword().equals(password)) {
             throw new InvalidCredentials();
         }
 
         AppSettings.setActiveUser(user);
-        Logger.log("Logged in id=" + user.getId());
-
+        Logger.log("Logged in as " + baseName + "(" + user + ")");
         return user;
     }
-    
-    @SuppressWarnings("unchecked")
-    public List<User> getAllByClass(Class<? extends User> dotClass) {
-        return (List<User>) repository.findAllByClass(dotClass);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<User> getAllByClassOrSubclass(Class<? extends User> dotClass) {
-        return (List<User>) repository.findAllByClassOrSubclass(dotClass);
-    }
 
 
-    public UserDTO getDTO(int userId){
-        User user = get(userId);
-        return new UserDTO(user);
+
+    public <U extends User> U get(int userId, Class<U> className){
+        return (U) getAllByClass(className).stream()
+                                        .filter(u -> u.getId() == userId)
+                                        .findFirst()
+                                        .orElseThrow(()-> new DoesNotExist(className.getSimpleName() + " with id=" + userId));
     }
     
-    public UserDTO getDTO(User user){
-        return new UserDTO(user);
+    @SuppressWarnings("unchecked")
+    public <U extends User> List<U> getAllByClass(Class<U> className){
+        return (List<U>) repository.getAll()
+                        .stream()
+                        .filter(u -> className.isAssignableFrom(u.getClass()))
+                        .toList();
     }
 
-    private static void initializeSystemUsers(){
-
-        UserRepository userRepository = UserRepository.getInstance();
-
-        User deletedUser = AppSettings.DELETED_USER;
-        User systemUser = AppSettings.ANONYMOUS_USER;
-        User defaultAdminUser = AppSettings.DEFAULT_ADMIN;
-
-        if(!userRepository.exists(deletedUser.getId())){
-            userRepository.save(deletedUser);
+    public User getByLogin(String login){
+        for(User user : repository.getAll()){
+            if(Objects.equals(user.getLogin(), login)){
+                return user;
+            }
         }
-        if(!userRepository.exists(systemUser.getId())){
-            userRepository.save(systemUser);
-        }
-        if(!userRepository.existsByLogin("admin")){
-            userRepository.save(defaultAdminUser);
-        }
+        throw new DoesNotExist(baseName + " with login=" + login);
     }
+
+    public boolean existsByLogin(String login){
+        for(User user : repository.getAll()){
+            if(Objects.equals(user.getLogin(), login)){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

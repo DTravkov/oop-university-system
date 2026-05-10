@@ -2,27 +2,26 @@ package model.domain;
 
 import java.util.Date;
 import java.util.Objects;
+import utils.FieldValidator;
 
-public class Comment extends SerializableModel{
-	
+public class Comment extends SerializableModel {
+
     private static final long serialVersionUID = 1L;
 
-    private int senderId;
-	private final String content;
+    private final User sender;
+    private final String content;
     private final Date sentDate;
 
-	public Comment(int senderId, String content) {
-        this.senderId = senderId;
+    public Comment(User sender, String content) {
+        FieldValidator.requireNonNull(sender, "Sender");
+        FieldValidator.requireNonBlank(content, "Content");
+        this.sender = sender;
         this.content = content;
         this.sentDate = new Date();
-	}
-
-    public int getSenderId() {
-        return senderId;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public User getSender() {
+        return sender;
     }
 
     public String getContent() {
@@ -33,7 +32,6 @@ public class Comment extends SerializableModel{
         return sentDate;
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -42,7 +40,7 @@ public class Comment extends SerializableModel{
         if (id != 0 || other.id != 0) {
             return id != 0 && id == other.id;
         }
-        return senderId == other.senderId && Objects.equals(content, other.content);
+        return Objects.equals(sender, other.sender) && Objects.equals(content, other.content);
     }
 
     @Override
@@ -50,23 +48,12 @@ public class Comment extends SerializableModel{
         if (id != 0) {
             return Integer.hashCode(id);
         }
-        return Objects.hash(senderId, content);
+        return Objects.hash(sender, content);
     }
 
     @Override
     public String toString() {
-        return "Comment[id=" + id + ", senderId=" + senderId + ", content=" + content + ",sentDate=" + sentDate + "]";
+        return "Comment[id=" + id + ", sender=" + sender + ", content=" + content + ", sentDate=" + sentDate + "]";
     }
 
-
-    
-
-
-    
-
-    
-
-    
-
-	
 }

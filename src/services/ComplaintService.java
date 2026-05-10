@@ -4,84 +4,58 @@ import java.util.List;
 
 import exceptions.OperationNotAllowed;
 import model.domain.Dean;
-import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
-import model.dto.TeacherComplaintDTO;
-import model.repository.ComplaintRepository;
 import services.events.UserDeleteEvent;
-import settings.AppSettings;
 
-public class ComplaintService extends BaseService<TeacherComplaint, ComplaintRepository>{
+public class ComplaintService extends BaseService<TeacherComplaint>{
 
-    private final UserService userService;
 
     public ComplaintService(UserService userService) {
-        super(ComplaintRepository.getInstance());
-        this.userService = userService;
+        super(TeacherComplaint.class);
         subscribeToEvents();
     }
 
     public void sendComplaint(TeacherComplaint complaint) {
-
-        User from = userService.get(complaint.getSenderId());
-        User to = userService.get(complaint.getReceiverId());
-        User about = userService.get(complaint.getStudentId());
-
-        if(from.getId() == AppSettings.DELETED_USER_ID || to.getId() == AppSettings.DELETED_USER_ID){
-            throw new OperationNotAllowed(" sending complaints to/from deleted account");
-        }
-        if(!(from instanceof Teacher)){
-            throw new OperationNotAllowed(" sending complaints from " + from.getClass().getSimpleName() + " +account");
-        }
-        if(!(to instanceof Dean)){
-            throw new OperationNotAllowed(" sending complaints to " + to.getClass().getSimpleName() + " account");
-        }
-        if(!(about instanceof Student)){
-            throw new OperationNotAllowed(" sending complaints about person who is " + about.getClass().getSimpleName());
-        }
-
         this.create(complaint);
     }
 
-    public List<TeacherComplaint> getAllByTeacherId(int teacherId) {
-        return repository.findAllByTeacherId(teacherId);
+    public void closeComplaint(TeacherComplaint complaint, Dean dean) {
+        if(complaint.getDean().getId() != dean.getId()){
+            throw new OperationNotAllowed("closing other deans' complaints");
+        }
+        this.delete(complaint);
     }
 
-    public List<TeacherComplaint> getAllByDeanId(int deanId) {
-        return repository.findAllByDeanId(deanId);
+    public List<TeacherComplaint> getTeacherComplaints(Teacher teacher) {
+        return getAll().stream()
+                       .filter(comp -> comp.getTeacher().getId() == teacher.getId())
+                       .toList();
     }
 
-    public TeacherComplaintDTO getDTO(int complaintId) {
-        TeacherComplaint complaint = get(complaintId);
-        return getDTO(complaint);
+    public List<TeacherComplaint> getDeanComplaints(Dean dean) {
+        return getAll().stream()
+                       .filter(comp -> comp.getDean().getId() == dean.getId())
+                       .toList();
     }
 
-    public TeacherComplaintDTO getDTO(TeacherComplaint complaint) {
-        return new TeacherComplaintDTO(
-                complaint,
-                userService.getDTO(complaint.getSenderId()),
-                userService.getDTO(complaint.getReceiverId()),
-                userService.getDTO(complaint.getStudentId())
-        );
-    }
 
     @Override
     public void subscribeToEvents(){
-        eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
-            cleanUpUserComplaintData(eventData.getUserId());
-        });
+        eventSystem.subscribe(UserDeleteEvent.class, eventData -> onUserDelete(eventData.getUser()));
 
     }
 
-    public void cleanUpUserComplaintData(int deletedUserId) {
-        List<TeacherComplaint> complaintsToDelete = repository.findAll().stream()
-                .filter(comp -> comp.getSenderId() == deletedUserId
-                        || comp.getReceiverId() == deletedUserId
-                        || comp.getStudentId() == deletedUserId)
-                .toList();
-        complaintsToDelete.forEach(this::delete);
+    public void onUserDelete(User user) {
+        if(user instanceof Dean || user instanceof Teacher){
+            getAll().forEach(comp -> {
+                if(comp.getTeacher().getId() == user.getId() || comp.getDean().getId() == user.getId()){
+                    this.delete(comp);
+                }
+            });
+        }
+        
     }
 
 }

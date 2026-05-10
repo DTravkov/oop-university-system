@@ -1,6 +1,5 @@
 package model.domain;
 
-import exceptions.ImmutableFieldChanged;
 import settings.AppSettings;
 
 public class DeletedUser extends User{
@@ -8,14 +7,13 @@ public class DeletedUser extends User{
 	private static final long serialVersionUID = 1L;
 
     public DeletedUser() {
-		super("DELETED", "DELETED", "Deleted", "User");
+		super("DELETED", "DELETED", "DELETED", "USER");
 		this.setBanned(true);
 		this.id = AppSettings.DELETED_USER_ID;
-	}    
-
-	@Override
-	public void setId(int id) {
-		throw new ImmutableFieldChanged();
 	}
+
+	
+
+    
 
 }

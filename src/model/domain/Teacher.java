@@ -1,11 +1,14 @@
 package model.domain;
 
+
 import model.enumeration.TeacherType;
 import utils.FieldValidator;
 
 public class Teacher extends Employee {
 	
 	private static final long serialVersionUID = 1L;
+
+
 	private TeacherType type;
 	
 	public Teacher(String login, String password, String name, String surname, TeacherType type) {
@@ -28,6 +31,7 @@ public class Teacher extends Employee {
 	public void setType(TeacherType type) {
 		this.type = type;
 	}
+
 
 	@Override
 	public String toString() {

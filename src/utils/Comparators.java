@@ -20,8 +20,8 @@ public class Comparators {
     public static Comparator<ResearchPaper> RESEARCH_PAPER_BY_CITATIONS_DESC = ((rp1,rp2) -> Integer.compare(rp2.getCitations(), rp1.getCitations()));
 
     public static Comparator<User> USER_BY_FULL_NAME = ((u1, u2) -> {
-        String fullNameOne = u1.getFullName().toLowerCase().replace(" ", "");
-        String fullNameTwo = u2.getFullName().toLowerCase().replace(" ", "");
+        String fullNameOne = u1.getFullname().toLowerCase().replace(" ", "");
+        String fullNameTwo = u2.getFullname().toLowerCase().replace(" ", "");
         return fullNameOne.compareTo(fullNameTwo);
     });
 

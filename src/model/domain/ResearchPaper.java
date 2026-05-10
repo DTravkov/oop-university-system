@@ -7,63 +7,78 @@ import java.util.List;
 public class ResearchPaper extends SerializableModel {
     private static final long serialVersionUID = 1L;
 
-    private List<String> pages = new ArrayList<>();
-    private List<Integer> participants = new ArrayList<>();
-    private int views = 0;
-    private int citations = 0;
-    private Date publishDate = new Date();
+    private String title;
+    private int views;
+    private int citations;
+    private Date publishDate;
+    private List<ResearcherProfile> researchers = new ArrayList<>();
+    private List<ResearchPaper> references = new ArrayList<>();
+
     
 
-    public ResearchPaper() {
+    public ResearchPaper(String title) {
+        this.title = title;
+        this.views = 0;
+        this.citations = 0;
+        this.publishDate = new Date();
     }
 
-
-    public List<Integer> getParticipants() {
-        return List.copyOf(participants);
+    public void setTitle(String title){
+        this.title = title;
     }
-
-    public void addParticipant(int userId) {
-        this.participants.add(userId);
+    public String getTitle() {
+        return title;
     }
-
-    public void removeParticipant(int userId) {
-        this.participants.remove(Integer.valueOf(userId));
-    }
-
     public int getViews() {
         return views;
     }
-    
-    public void addView(){
-        this.views += 1;
-    };
+
+    public void setViews(int views) {
+        this.views = views;
+    }
 
     public int getCitations() {
         return citations;
     }
 
-    public void addCitation(){
-        this.citations += 1;
-    };
+    public void setCitations(int citations) {
+        this.citations = citations;
+    }
 
     public Date getPublishDate() {
         return publishDate;
     }
 
-    public void addPage(String pageContent, int pageNumber){
-        this.pages.add(pageNumber, pageContent);
+    public void setPublishDate(Date publishDate) {
+        this.publishDate = publishDate;
     }
 
-    public void appendPage(String pageContent){
-        this.pages.add(pageContent);
+    public List<ResearchPaper> getReferences() {
+        return List.copyOf(references);
+    }
+    
+    public void addReference(ResearchPaper paper) {
+        if (paper != null && !references.contains(paper)) {
+            references.add(paper);
+        }
     }
 
-    public void popPage(){
-        this.pages.removeLast();
+    public List<ResearcherProfile> getResearchers() {
+        return List.copyOf(researchers);
     }
-    public void removePage(int pageNumber){
-        this.pages.remove(pageNumber);
+
+    public void addResearcher(ResearcherProfile researcher) {
+        if (researcher != null && !researchers.contains(researcher)) {
+            researchers.add(researcher);
+        }
     }
-    
-    
+
+    public void removeResearcher(ResearcherProfile researcher) {
+        if (researchers.contains(researcher)) {
+            researchers.remove(researcher);
+        }
+    }
+
+
+
 }
