@@ -79,6 +79,29 @@ public class ResearchPaper extends SerializableModel {
         }
     }
 
+    @Override
+    public String asLine() {
+        return String.format("ID: %d | Title: %s | Views: %d | Citations: %d",
+                id, title, views, citations);
+    }
 
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Title: ").append(title).append('\n');
+        sb.append("Views: ").append(views).append('\n');
+        sb.append("Citations: ").append(citations).append('\n');
+        sb.append("Published: ").append(publishDate).append('\n');
+        sb.append("/Researchers/\n");
+        for (ResearcherProfile rp : researchers) {
+            sb.append(rp.asLine()).append('\n');
+        }
+        sb.append("/Reference titles/\n");
+        for (ResearchPaper ref : references) {
+            sb.append(ref.getId()).append(" — ").append(ref.getTitle()).append('\n');
+        }
+        return sb.toString();
+    }
 
 }

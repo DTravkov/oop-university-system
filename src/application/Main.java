@@ -8,7 +8,6 @@ public class Main extends BaseApp{
         if(isAuthenticated()) 
             Menus.getMainMenu().start();
         shutdown();
-        
     }
 
 }

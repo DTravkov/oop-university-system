@@ -8,5 +8,15 @@ public class Dean extends Employee {
 	public Dean(String login, String password, String name, String surname) {
 		super(login, password, name, surname);
 	}
-	
+
+	@Override
+	public String asLine() {
+		return "Dean | " + super.asLine();
+	}
+
+	@Override
+	public String asTable() {
+		return "Role: Dean\n" + super.asTable();
+	}
+
 }

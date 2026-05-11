@@ -94,6 +94,25 @@ public class TeacherComplaint extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Urgency: %s | Teacher: %s | Dean: %s | About student: %s",
+                id, urgencyLevel, teacher.getFullname(), dean.getFullname(), student.getFullname());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Urgency: ").append(urgencyLevel).append('\n');
+        sb.append("Sent: ").append(sentDate).append('\n');
+        sb.append("/Teacher/\n").append(teacher.asLine()).append('\n');
+        sb.append("/Dean/\n").append(dean.asLine()).append('\n');
+        sb.append("/Student/\n").append(student.asLine()).append('\n');
+        sb.append("Content:\n").append(content).append('\n');
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName() +
                 "[id=" + id +

@@ -74,6 +74,23 @@ public class TechRequest extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Status: %s | From: %s | To: %s",
+                id, status, employee.getFullname(), specialist.getFullname());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Status: ").append(status).append('\n');
+        sb.append("/Employee/\n").append(employee.asLine()).append('\n');
+        sb.append("/Specialist/\n").append(specialist.asLine()).append('\n');
+        sb.append("Content:\n").append(content).append('\n');
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "TechRequest{" +
                 "id=" + id +

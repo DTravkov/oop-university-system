@@ -98,7 +98,9 @@ public class Course extends SerializableModel {
         FieldValidator.requireNonNull(lectureTeacher, "Lecture teacher");
         if(!lectureTeacher.isLecturer())
             throw new OperationNotAllowed("Adding non-lecturer as a lecture teacher");
-
+        if(lectureTeachers.contains(lectureTeacher)){
+            throw new AlreadyExists("teacher with id=" + lectureTeacher.getId() + " as a lecture teacher");
+        }
         if (!this.lectureTeachers.contains(lectureTeacher)) {
             this.lectureTeachers.add(lectureTeacher);
         }
@@ -112,6 +114,9 @@ public class Course extends SerializableModel {
         FieldValidator.requireNonNull(practiceTeacher, "Practice teacher");
         if(!practiceTeacher.isPractice())
             throw new OperationNotAllowed("Adding non-practice as a lecture teacher");
+        if(lectureTeachers.contains(practiceTeacher)){
+            throw new AlreadyExists("teacher with id=" + practiceTeacher.getId() + " as a practice teacher");
+        }
         if (!this.practiceTeachers.contains(practiceTeacher)) {
             this.practiceTeachers.add(practiceTeacher);
         }
@@ -141,6 +146,32 @@ public class Course extends SerializableModel {
             return Integer.hashCode(id);
         }
         return Objects.hash(name);
+    }
+
+    @Override
+    public String asLine() {
+        return String.format("ID: %d | Title: %s | Type: %s | Credits: %d",
+                id, name, type, credits);
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Title: ").append(name).append('\n');
+        sb.append("Description: ").append(description).append('\n');
+        sb.append("Type: ").append(type).append('\n');
+        sb.append("Credits: ").append(credits).append('\n');
+        sb.append("/Lecture teachers/\n");
+        for (Teacher t : lectureTeachers) {
+            sb.append(t.asLine()).append('\n');
+        }
+        sb.append("/Practice teachers/\n");
+        for (Teacher t : practiceTeachers) {
+            sb.append(t.asLine()).append('\n');
+        }
+        sb.append("/Enrollments count/\n").append(enrollments.size()).append('\n');
+        return sb.toString();
     }
 
     @Override

@@ -32,6 +32,15 @@ public class Teacher extends Employee {
 		this.type = type;
 	}
 
+	@Override
+	public String asLine() {
+		return super.asLine() + String.format(" | Teacher type: %s", type);
+	}
+
+	@Override
+	public String asTable() {
+		return super.asTable() + "Teacher type: " + type + '\n';
+	}
 
 	@Override
 	public String toString() {

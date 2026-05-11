@@ -40,6 +40,14 @@ public abstract class BaseApp {
         System.out.println(data);
     }
 
+    protected static void printHeader(String data) {
+        System.out.println("||| " + data + " |||");
+    }
+    
+    protected static void printHeader(Object data) {
+        System.out.println("||| " + data + " |||");
+    }
+
     protected static void printSuccess(String data) {
         System.out.println( "[" + Translator.translate(UIMessage.SUCCESS) + "] " + data);
     }
@@ -94,6 +102,10 @@ public abstract class BaseApp {
         private boolean isRunning;
 
         protected MenuBuilder(String menuTitle) {
+            if(menuTitle.isBlank()){
+                this.menuTitle = "";
+                return;
+            }
             this.menuTitle = "\n||| " + menuTitle + " |||";
         }
 

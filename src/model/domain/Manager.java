@@ -7,4 +7,14 @@ public class Manager extends Employee {
     public Manager(String login, String password, String name, String surname) {
         super(login, password, name, surname);
     }
+
+    @Override
+    public String asLine() {
+        return "Manager | " + super.asLine();
+    }
+
+    @Override
+    public String asTable() {
+        return "Role: Manager\n" + super.asTable();
+    }
 }

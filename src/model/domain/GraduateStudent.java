@@ -12,6 +12,16 @@ public class GraduateStudent extends Student {
 	}
 
 	@Override
+	public String asLine() {
+		return "Graduate | " + super.asLine();
+	}
+
+	@Override
+	public String asTable() {
+		return "Role: GraduateStudent\n" + super.asTable();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

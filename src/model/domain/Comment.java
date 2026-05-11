@@ -52,6 +52,21 @@ public class Comment extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        String preview = content.length() > 36 ? content.substring(0, 33) + "..." : content;
+        return String.format(" %s | %s", sender.getFullname(), preview);
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Sender:\n").append(sender.asLine()).append('\n');
+        sb.append("Sent: ").append(sentDate).append('\n');
+        sb.append("Content:\n").append(content).append('\n');
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "Comment[id=" + id + ", sender=" + sender + ", content=" + content + ", sentDate=" + sentDate + "]";
     }

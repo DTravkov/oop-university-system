@@ -18,6 +18,10 @@ public class AppSettings {
     public static final int DELETED_USER_ID = -2;
     public static final User DELETED_USER = new DeletedUser();
 
+    /** Same idea as {@link #DELETED_USER} but typed as {@link Teacher} for enrollment lecture/practice slots. */
+    public static final int DELETED_TEACHER_ID = -3;
+    public static final Teacher DELETED_TEACHER = new DeletedTeacher();
+
     public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "Admin", "Superuserovich");
 
 
@@ -25,6 +29,7 @@ public class AppSettings {
     public static final List<User> DEFAULT_SYSTEM_USERS = List.of(
         ANONYMOUS_USER,
         DELETED_USER,
+        DELETED_TEACHER,
         DEFAULT_ADMIN
     );
 
@@ -38,6 +43,7 @@ public class AppSettings {
     public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
         AnonymousUser.class,
         DeletedUser.class,
+        DeletedTeacher.class,
         Employee.class,
         User.class
     );
@@ -45,6 +51,7 @@ public class AppSettings {
     public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(
         AnonymousUser.class,
         DeletedUser.class,
+        DeletedTeacher.class,
         User.class,
         Student.class,
         GraduateStudent.class,

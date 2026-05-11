@@ -12,8 +12,14 @@ public class DeletedUser extends User{
 		this.id = AppSettings.DELETED_USER_ID;
 	}
 
-	
+	@Override
+	public String asLine() {
+		return "ID: " + id + " | [Deleted user placeholder]";
+	}
 
-    
+	@Override
+	public String asTable() {
+		return "ID: " + id + "\nRole: DeletedUser (system placeholder)\n";
+	}
 
 }

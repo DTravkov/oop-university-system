@@ -13,6 +13,8 @@ import settings.AppSettings;
 import java.util.List;
 import java.util.Scanner;
 
+import exceptions.DoesNotExist;
+
 public class UIForms {
 
     public static String readNonEmpty(Scanner scanner, UIMessage prompt) {
@@ -90,7 +92,28 @@ public class UIForms {
             System.out.println(Translator.translate(UIMessage.MSG_INPUT_YES_NO));
         }
     }
-    
+
+
+    public static <T extends SerializableModel> T readIdFromList(Scanner scanner, UIMessage prompt, List<T> entityList) {
+        while (true) {
+            System.out.print(Translator.translate(prompt));
+            String input = scanner.nextLine().trim();
+            int id = Integer.parseInt(input);
+            try {
+                for(T entity : entityList){
+                    if(entity.getId() == id){
+                        return entity;
+                    }
+                }
+                throw new DoesNotExist("Choice with id=" + id);
+            } catch (NumberFormatException e) {
+                System.out.println(Translator.translate(UIMessage.MSG_INPUT_NUMBER));
+            }
+            catch (DoesNotExist e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
     public static TeacherType askTeacherType(Scanner scanner) {
         while (true) {
             System.out.print(Translator.translate(UIMessage.INPUT_TEACHER_TYPE));

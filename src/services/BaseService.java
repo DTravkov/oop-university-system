@@ -5,7 +5,9 @@ import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 
 import java.util.List;
+import java.util.function.Predicate;
 
+import model.domain.Enrollment;
 import model.domain.SerializableModel;
 import model.repository.Repository;
 import services.events.EventSystem;
@@ -46,6 +48,10 @@ public abstract class BaseService<T extends SerializableModel> implements IServi
                                 .filter(e -> e.equals(entity))
                                 .findFirst()
                                 .orElseThrow(()-> new DoesNotExist(baseName + " with id=" + entity.getId()));
+    }
+
+    public T find(Predicate<T> query){
+        return repository.find(query);
     }
 
     public void update(T entity){

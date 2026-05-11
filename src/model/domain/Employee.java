@@ -17,5 +17,14 @@ public abstract class Employee extends User{
 		this.salary = salary;
 	}
 
+	@Override
+	public String asLine() {
+		return super.asLine();
+	}
+
+	@Override
+	public String asTable() {
+		return super.asTable();
+	}
 
 }

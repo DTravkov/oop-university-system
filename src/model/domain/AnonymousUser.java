@@ -13,8 +13,14 @@ public class AnonymousUser extends User{
 		this.id = AppSettings.ANONYMOUS_USER_ID;
 	}
 
-	
+	@Override
+	public String asLine() {
+		return "ID: " + id + " | Anonymous (not logged in)";
+	}
 
-    
+	@Override
+	public String asTable() {
+		return "ID: " + id + "\nRole: AnonymousUser\n";
+	}
 
 }

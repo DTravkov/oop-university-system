@@ -60,6 +60,22 @@ public class Message extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        String preview = content.length() > 40 ? content.substring(0, 37) + "..." : content;
+        return String.format("ID: %d | From: %s | %s", id, sender.getFullname(), preview);
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Sender:\n").append(sender.asLine()).append('\n');
+        sb.append("Sent: ").append(sentDate).append('\n');
+        sb.append("Content:\n").append(content).append('\n');
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "Message{" +
                 "id=" + id +

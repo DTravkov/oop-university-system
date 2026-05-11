@@ -25,6 +25,12 @@ public abstract class SerializableModel implements Serializable {
 		return this.id == 0;
 	}
 
+	/** Short single-line summary for lists and menus. */
+	public abstract String asLine();
+
+	/** Multi-line structured details. */
+	public abstract String asTable();
+
 
 	@Override
 	public boolean equals(Object obj) {

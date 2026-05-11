@@ -90,6 +90,26 @@ public class StudentOrganization extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Name: %s | Members: %d | President: %s",
+                id, name, members.size(), president.getFullname());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Name: ").append(name).append('\n');
+        sb.append("Description:\n").append(description).append('\n');
+        sb.append("/President/\n").append(president.asLine()).append('\n');
+        sb.append("/Members/\n");
+        for (Student m : members) {
+            sb.append(m.asLine()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "StudentOrganization{" +
                 "id=" + id +

@@ -85,6 +85,19 @@ public class User extends SerializableModel{
 		isBanned = banned;
 	}
 
+	@Override
+	public String asLine() {
+		return String.format("ID: %d | Name: %s ",
+				id, getFullname());
+	}
+
+	@Override
+	public String asTable() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("ID: ").append(id).append('\n');
+		sb.append("Name: ").append(getFullname()).append('\n');
+		return sb.toString();
+	}
 
 	@Override
 	public boolean equals(Object o) {

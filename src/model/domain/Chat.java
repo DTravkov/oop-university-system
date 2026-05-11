@@ -96,6 +96,26 @@ public class Chat extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Members: %d | Messages: %d", id, members.size(), messages.size());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("/Members/\n");
+        for (Employee e : members) {
+            sb.append(e.asLine()).append('\n');
+        }
+        sb.append("/Messages/\n");
+        for (Message m : messages) {
+            sb.append(m.asLine()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "Chat{" +
                 "id=" + id +

@@ -36,6 +36,22 @@ public class LogEntry extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        String a = action == null ? "" : action;
+        return String.format("Log | User id: %d | %s | %s", userId, fullname, a);
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Time: ").append(StringUtils.formatLogTime(time)).append('\n');
+        sb.append("User id: ").append(userId).append('\n');
+        sb.append("Full name: ").append(fullname).append('\n');
+        sb.append("Action:\n").append(action == null ? "" : action).append('\n');
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         String a = action == null ? "" : action;
         return StringUtils.formatLogTime(time) + " | " + fullname +", id=" + userId + " | " + a;

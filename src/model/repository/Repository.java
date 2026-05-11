@@ -4,6 +4,7 @@ import model.domain.SerializableModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Repository<T extends SerializableModel>{
 
@@ -48,6 +49,13 @@ public class Repository<T extends SerializableModel>{
 
     public boolean get(T entity) {
         return DB.exists(baseClass, entity.getId());
+    }
+
+    public T find(Predicate<T> query){
+        return getAll().stream()
+                        .filter(query)
+                        .findFirst()
+                        .orElse(null);
     }
 
     public boolean exists(T entity) {

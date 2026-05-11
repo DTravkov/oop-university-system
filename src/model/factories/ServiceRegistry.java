@@ -1,6 +1,7 @@
 package model.factories;
 import services.ComplaintService;
 import services.CourseService;
+import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
 import services.TeacherService;
@@ -11,6 +12,7 @@ public final class ServiceRegistry {
     private static final ServiceRegistry INSTANCE = new ServiceRegistry();
 
     public final UserService userService;
+    public final EnrollmentService enrollmentService;
     public final CourseService courseService;
     public final TeacherService teacherService;
     public final ComplaintService complaintService;
@@ -19,8 +21,9 @@ public final class ServiceRegistry {
 
     private ServiceRegistry() {
         userService = new UserService();
-        courseService = new CourseService();
-        teacherService = new TeacherService(courseService);
+        enrollmentService = new EnrollmentService();
+        courseService = new CourseService(enrollmentService);
+        teacherService = new TeacherService(courseService, enrollmentService);
         complaintService = new ComplaintService(userService);
         messageService = new MessageService();
         newsService = new NewsService();

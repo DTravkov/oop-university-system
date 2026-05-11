@@ -60,6 +60,9 @@ public class UserFactory {
         if (userClass == DeletedUser.class) {
             throw new IllegalArgumentException("Unsupported user class: DeletedUser is a system placeholder");
         }
+        if (userClass == DeletedTeacher.class) {
+            throw new IllegalArgumentException("Unsupported user class: DeletedTeacher is a system placeholder");
+        }
         throw new IllegalArgumentException("Unsupported user class: " + userClass.getSimpleName());
     }
 

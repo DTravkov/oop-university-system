@@ -1,5 +1,7 @@
 package model.domain;
 
+import exceptions.OperationNotAllowed;
+import model.enumeration.AttestationType;
 import utils.FieldValidator;
 
 import java.util.Date;
@@ -13,12 +15,10 @@ public class Enrollment extends SerializableModel {
     private Student student;
     private Date enrollmentDate;
 
-    private double firstAttestationPoint;
-    private double secondAttestationPoint;
-    private double finalExamPoint;
-
     private Teacher lectureTeacher;
     private Teacher practiceTeacher;
+
+    private final Mark mark;
 
     public Enrollment(Course course, Student student, Teacher lectureTeacher, Teacher practiceTeacher) {
         FieldValidator.requireNonNull(course, "Course");
@@ -26,33 +26,31 @@ public class Enrollment extends SerializableModel {
         this.course = course;
         this.student = student;
         this.enrollmentDate = new Date();
-        this.firstAttestationPoint = 0.0;
-        this.secondAttestationPoint = 0.0;
-        this.finalExamPoint = 0.0;
+        this.mark = new Mark();
         this.lectureTeacher = lectureTeacher;
         this.practiceTeacher = practiceTeacher;
     }
 
-    
     public Teacher getLectureTeacher() {
         return lectureTeacher;
     }
-
 
     public void setLectureTeacher(Teacher lectureTeacher) {
         this.lectureTeacher = lectureTeacher;
     }
 
-
     public Teacher getPracticeTeacher() {
         return practiceTeacher;
     }
-
 
     public void setPracticeTeacher(Teacher practiceTeacher) {
         this.practiceTeacher = practiceTeacher;
     }
 
+    public boolean isTeaching(Teacher teacher) {
+        return this.lectureTeacher.getId() == teacher.getId()
+                || this.practiceTeacher.getId() == teacher.getId();
+    }
 
     public Course getCourse() {
         return course;
@@ -80,43 +78,35 @@ public class Enrollment extends SerializableModel {
         this.enrollmentDate = enrollmentDate;
     }
 
-    public double getFirstAttestationPoint() {
-        return firstAttestationPoint;
+    public Mark getMark() {
+        return mark;
     }
 
-    public void incrementFirstAttestationPoint(double delta) {
-        double next = firstAttestationPoint + delta;
-        FieldValidator.requireInRange(next, 0, 30, "First attestation point");
-        this.firstAttestationPoint = next;
+    public double getFirstAttestationPoint() {
+        return mark.getFirstAttestationPoint();
     }
 
     public double getSecondAttestationPoint() {
-        return secondAttestationPoint;
-    }
-
-    public void incrementSecondAttestationPoint(double delta) {
-        double next = secondAttestationPoint + delta;
-        FieldValidator.requireInRange(next, 0, 30, "Second attestation point");
-        this.secondAttestationPoint = next;
+        return mark.getSecondAttestationPoint();
     }
 
     public double getFinalExamPoint() {
-        return finalExamPoint;
+        return mark.getFinalExamPoint();
     }
 
-    public void incrementFinalExamPoint(double delta) {
-        double next = finalExamPoint + delta;
-        FieldValidator.requireInRange(next, 0, 40, "Final exam point");
-        this.finalExamPoint = next;
+    public void incrementMark(double point, Teacher teacher, AttestationType attestationType) {
+        if (!isTeaching(teacher)) {
+            throw new OperationNotAllowed("putting marks for other teacher students");
+        }
+        mark.increment(attestationType, point);
     }
 
     public double getTotalPoint() {
-        return firstAttestationPoint + secondAttestationPoint + finalExamPoint;
+        return mark.getTotalPoint();
     }
 
     public double getGpa() {
-        double gpa = (getTotalPoint() / 100.0) * 4.0;
-        return Math.round(gpa * 100.0) / 100.0;
+        return mark.getGpa();
     }
 
     @Override
@@ -130,9 +120,7 @@ public class Enrollment extends SerializableModel {
         }
         return Objects.equals(course, enr.course)
                 && Objects.equals(student, enr.student)
-                && firstAttestationPoint == enr.firstAttestationPoint
-                && secondAttestationPoint == enr.secondAttestationPoint
-                && finalExamPoint == enr.finalExamPoint;
+                && Objects.equals(mark, enr.mark);
     }
 
     @Override
@@ -140,7 +128,24 @@ public class Enrollment extends SerializableModel {
         if (id != 0) {
             return Integer.hashCode(id);
         }
-        return Objects.hash(course, student, firstAttestationPoint, secondAttestationPoint, finalExamPoint);
+        return Objects.hash(course, student, mark);
+    }
+
+    @Override
+    public String asLine() {
+        return String.format("ID: %d | Course: %s | Student: %s | Total: %.1f | GPA: %.2f",
+                id, course.getName(), student.getFullname(), getTotalPoint(), getGpa());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Course: ").append(course.getName()).append('\n');
+        sb.append("Lecture teacher: ").append(lectureTeacher.getFullname()).append('\n');
+        sb.append("Practice teacher: ").append(practiceTeacher.getFullname()).append('\n');
+        sb.append("/Marks/\n").append(mark.asTable());
+        return sb.toString();
     }
 
     @Override
@@ -149,9 +154,7 @@ public class Enrollment extends SerializableModel {
                 "id=" + id +
                 ", course=" + course +
                 ", student=" + student +
-                ", firstAttestationPoint=" + firstAttestationPoint +
-                ", secondAttestationPoint=" + secondAttestationPoint +
-                ", finalExamPoint=" + finalExamPoint +
+                ", mark=" + mark +
                 ", totalPoint=" + getTotalPoint() +
                 '}';
     }

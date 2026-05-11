@@ -116,6 +116,28 @@ public class News extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Title: %s | Urgency: %s | Publisher: %s",
+                id, title, urgencyLevel, publisher.getFullname());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("Title: ").append(title).append('\n');
+        sb.append("Urgency: ").append(urgencyLevel).append('\n');
+        sb.append("Published: ").append(publishedDate).append('\n');
+        sb.append("Publisher: ").append(publisher.asLine()).append('\n');
+        sb.append("Content:\n").append(content).append('\n');
+        sb.append("/Comments/\n");
+        for (Comment c : comments) {
+            sb.append(c.asLine()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "News{" +
                 "id=" + id +

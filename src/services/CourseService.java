@@ -19,8 +19,11 @@ import services.events.UserDeleteEvent;
 
 public class CourseService extends BaseService<Course>  {
 
-    public CourseService() {
+    private final EnrollmentService enrollmentService;
+
+    public CourseService(EnrollmentService enrollmentService) {
         super(Course.class);
+        this.enrollmentService = enrollmentService;
         subscribeToEvents();
     }
 
@@ -69,20 +72,8 @@ public class CourseService extends BaseService<Course>  {
     }
 
 
-    public void addEnrollment(Course course, Enrollment enrollment){
-        course.addEnrollment(enrollment);
-    }
-
-    public void removeEnrollment(Course course, Enrollment enrollment){
-        course.removeEnrollment(enrollment);
-    }
-
-
     public List<Enrollment> getStudentEnrollments(Student student) {
-        return getAll().stream()
-                .flatMap(c -> c.getEnrollments().stream())
-                .filter(e -> e.getStudent().getId() == student.getId())
-                .toList();
+        return enrollmentService.getStudentEnrollments(student);
     }
 
     public Map<TeacherType, List<Course>> getAllByTeacher(Teacher teacher) {

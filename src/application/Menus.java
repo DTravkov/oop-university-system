@@ -1,11 +1,9 @@
 package application;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import exceptions.DoesNotExist;
 import model.domain.Admin;
 import model.domain.Chat;
 import model.domain.Comment;
@@ -31,6 +29,7 @@ import model.enumeration.UIMessage;
 import model.factories.UserFactory;
 import services.ComplaintService;
 import services.CourseService;
+import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
 import services.TeacherService;
@@ -38,12 +37,14 @@ import services.UserService;
 import settings.AppSettings;
 import utils.LogEntry;
 import utils.Logger;
+import utils.StringUtils;
 import utils.Translator;
 import utils.UIForms;
 
 public class Menus extends BaseApp{
 
     static final UserService userService = services.userService;
+    static final EnrollmentService enrollmentService = services.enrollmentService;
     static final CourseService courseService = services.courseService;
     static final TeacherService teacherService = services.teacherService;
     static final ComplaintService complaintService = services.complaintService;
@@ -56,9 +57,13 @@ public class Menus extends BaseApp{
 
         MenuBuilder menu = new MenuBuilder("University System v0.0001");
         menu.addAction("My profile", () -> getProfileMenu().start());
+        if(activeUser instanceof Student){
+            menu.addAction("My transcript", () -> printStudentTranscript());
+        }
         menu.addAction("Research Menu", () -> getResearcherMenu().start());
         menu.addAction("News Menu", () -> getNewsMenu().start());
         menu.addAction("Course Menu", () -> getCourseMenu().start());
+
         if(activeUser instanceof Employee){
             menu.addAction("Messenger Menu", () -> getMessengerMenu().start());
             menu.addAction("Technical Request Menu", () -> getTechRequestMenu().start());
@@ -84,6 +89,23 @@ public class Menus extends BaseApp{
     }
 
     
+    private static void printStudentTranscript() {
+        Student student = (Student) getActiveUser();
+        List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(student);
+        if(enrollments.isEmpty()){
+            printFail("You are not enrolled on any course yet");
+            return;
+        }
+        println(student.asTable());
+        println("Overall GPA: " + enrollmentService.getStudentGpa(student));
+        println("--------------------------");
+        for (Enrollment enr : enrollments) {
+            println(enr.asTable());
+            println("--------------------------");
+        }
+    }
+
+
     public static MenuBuilder getAuthMenu(){
         MenuBuilder menu = new MenuBuilder("Authentication");
         menu.addAction("Login", () -> {
@@ -103,20 +125,18 @@ public class Menus extends BaseApp{
     private static MenuBuilder getNewsMenu() {
         MenuBuilder menu = new MenuBuilder("News Menu");
         for(News news : newsService.getAll()){
-            menu.addAction(news.getTitle(), () -> openNews(news));
+            menu.addAction(news.asLine(), () -> openNews(news));
         }
         menu.addAction("Back", () -> menu.stop());
         return menu;
     }
 
     private static void openNews(News news) {
-        News updated = newsService.get(news);
-        MenuBuilder menu = new MenuBuilder(updated.getTitle());
-        menu.addLabel(" -" + news.getContent() + "- ");
-        menu.addLabel("Comments: ");
-        updated.getComments().forEach(c -> menu.addLabel(c.getSender().getFullname() +  " " + c. getSentDate() + "\n:" + c.getContent()));
+        News updatedNews = newsService.get(news);
+        MenuBuilder menu = new MenuBuilder("");
+        menu.addLabel(updatedNews.asTable());
         menu.addAction("Leave a comment", () -> {
-            leaveComment(updated);
+            leaveComment(updatedNews);
             menu.stop();
         });
         menu.addAction("Back", () -> menu.stop());
@@ -133,9 +153,56 @@ public class Menus extends BaseApp{
 
 
     private static MenuBuilder getCourseMenu() {
+        User activeUser = getActiveUser();
         MenuBuilder menu = new MenuBuilder("Course Menu");
+        menu.addAction("View all courses", () -> printAllCourses());
+        menu.addAction("View all teachers", () -> printAllTeachersForCourseMenu());
+        if (activeUser instanceof Student) {
+            menu.addAction("Enroll to a course", () -> enrollStudentInCourse((Student) activeUser));
+        }
+
         menu.addAction("Back", () -> menu.stop());
         return menu;
+    }
+
+    private static void printAllTeachersForCourseMenu() {
+        List<Teacher> teachers = userService.getAllByClass(Teacher.class);
+        if (teachers.isEmpty()) {
+            println("No teachers.");
+            return;
+        }
+        printHeader("Teachers");
+        teachers.forEach(t -> println(t.asLine()));
+    }
+
+    private static void enrollStudentInCourse(Student student) {
+            List<Course> courses = courseService.getAll();
+            if (courses.isEmpty()) {
+                println("No courses.");
+                return;
+            }
+            println("Choose a course:");
+            courses.forEach(c -> println(c.asLine()));
+            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
+
+            List<Teacher> lectures = course.getLectureTeachers();
+            List<Teacher> practices = course.getPracticeTeachers();
+
+            if (lectures.isEmpty() || practices.isEmpty()) {
+                printFail("This course must have at least one lecture teacher and one practice teacher before you can enroll.");
+                return;
+            }
+
+            println("Choose your lecture teacher:");
+            lectures.forEach(l -> println(l.asLine()));
+            Teacher lectureTeacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, lectures);
+
+            println("Choose your practice teacher:");
+            practices.forEach(p -> println(p.asLine()));
+            Teacher practiceTeacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, practices);
+
+            enrollmentService.create(new Enrollment(course, student, lectureTeacher, practiceTeacher));
+            printSuccess("Enrolled in " + course.getName() + ".");
     }
 
     private static MenuBuilder getMessengerMenu() {
@@ -151,11 +218,14 @@ public class Menus extends BaseApp{
 
     private static void startChat() {
         Employee activeUser = (Employee) getActiveUser();
-        println("||| Employees |||");
-        List<Employee> list = userService.getAllByClass(Employee.class);
-        list.forEach(u -> println(u));
-        int empId = UIForms.readInt(scanner, UIMessage.INPUT_EMPLOYEE_ID);
-        Employee emp = userService.get(empId, Employee.class);
+        printHeader("Employees");
+        List<Employee> employees = userService.getAllByClass(Employee.class);
+        if (employees.isEmpty()) {
+            println("No employees.");
+            return;
+        }
+        employees.forEach(e -> println(e.asLine()));
+        Employee emp = UIForms.readIdFromList(scanner, UIMessage.INPUT_EMPLOYEE_ID, employees);
         String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
         messageService.sendMessage(new Message(activeUser, content), emp);
     }
@@ -164,7 +234,7 @@ public class Menus extends BaseApp{
     private static void openChat(Chat chat) {
         Employee employee = (Employee) getActiveUser();
         MenuBuilder menu = new MenuBuilder("");
-        chat.getMessages().forEach(msg -> menu.addLabel(msg.getSender().getFullname() + " " + msg.getSentDate() + "\n" + msg.getContent()));
+        chat.getMessages().forEach(msg -> menu.addLabel(msg.asLine()));
         menu.addAction("Send Message", ()->{
             String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
             messageService.sendMessage(new Message(employee, content), chat.getOtherMember(employee));
@@ -201,16 +271,22 @@ public class Menus extends BaseApp{
             Teacher teacher = (Teacher) getActiveUser();
 
             List<Dean> deans = userService.getAllByClass(Dean.class);
+            if (deans.isEmpty()) {
+                println("No deans.");
+                return;
+            }
+            printHeader("Deans");
+            deans.forEach(d -> println(d.asLine()));
+            Dean dean = UIForms.readIdFromList(scanner, UIMessage.INPUT_RECEIVER_ID, deans);
 
-            println("||| Deans |||");
-            deans.forEach(d -> println((Dean) d));
-            int deanId = UIForms.readInt(scanner, UIMessage.INPUT_RECEIVER_ID);
-            Dean dean = userService.get(deanId, Dean.class);
-
-            println("||| Students |||");
-            userService.getAllByClass(Student.class).forEach(st -> println(st));
-            int studentId = UIForms.readInt(scanner, UIMessage.INPUT_STUDENT_ID);
-            Student student = userService.get(studentId, Student.class);
+            List<Student> students = userService.getAllByClass(Student.class);
+            if (students.isEmpty()) {
+                println("No students.");
+                return;
+            }
+            printHeader("Students");
+            students.forEach(s -> println(s.asLine()));
+            Student student = UIForms.readIdFromList(scanner, UIMessage.INPUT_STUDENT_ID, students);
 
             ComplaintUrgencyLevel urgency = UIForms.readComplaintUrgencyLevel(scanner);
             String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
@@ -223,22 +299,35 @@ public class Menus extends BaseApp{
     private static void closeComplaint() {
             Dean dean = (Dean) getActiveUser();
             List<TeacherComplaint> pending = complaintService.getDeanComplaints(dean);
-            println("||| Complaints |||");
-            pending.forEach(c -> println(c));
-            int complaintId = UIForms.readInt(scanner, UIMessage.INPUT_REQUEST_ID);
-            TeacherComplaint complaint = complaintService.get(complaintId);
+            if (pending.isEmpty()) {
+                println("No pending complaints.");
+                return;
+            }
+            printHeader("Complaints");
+            pending.forEach(tc -> println(tc.asLine()));
+            TeacherComplaint complaint = UIForms.readIdFromList(scanner, UIMessage.INPUT_REQUEST_ID, pending);
             complaintService.closeComplaint(complaint, dean);
             printSuccess("Complaint closed.");
     }
 
     private static void printTeacherComplaints() {
         Teacher activeUser = (Teacher) getActiveUser();
-        complaintService.getTeacherComplaints(activeUser).forEach(comp -> println(comp));
+        List<TeacherComplaint> complaints = complaintService.getTeacherComplaints(activeUser);
+        if(complaints.isEmpty()){
+            printFail("You have no complaints yet,");
+            return;
+        }
+        complaints.forEach(tc -> println(tc.asLine()));
     }
 
     private static void printDeanComplaints() {
         Dean activeUser = (Dean) getActiveUser();
-        complaintService.getDeanComplaints(activeUser).forEach(comp -> println(comp));
+        List<TeacherComplaint> complaints = complaintService.getDeanComplaints(activeUser);
+        if(complaints.isEmpty()){
+            printFail("You have no complaints yet,");
+            return;
+        }
+        complaints.forEach(tc -> println(tc.asLine()));
     }
 
 
@@ -246,30 +335,30 @@ public class Menus extends BaseApp{
         MenuBuilder menu = new MenuBuilder("Teacher Menu");
         menu.addAction("View my courses", () -> printTeacherCourses());
         menu.addAction("View my students", () -> printTeacherStudents());
-        menu.addAction("Put a mark", () -> putMarkToTeacherStudent());
+        menu.addAction("Put a mark", () -> putMarkToStudent());
         menu.addAction("Back", () -> menu.stop());
         return menu;
     }
 
-    private static void putMarkToTeacherStudent() {
+    private static void putMarkToStudent() {
         Teacher activeUser = (Teacher) getActiveUser();
-        Map<Course,List<Enrollment>> enrollments = teacherService.getTeacherEnrollments(activeUser);
-        List<Enrollment> enrollmentsList = new ArrayList<>();
-        println("||| Enrollments |||");
-        for(var entry : enrollments.entrySet()){
-            println("||| " + entry.getKey().getName() + " |||");
-            entry.getValue().forEach(enr -> {
-                println(enr);
-                enrollmentsList.add(enr);
-            });
+        Map<Course,List<Enrollment>> enrollmentMap = teacherService.getTeacherEnrollments(activeUser);
+        List<Course> courses = enrollmentMap.keySet().stream().toList();
+        if(enrollmentMap.isEmpty()){
+            printFail("No enrollments");
+            return;
         }
-        int enrollmentId = UIForms.readInt(scanner, UIMessage.INPUT_ENROLLMENT_ID);
-        Enrollment enrollment = enrollmentsList.stream().filter(enr -> enr.getId() == enrollmentId)
-                                                        .findFirst()
-                                                        .orElseThrow(() -> new DoesNotExist("enrollment with id=" + enrollmentId));
+
+        printHeader("Courses");
+        courses.forEach(c -> println(c.asLine()));
+        Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
+        List<Enrollment> courseEnrollments = enrollmentMap.get(course);
+        printHeader(course.getName() + " Enrollments");
+        courseEnrollments.forEach(en -> println(en.asLine()));
+        Enrollment enrollment = UIForms.readIdFromList(scanner, UIMessage.INPUT_ENROLLMENT_ID, courseEnrollments);
         AttestationType type = UIForms.readAttestationType(scanner);
         double pointsToAdd = UIForms.readDouble(scanner, UIMessage.INPUT_POINTS_TO_ADD);
-        teacherService.putMark(enrollment, activeUser, type, pointsToAdd);
+        enrollmentService.addPoints(enrollment, activeUser, type, pointsToAdd);
         printSuccess("Mark recorded.");
     }
 
@@ -277,20 +366,20 @@ public class Menus extends BaseApp{
     private static void printTeacherStudents() {
         Teacher activeUser = (Teacher) getActiveUser();
         Map<Course,List<Student>> students = teacherService.getTeacherStudents(activeUser);
-        println("||| Students |||");
+        printHeader("Students");
         for(var entry : students.entrySet()){
-            println("||| " + entry.getKey().getName() + " |||");
-            entry.getValue().forEach(student -> println(student));
+            printHeader(entry.getKey().getName());
+            entry.getValue().forEach(s -> println(s.asLine()));
         }
     }
 
 
     private static void printTeacherCourses() {
         Teacher activeUser = (Teacher) getActiveUser();
-        Map<TeacherType, List<Course>> courses = teacherService.getTeacherCourses(activeUser);
-        for(var entry : courses.entrySet()){
-            println("||| " + entry.getKey().name() + " |||");
-            entry.getValue().forEach(course -> println(course));
+        Map<TeacherType, List<Course>> courseMap = teacherService.getTeacherCourses(activeUser);
+        for(var entry : courseMap.entrySet()){
+            printHeader(StringUtils.capitalize(entry.getKey().name()));
+            entry.getValue().forEach(c -> println(c.asLine()));
         }
     }
 
@@ -309,25 +398,34 @@ public class Menus extends BaseApp{
     }
 
     private static void banUser() {
-        printAllUsersByClass(User.class);
-        int userId = UIForms.readInt(scanner, UIMessage.INPUT_USER_ID);
-        User user = userService.get(userId);
+        List<User> users = userService.getAllByClass(User.class);
+        if (users.isEmpty()) {
+            println("No users found.");
+            return;
+        }
+        printHeader("User");
+        users.forEach(u -> println(u.asLine()));
+        User user = UIForms.readIdFromList(scanner, UIMessage.INPUT_USER_ID, users);
         userService.ban(user);
-        printSuccess("User " + user + " is banned");
+        printSuccess("User " + user.asLine() + " is banned");
     }
 
 
     private static void deleteUser() {
-        printAllUsersByClass(User.class);
-        int userId = UIForms.readInt(scanner, UIMessage.INPUT_USER_ID);
-        User user = userService.get(userId);
+        List<User> users = userService.getAllByClass(User.class);
+        if (users.isEmpty()) {
+            println("No users found.");
+            return;
+        }
+        printHeader("User");
+        users.forEach(u -> println(u.asLine()));
+        User user = UIForms.readIdFromList(scanner, UIMessage.INPUT_USER_ID, users);
         userService.delete(user);
-        printSuccess("User" + user + "is deleted");
+        printSuccess("User " + user.asLine() + " is deleted");
     }
 
 
     private static void createUser() {
-        retryOnException(() -> {
             Class<? extends User> className = UIForms.readUserClass(scanner);
 
             String login = UIForms.readNonEmpty(scanner, UIMessage.INPUT_LOGIN);
@@ -348,7 +446,6 @@ public class Menus extends BaseApp{
             User user = UserFactory.createFromClass(className, login, password, name, surname, admissionDate, teacherType);
             User saved = userService.create(user);
             printSuccess(Translator.translate(UIMessage.AUTH_WELCOME, saved.getName()));
-        });
     }
 
 
@@ -359,8 +456,8 @@ public class Menus extends BaseApp{
             println("No users found.");
             return;
         }
-        println("||| " + className.getSimpleName() + " |||");
-        users.forEach(BaseApp::println);
+        printHeader(className.getSimpleName());
+        users.forEach(u -> println(u.asLine()));
     }
 
 
@@ -371,7 +468,7 @@ public class Menus extends BaseApp{
             println("No logs found.");
             return;
         }
-        logs.forEach(BaseApp::println);
+        logs.forEach(l -> println(l.asLine()));
     }
 
 
@@ -382,7 +479,7 @@ public class Menus extends BaseApp{
             return;
         }
         println("Recent logs for last " + AppSettings.RECENT_LOG_HOURS + " hours:");
-        logs.forEach(BaseApp::println);
+        logs.forEach(l -> println(l.asLine()));
     }
 
 
@@ -392,7 +489,7 @@ public class Menus extends BaseApp{
             println("No logs found.");
             return;
         }
-        logs.forEach(BaseApp::println);
+        logs.forEach(l -> println(l.asLine()));
     }
 
 
@@ -416,8 +513,8 @@ public class Menus extends BaseApp{
     }
 
     private static void printAllCourses() {
-        println("||| Courses |||");
-        courseService.getAll().forEach(c -> println(c));
+        printHeader("Courses");
+        courseService.getAll().forEach(c -> println(c.asLine()));
     }
 
     private static void createCourse() {
@@ -431,20 +528,35 @@ public class Menus extends BaseApp{
     }
 
     private static void deleteCourse() {
-            printAllCourses();
-            int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
-            courseService.delete(courseId);
+            List<Course> courses = courseService.getAll();
+            if (courses.isEmpty()) {
+                println("No courses.");
+                return;
+            }
+            printHeader("Courses");
+            courses.forEach(c -> println(c.asLine()));
+            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
+            courseService.delete(course.getId());
             printSuccess("Course deleted.");
     }
 
     private static void assignTeacherToCourse() {
-            printAllCourses();
-            int courseId = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_ID);
-            Course course = courseService.get(courseId);
-            println("||| Teachers |||");
-            userService.getAllByClass(Teacher.class).forEach(Menus::println);
-            int teacherId = UIForms.readInt(scanner, UIMessage.INPUT_TEACHER_ID);
-            Teacher teacher = userService.get(teacherId, Teacher.class);
+            List<Course> courses = courseService.getAll();
+            if (courses.isEmpty()) {
+                println("No courses.");
+                return;
+            }
+            printHeader("Courses");
+            courses.forEach(c -> println(c.asLine()));
+            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
+            List<Teacher> teachers = userService.getAllByClass(Teacher.class);
+            if (teachers.isEmpty()) {
+                println("No teachers.");
+                return;
+            }
+            printHeader("Teachers");
+            teachers.forEach(t -> println(t.asLine()));
+            Teacher teacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, teachers);
             TeacherType role = UIForms.readLectureOrPractice(scanner);
             courseService.addTeacher(course, teacher, role);
             printSuccess("Teacher assigned to course.");
@@ -456,12 +568,11 @@ public class Menus extends BaseApp{
             println("No news.");
             return;
         }
-        println("||| News |||");
-        all.forEach(Menus::println);
+        printHeader("News");
+        all.forEach(n -> println(n.asLine()));
     }
 
     private static void createNews() {
-        retryOnException(() -> {
             Manager manager = (Manager) getActiveUser();
             String title = UIForms.readNonEmpty(scanner, "News title: ");
             String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
@@ -469,14 +580,18 @@ public class Menus extends BaseApp{
             News news = new News(manager, title, content, urgency);
             newsService.postNews(news);
             printSuccess("News posted.");
-        });
     }
 
     private static void deleteNews() {
             Manager manager = (Manager) getActiveUser();
-            printAllNews();
-            int newsId = UIForms.readInt(scanner, UIMessage.INPUT_NEWS_ID);
-            News news = newsService.get(newsId);
+            List<News> all = newsService.getAll();
+            if (all.isEmpty()) {
+                println("No news.");
+                return;
+            }
+            printHeader("News");
+            all.forEach(n -> println(n.asLine()));
+            News news = UIForms.readIdFromList(scanner, UIMessage.INPUT_NEWS_ID, all);
             newsService.deleteNews(news, manager);
             printSuccess("News deleted.");
     }
@@ -487,13 +602,13 @@ public class Menus extends BaseApp{
             println("No students.");
             return;
         }
-        println("||| Average GPA by student |||");
+        printHeader("Average GPA by student");
         int totalGPA = 0;
         int totalStudents = 0;
         for (Student student : students) {
-            List<Enrollment> enrollments = courseService.getStudentEnrollments(student);
+            List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(student);
             if (enrollments.isEmpty()) {
-                println(student.getFullname() + " (id=" + student.getId() + "): no enrollments");
+                println(student.asLine() + " | no enrollments");
                 continue;
             }
             double gpa = 0;
@@ -503,7 +618,7 @@ public class Menus extends BaseApp{
             gpa /= enrollments.size();
             totalGPA += gpa;
             totalStudents += 1;
-            println(student.getFullname() + " (id=" + student.getId() + "): " + String.format("%.2f", gpa));
+            println(student.asLine() + " | Avg GPA: " + String.format("%.2f", gpa));
         }
         if(totalStudents != 0)
             println("Overall average GPA: " + totalGPA / totalStudents);
@@ -515,15 +630,15 @@ public class Menus extends BaseApp{
             println("No courses.");
             return;
         }
-        println("||| Average enrollment GPA by course |||");
+        printHeader("Average enrollment GPA by course");
         for (Course course : courses) {
-            List<Enrollment> enrollments = course.getEnrollments();
+            List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(course);
             if (enrollments.isEmpty()) {
-                println(course.getName() + " (id=" + course.getId() + "): no enrollments");
+                println(course.asLine() + " | no enrollments");
                 continue;
             }
             double avg = enrollments.stream().mapToDouble(Enrollment::getGpa).average().orElse(0.0);
-            println(course.getName() + " (id=" + course.getId() + "): " + String.format("%.2f", avg));
+            println(course.asLine() + " | Avg GPA: " + String.format("%.2f", avg));
         }
     }
 
@@ -533,7 +648,7 @@ public class Menus extends BaseApp{
             println("No teachers.");
             return;
         }
-        println("||| Average student GPA by teacher |||");
+        printHeader("Average student GPA by teacher");
         for (Teacher teacher : teachers) {
             Map<Course, List<Enrollment>> byCourse = teacherService.getTeacherEnrollments(teacher);
             double sum = 0.0;
@@ -545,10 +660,9 @@ public class Menus extends BaseApp{
                 }
             }
             if (count == 0) {
-                println(teacher.getFullname() + " (id=" + teacher.getId() + "): no enrollments");
+                println(teacher.asLine() + " | no enrollments");
             } else {
-                println(teacher.getFullname() + " (id=" + teacher.getId() + "): "
-                        + String.format("%.2f", sum / count));
+                println(teacher.asLine() + " | Avg GPA: " + String.format("%.2f", sum / count));
             }
         }
     }
@@ -562,7 +676,7 @@ public class Menus extends BaseApp{
 
     public static MenuBuilder getProfileMenu() {
         MenuBuilder menu = new MenuBuilder("My profile");
-        menu.addAction("View profile", () -> println(getActiveUser().toString()));
+        menu.addAction("View profile", () -> println("\n" + getActiveUser().asTable()));
         menu.addAction("Back", () -> menu.stop());
         return menu;
     }

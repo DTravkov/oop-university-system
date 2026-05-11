@@ -7,4 +7,14 @@ public class TechSupportSpecialist extends Employee {
     public TechSupportSpecialist(String login, String password, String name, String surname) {
         super(login, password, name, surname);
     }
+
+    @Override
+    public String asLine() {
+        return "TechSupport | " + super.asLine();
+    }
+
+    @Override
+    public String asTable() {
+        return "Role: TechSupportSpecialist\n" + super.asTable();
+    }
 }

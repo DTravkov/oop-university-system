@@ -27,6 +27,17 @@ public class Student extends User implements IEnrollable {
 	}
 
 	@Override
+	public String asLine() {
+		return String.format("ID: %d | Name: %s",
+				id, getFullname());
+	}
+
+	@Override
+	public String asTable() {
+		return super.asTable();
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

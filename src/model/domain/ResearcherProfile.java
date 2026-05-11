@@ -72,6 +72,24 @@ public class ResearcherProfile extends SerializableModel {
     }
 
     @Override
+    public String asLine() {
+        return String.format("ID: %d | Researcher: %s | Papers: %d",
+                id, user.getFullname(), papers.size());
+    }
+
+    @Override
+    public String asTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(id).append('\n');
+        sb.append("/User/\n").append(user.asLine()).append('\n');
+        sb.append("/Papers/\n");
+        for (ResearchPaper p : papers) {
+            sb.append(p.asLine()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "ResearcherProfile{" +
                 "id=" + id +
