@@ -38,7 +38,7 @@ public class LogEntry extends SerializableModel {
     @Override
     public String asLine() {
         String a = action == null ? "" : action;
-        return String.format("Log | User id: %d | %s | %s", userId, fullname, a);
+        return String.format("Log | ID: %d | %s | %s", userId, fullname, a);
     }
 
     @Override

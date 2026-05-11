@@ -13,7 +13,7 @@ public class GraduateStudent extends Student {
 
 	@Override
 	public String asLine() {
-		return "Graduate | " + super.asLine();
+		return super.asLine() + " | Graduate";
 	}
 
 	@Override

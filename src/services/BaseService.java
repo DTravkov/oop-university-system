@@ -31,7 +31,7 @@ public abstract class BaseService<T extends SerializableModel> implements IServi
         if(repository.exists(entity.getId())){
             throw new AlreadyExists(baseName + " with id " + entity.getId());
         }
-        Logger.log("Create " + baseName + " (" + entity + ")");
+        Logger.log("Create " + baseName + " (" + entity.getId() + ")");
         return repository.save(entity);
     }
     
@@ -61,7 +61,7 @@ public abstract class BaseService<T extends SerializableModel> implements IServi
         if(entity.getId() == 0){
             throw new OperationNotAllowed( baseName + " non-existing object can not be updated");
         }
-        Logger.log("Update " + baseName + " (" + entity + ")");
+        Logger.log("Update " + baseName + " (" + entity.getId() + ")");
         repository.save(entity);
     }
 
@@ -69,7 +69,7 @@ public abstract class BaseService<T extends SerializableModel> implements IServi
         if(!repository.exists(entity)){
             throw new DoesNotExist( baseName + " object with id " + entity.getId());
         }
-        Logger.log("Delete " + baseName + " (" + entity + ")");
+        Logger.log("Delete " + baseName + " (" + entity.getId() + ")");
         repository.delete(entity);
     }
 

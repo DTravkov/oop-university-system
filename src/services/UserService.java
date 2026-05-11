@@ -48,7 +48,7 @@ public class UserService extends BaseService<User> {
     public User ban(User user) {
         user.setBanned(true);
         repository.save(user);
-        Logger.log("Ban " + baseName + "(" + user + ")");
+        Logger.log("Ban " + baseName + "(" + user.getId() + ")");
         return user;
     }
 
@@ -62,7 +62,7 @@ public class UserService extends BaseService<User> {
         }
 
         AppSettings.setActiveUser(user);
-        Logger.log("Logged in as " + baseName + "(" + user + ")");
+        Logger.log("Logged in as " + baseName + "(" + user.getId() + ")");
         return user;
     }
 

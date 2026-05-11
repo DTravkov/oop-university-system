@@ -96,7 +96,7 @@ public class Menus extends BaseApp{
             printFail("You are not enrolled on any course yet");
             return;
         }
-        println(student.asTable());
+        println("\n" + student.asLine());
         println("Overall GPA: " + enrollmentService.getStudentGpa(student));
         println("--------------------------");
         for (Enrollment enr : enrollments) {

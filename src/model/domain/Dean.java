@@ -11,7 +11,7 @@ public class Dean extends Employee {
 
 	@Override
 	public String asLine() {
-		return "Dean | " + super.asLine();
+		return super.asLine() + " | Dean";
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class Repository<T extends SerializableModel>{
 
     @SuppressWarnings("unchecked")
     public List<T> getAll() {
-        return (List<T>) new ArrayList<>(DB.getAll(baseClass).values());
+        return (List<T>) new ArrayList<>(DB.getAll(baseClass).values().stream().filter(e -> e.getId() > 0).toList());
     }
 
     public boolean get(int entityId) {

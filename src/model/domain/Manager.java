@@ -10,7 +10,7 @@ public class Manager extends Employee {
 
     @Override
     public String asLine() {
-        return "Manager | " + super.asLine();
+        return super.asLine() + " | Manager";
     }
 
     @Override
