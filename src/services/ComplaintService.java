@@ -17,10 +17,7 @@ public class ComplaintService extends BaseService<TeacherComplaint>{
         subscribeToEvents();
     }
 
-    public void sendComplaint(TeacherComplaint complaint) {
-        this.create(complaint);
-    }
-
+    
     public void closeComplaint(TeacherComplaint complaint, Dean dean) {
         if(complaint.getDean().getId() != dean.getId()){
             throw new OperationNotAllowed("closing other deans' complaints");

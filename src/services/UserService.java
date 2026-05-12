@@ -47,7 +47,7 @@ public class UserService extends BaseService<User> {
 
     public User ban(User user) {
         user.setBanned(true);
-        repository.save(user);
+        update(user);
         Logger.log("Ban " + baseName + "(" + user.getId() + ")");
         return user;
     }

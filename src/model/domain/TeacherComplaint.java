@@ -1,7 +1,6 @@
 package model.domain;
 
 import java.util.Date;
-import java.util.Objects;
 
 import model.enumeration.ComplaintUrgencyLevel;
 import utils.FieldValidator;
@@ -68,29 +67,6 @@ public class TeacherComplaint extends SerializableModel {
     public void setSentDate(Date sentDate) {
         FieldValidator.requireNonNull(sentDate, "Sent date");
         this.sentDate = sentDate;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TeacherComplaint that = (TeacherComplaint) o;
-        if (id != 0 && that.getId() != 0) {
-            return id == that.getId();
-        }
-        return urgencyLevel == that.urgencyLevel
-                && Objects.equals(teacher, that.teacher)
-                && Objects.equals(dean, that.dean)
-                && Objects.equals(student, that.student)
-                && Objects.equals(content, that.content);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(urgencyLevel, teacher, dean, student, content);
     }
 
     @Override

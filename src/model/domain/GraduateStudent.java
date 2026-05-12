@@ -1,15 +1,29 @@
 package model.domain;
 
-import java.util.*;
+import java.util.Date;
+
+import settings.AppSettings;
 
 
 public class GraduateStudent extends Student {
 	
 	private static final long serialVersionUID = 1L;
 
+	private ResearcherProfile supervisor = AppSettings.DELETED_RESEARCHER_PROFILE;
+
     public GraduateStudent(String login, String password, String name, String surname, Date admissionDate) {
 		super(login, password, name, surname, admissionDate);
 	}
+
+	
+	public ResearcherProfile getSupervisor() {
+		return supervisor;
+	}
+
+	public void setSupervisor(ResearcherProfile supervisor) {
+		this.supervisor = supervisor;
+	}
+
 
 	@Override
 	public String asLine() {
@@ -18,27 +32,7 @@ public class GraduateStudent extends Student {
 
 	@Override
 	public String asTable() {
-		return "Role: GraduateStudent\n" + super.asTable();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		GraduateStudent student = (GraduateStudent) o;
-		if (id != 0 || student.getId() != 0) {
-			return id != 0 && id == student.getId();
-		}
-		if (!super.equals(o)) return false;
-		return Objects.equals(admissionDate, student.admissionDate);
-	}
-
-	@Override
-	public int hashCode() {
-		if (id != 0) {
-			return Integer.hashCode(id);
-		}
-		return Objects.hash(super.hashCode(), admissionDate);
+		return "Role: Graduate Student\n" + super.asTable();
 	}
 
 	@Override

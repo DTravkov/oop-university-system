@@ -1,104 +1,69 @@
 package services;
 
 import java.util.List;
+import java.util.Random;
 
-import exceptions.OperationNotAllowed;
-import model.domain.IMessagable;
+import model.domain.Employee;
 import model.domain.TechRequest;
 import model.domain.TechSupportSpecialist;
 import model.domain.User;
-import model.dto.TechRequestDTO;
-import model.enumeration.TechRequestStatus;
-import model.repository.TechRequestRepository;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
+import utils.Comparators;
 
-public class TechRequestService extends BaseService<TechRequest, TechRequestRepository>{
+public class TechRequestService extends BaseService<TechRequest>{
 
-    private final UserService userService;
-
+    public final UserService userService;
     public TechRequestService(UserService userService) {
-        super(TechRequestRepository.getInstance());
+        super(TechRequest.class);
         this.userService = userService;
         subscribeToEvents();
     }
 
-    public TechRequest sendRequest(TechRequest request) {
-
-        User from = userService.get(request.getSenderId());
-        User to = userService.get(request.getReceiverId());
-
-        if(from == to){
-            throw new OperationNotAllowed(" sending a technical request to yourself");
-        }
-        if(!(from instanceof IMessagable)){
-            throw new OperationNotAllowed(" sending technical requests from " + from.getClass().getSimpleName() + " account");
-        }
-        if(!(to instanceof TechSupportSpecialist)){
-            throw new OperationNotAllowed(" sending technical requests to " + to.getClass().getSimpleName() + " account");
-        }
-
-        return super.create(request);
+    @Override
+    public List<TechRequest> getAll() {
+        return super.getAll().stream().sorted(Comparators.TECH_REQUEST_BY_STAGE).toList();
     }
 
-    public void updateRequest(TechRequest updated){
-        super.update(updated);
+    public List<TechRequest> getAllBySpecialist(TechSupportSpecialist specialist){
+        return getAll().stream()
+                    .filter(req -> req.getSpecialist().getId() == specialist.getId())
+                    .toList();
     }
 
-    public List<TechRequest> getAll(){
-        return repository.findAll();
+    public List<TechRequest> getAllByEmployee(Employee employee){
+        return getAll().stream()
+                    .filter(req -> req.getEmployee().getId() == employee.getId())
+                    .toList();
     }
 
-    public List<TechRequest> getAllBySpecialistId(int specialistId){
-        return repository.findAllBySpecialistId(specialistId);
-    }
-
-    public List<TechRequest> getAllBySenderId(int senderId){
-        return repository.findAllBySenderId(senderId);
-    }
-
-    public List<TechRequest> getAllByStatus(TechRequestStatus status){
-        return repository.findAllByStatus(status);
-    }
-
-    public TechRequestDTO getDTO(int requestId){
-        TechRequest request = get(requestId);
-        return new TechRequestDTO(
-                request,
-                userService.getDTO(request.getSenderId()),
-                userService.getDTO(request.getReceiverId())
-        );
-    }
-
-    public TechRequestDTO getDTO(TechRequest request){
-        return new TechRequestDTO(
-                request,
-                userService.getDTO(request.getSenderId()),
-                userService.getDTO(request.getReceiverId())
-        );
-    }
 
     @Override
     public void subscribeToEvents(){
-        eventSystem.subscribe(UserDeleteEvent.class, eventData -> {
-            cleanUpUserTechRequestData(eventData.getUserId());
+        eventSystem.subscribe(UserDeleteEvent.class, event -> {
+            cleanUpUserTechRequestData(event.getUser());
         });
 
     }
 
-    public void cleanUpUserTechRequestData(int deletedUserId) {
-        this.getAll().forEach((req) -> {
-            if (req.getSenderId() == deletedUserId) {
-                req.setSenderId(AppSettings.DELETED_USER_ID);
-            }
-            if (req.getReceiverId() == deletedUserId) {
-                if (req.getStatus() != TechRequestStatus.DONE) {
-                    req.setStatus(TechRequestStatus.PENDING);
+    public void cleanUpUserTechRequestData(User user) {
+
+        if(user instanceof TechSupportSpecialist specialist){
+            Random random = new Random();
+            List<TechSupportSpecialist> otherSpecialists = userService.getAllByClass(TechSupportSpecialist.class);
+            getAllBySpecialist(specialist).forEach(req -> {
+                if(!otherSpecialists.isEmpty()){
+                    TechSupportSpecialist replacement = otherSpecialists.get(random.nextInt(0, otherSpecialists.size()-1));
+                    req.setSpecialist(replacement);
+                    return;
                 }
-                req.setReceiverId(AppSettings.DELETED_USER_ID);
-            }
-        });
-        this.saveAll();
+                req.setSpecialist(AppSettings.DELETED_TECH_SUPPORT_SPECIALIST);
+            });
+        }
+
+        if(user instanceof Employee employee){
+            getAllByEmployee(employee).forEach(req -> this.delete(req));
+        }
     }
 
 }

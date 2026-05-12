@@ -18,9 +18,17 @@ public class AppSettings {
     public static final int DELETED_USER_ID = -2;
     public static final User DELETED_USER = new DeletedUser();
 
-    /** Same idea as {@link #DELETED_USER} but typed as {@link Teacher} for enrollment lecture/practice slots. */
     public static final int DELETED_TEACHER_ID = -3;
     public static final Teacher DELETED_TEACHER = new DeletedTeacher();
+
+    public static final int DELETED_TECH_SUPPORT_SPECIALIST_ID = -4;
+    public static final TechSupportSpecialist DELETED_TECH_SUPPORT_SPECIALIST = new DeletedTechSupportSpecialist();
+
+    public static final int DELETED_STUDENT_ID = -5;
+    public static final Student DELETED_STUDENT = new DeletedStudent();
+
+    public static final int DELETED_RESEARCHER_PROFILE_ID = -6;
+    public static final ResearcherProfile DELETED_RESEARCHER_PROFILE = new DeletedResearcherProfile();
 
     public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "Admin", "Superuserovich");
 
@@ -30,6 +38,8 @@ public class AppSettings {
         ANONYMOUS_USER,
         DELETED_USER,
         DELETED_TEACHER,
+        DELETED_TECH_SUPPORT_SPECIALIST,
+        DELETED_STUDENT,
         DEFAULT_ADMIN
     );
 
@@ -39,11 +49,12 @@ public class AppSettings {
     public static final String DEFAULT_DATA_DIRECTORY = "data/";
 
 
-    /** User subclasses that cannot be registered as normal accounts via the UI. */
     public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
         AnonymousUser.class,
         DeletedUser.class,
         DeletedTeacher.class,
+        DeletedTechSupportSpecialist.class,
+        DeletedStudent.class,
         Employee.class,
         User.class
     );
@@ -52,6 +63,8 @@ public class AppSettings {
         AnonymousUser.class,
         DeletedUser.class,
         DeletedTeacher.class,
+        DeletedTechSupportSpecialist.class,
+        DeletedStudent.class,
         User.class,
         Student.class,
         GraduateStudent.class,

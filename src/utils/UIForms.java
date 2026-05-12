@@ -4,6 +4,7 @@ import model.domain.*;
 import model.enumeration.AttestationType;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.CourseType;
+import model.enumeration.LanguagePreference;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
 import model.enumeration.TechRequestStatus;
@@ -145,11 +146,32 @@ public class UIForms {
         return roles.get(choice - 1);
     }
 
+    public static LanguagePreference readLanguagePreference(Scanner scanner) {
+        while (true) {
+            System.out.println(Translator.translate(UIMessage.AUTH_CHANGE_LANG));
+            System.out.println("1. " + "English");
+            System.out.println("2. " + "Kazakh");
+            System.out.println("3. " + "Russian");
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    return LanguagePreference.EN;
+                case "2":
+                    return LanguagePreference.KK;
+                case "3":
+                    return LanguagePreference.RU;
+                default:
+                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+            }
+        }
+    }
+
     public static TechRequestStatus readTechRequestStatus(Scanner scanner) {
 
         List<TechRequestStatus> roles = List.of(TechRequestStatus.values());
 
-        System.out.println(Translator.translate(UIMessage.INPUT_USER_ROLE));
+        System.out.println(Translator.translate(UIMessage.INPUT_TECH_REQ_STATUS));
         for (int i = 0; i < roles.size(); i++) {
             System.out.println((i + 1) + "." + roles.get(i).toString());
         }

@@ -7,19 +7,19 @@ public class DeletedUser extends User{
 	private static final long serialVersionUID = 1L;
 
     public DeletedUser() {
-		super("DELETED", "DELETED", "DELETED", "USER");
+		super("DELETED_USER", "Deleted", "Deleted", "User");
 		this.setBanned(true);
 		this.id = AppSettings.DELETED_USER_ID;
 	}
 
 	@Override
 	public String asLine() {
-		return "ID: " + id + " | [Deleted user placeholder]";
+		return "ID: " + id + " | Deleted User";
 	}
 
 	@Override
 	public String asTable() {
-		return "ID: " + id + "\nRole: DeletedUser (system placeholder)\n";
+		return "\nDeleted User\n";
 	}
 
 }

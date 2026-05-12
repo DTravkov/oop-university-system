@@ -2,7 +2,6 @@ package model.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
@@ -128,24 +127,6 @@ public class Course extends SerializableModel {
 
     public void removePracticeTeacher(Teacher practiceTeacher) {
         this.practiceTeachers.removeIf(t -> t.getId() == practiceTeacher.getId());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Course course = (Course) o;
-        if (this.id != 0 && course.getId() != 0) {
-            return this.id == course.getId();
-        }
-        return Objects.equals(name, course.name);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(name);
     }
 
     @Override

@@ -68,16 +68,6 @@ public abstract class BaseApp {
         }
     }
 
-    protected static void retryOnException(Runnable action) {
-        while (true) {
-            try {
-                action.run();
-                return;
-            } catch (ApplicationException exc) {
-                printExceptionDetails(exc);
-            }
-        }
-    }
 
     protected static void printInvalidChoice() {
         println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));

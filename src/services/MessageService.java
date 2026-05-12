@@ -9,6 +9,7 @@ import model.domain.Employee;
 import model.domain.Message;
 import model.domain.User;
 import services.events.UserDeleteEvent;
+import utils.Logger;
 
 public class MessageService extends BaseService<Chat>{
 
@@ -24,6 +25,7 @@ public class MessageService extends BaseService<Chat>{
             throw new DoesNotExist(msg.getSender() + " is not a member of the chat");
         }
         chat.sendMessage(msg);
+        Logger.log("Send message by sender (" + sender.asLine() + ") in chat (" + chat.getId() + ")");
         update(chat);
         return chat;
     }
@@ -42,12 +44,14 @@ public class MessageService extends BaseService<Chat>{
         if(exists(sender, receiver)){
             chat = get(sender, receiver);
             chat.sendMessage(msg);
+            Logger.log("Send message by sender (" + sender.asLine() + ") to receiver (" + receiver.asLine() + ") in chat (" + chat.getId() + ")");
             update(chat);
             return chat;
         }
 
         chat = this.create(new Chat(sender, receiver));
         chat.sendMessage(msg);
+        Logger.log("Send message by sender (" + sender.asLine() + ") to receiver (" + receiver.asLine() + ") in chat (" + chat.getId() + ")");
         update(chat);
         return chat;
     }

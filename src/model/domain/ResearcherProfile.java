@@ -2,7 +2,6 @@ package model.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import utils.FieldValidator;
 
@@ -23,10 +22,6 @@ public class ResearcherProfile extends SerializableModel {
     public void setUser(User user) {
         FieldValidator.requireNonNull(user, "User");
         this.user = user;
-    }
-
-    public int getUserId() {
-        return user.getId();
     }
 
     public List<ResearchPaper> getPapers() {
@@ -50,25 +45,6 @@ public class ResearcherProfile extends SerializableModel {
 
     public boolean removePaper(int paperId) {
         return papers.removeIf(p -> p.getId() == paperId);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ResearcherProfile that = (ResearcherProfile) o;
-        if (id != 0 && that.getId() != 0) {
-            return id == that.getId();
-        }
-        return Objects.equals(user, that.user);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(user);
     }
 
     @Override

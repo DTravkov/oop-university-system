@@ -15,6 +15,7 @@ import model.domain.User;
 import model.enumeration.AttestationType;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
+import utils.Logger;
 
 public class EnrollmentService extends BaseService<Enrollment>  {
 
@@ -35,6 +36,7 @@ public class EnrollmentService extends BaseService<Enrollment>  {
 
     public void addPoints(Enrollment enrollment, Teacher teacher, AttestationType att, double points){
         enrollment.incrementMark(points, teacher, att);
+        Logger.log("Add points (" + points + ") by teacher (" + teacher.asLine() + ") to enrollment (" + enrollment.getId() + ") for attestation (" + att + ")");
         this.update(enrollment);
     }
 

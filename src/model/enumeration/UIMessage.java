@@ -46,10 +46,13 @@ public enum UIMessage {
     INPUT_COURSE_ID("input.course_id"),
     INPUT_PROJECT_ID("input.project_id"),
     INPUT_PAPER_ID("input.paper_id"),
+    INPUT_PAPER_TITLE("input.paper_title"),
     INPUT_PROJECT_TOPIC("input.project_topic"),
     INPUT_RESEARCH_PROFILE_USER_ID("input.research_profile_user_id"),
     INPUT_RESEARCHER_USER_ID("input.researcher_user_id"),
     INPUT_ORG_ID("input.org_id"),
+    INPUT_ORG_NAME("input.org_name"),
+    INPUT_ORG_DESC("input.org_desc"),
     INPUT_SENDER_ID("input.sender_id"),
     INPUT_RECEIVER_ID("input.receiver_id"),
     INPUT_MESSAGE_ID("input.message_id"),
@@ -60,6 +63,7 @@ public enum UIMessage {
     INPUT_COMMENT("input.comment"),
 
     INPUT_COMPLAINT_LEVEL("input.complaint_level"),
+    INPUT_TECH_REQ_STATUS("input.tech_req_status"),
 
     USER_UPDATE("user.update"),
     USER_DELETE("user.delete"),

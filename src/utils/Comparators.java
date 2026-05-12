@@ -15,9 +15,11 @@ public class Comparators {
     
     public static Comparator<TechRequest> TECH_REQUEST_BY_STAGE = ((req1,req2) -> Integer.compare(req1.getStatus().getStage(), req2.getStatus().getStage()));
 
-    public static Comparator<ResearchPaper> RESEARCH_PAPER_BY_DATE = ((rp1,rp2) -> rp1.getPublishDate().compareTo(rp2.getPublishDate()));
+    public static Comparator<ResearchPaper> RESEARCH_PAPER_BY_DATE = ((rp1,rp2) -> -rp1.getPublishDate().compareTo(rp2.getPublishDate()));
 
     public static Comparator<ResearchPaper> RESEARCH_PAPER_BY_CITATIONS_DESC = ((rp1,rp2) -> Integer.compare(rp2.getCitations(), rp1.getCitations()));
+
+    public static Comparator<ResearchPaper> RESEARCH_PAPER_BY_VIEWS_DESC = ((rp1,rp2) -> Integer.compare(rp2.getViews(), rp1.getViews()));
 
     public static Comparator<User> USER_BY_FULL_NAME = ((u1, u2) -> {
         String fullNameOne = u1.getFullname().toLowerCase().replace(" ", "");

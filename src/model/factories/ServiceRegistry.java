@@ -4,7 +4,10 @@ import services.CourseService;
 import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
+import services.ResearchService;
+import services.StudentOrganizationService;
 import services.TeacherService;
+import services.TechRequestService;
 import services.UserService;
 
 public final class ServiceRegistry {
@@ -18,6 +21,9 @@ public final class ServiceRegistry {
     public final ComplaintService complaintService;
     public final MessageService messageService;
     public final NewsService newsService;
+    public final TechRequestService techRequestService;
+    public final StudentOrganizationService studentOrganizationService;
+    public final ResearchService researchService;
 
     private ServiceRegistry() {
         userService = new UserService();
@@ -27,6 +33,9 @@ public final class ServiceRegistry {
         complaintService = new ComplaintService(userService);
         messageService = new MessageService();
         newsService = new NewsService();
+        techRequestService = new TechRequestService(userService);
+        studentOrganizationService = new StudentOrganizationService();
+        researchService = new ResearchService();
     }
 
     public static ServiceRegistry getInstance() {

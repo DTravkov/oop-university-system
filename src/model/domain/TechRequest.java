@@ -1,7 +1,5 @@
 package model.domain;
 
-import java.util.Objects;
-
 import model.enumeration.TechRequestStatus;
 import utils.FieldValidator;
 
@@ -41,6 +39,8 @@ public class TechRequest extends SerializableModel {
         return specialist;
     }
 
+
+
     public void setSpecialist(TechSupportSpecialist specialist) {
         FieldValidator.requireNonNull(specialist, "Specialist");
         this.specialist = specialist;
@@ -50,28 +50,6 @@ public class TechRequest extends SerializableModel {
         return content;
     }
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TechRequest that = (TechRequest) o;
-        if (id != 0 && that.getId() != 0) {
-            return id == that.getId();
-        }
-        return status == that.status
-                && Objects.equals(employee, that.employee)
-                && Objects.equals(specialist, that.specialist)
-                && Objects.equals(content, that.content);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(status, employee, specialist, content);
-    }
 
     @Override
     public String asLine() {

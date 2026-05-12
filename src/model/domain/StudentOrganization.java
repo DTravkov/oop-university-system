@@ -1,11 +1,11 @@
 package model.domain;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 import exceptions.AlreadyExists;
+import exceptions.OperationNotAllowed;
+import settings.AppSettings;
 import utils.FieldValidator;
 
 public class StudentOrganization extends SerializableModel {
@@ -15,7 +15,7 @@ public class StudentOrganization extends SerializableModel {
     private String name;
     private String description;
     private Student president;
-    private final Set<Student> members;
+    private final List<Student> members;
 
     public StudentOrganization(String name, String description, Student president) {
         FieldValidator.requireNonBlank(name, "Organization name");
@@ -24,7 +24,8 @@ public class StudentOrganization extends SerializableModel {
         this.name = name;
         this.description = description;
         this.president = president;
-        this.members = new HashSet<>();
+        this.members = new ArrayList<>();
+        this.members.add(president);
 
     }
 
@@ -50,11 +51,20 @@ public class StudentOrganization extends SerializableModel {
 
     public void setPresident(Student president) {
         FieldValidator.requireNonNull(president, "President");
+        if(this.president.getId() == president.getId()){
+            throw new AlreadyExists("this user os already a president");
+        }
         this.president = president;
+        this.addMember(president);
+    }
+
+    public void removePresident() {
+        this.president = AppSettings.DELETED_STUDENT;
+        this.removeMember(president);
     }
 
 
-    public List<User> getMembers() {
+    public List<Student> getMembers() {
         return List.copyOf(members);
     }
 
@@ -66,28 +76,13 @@ public class StudentOrganization extends SerializableModel {
     }
 
     public boolean removeMember(Student member) {
+        if(member.equals(president)){
+            throw new OperationNotAllowed("deleting actual president");
+        }
         return members.remove(member);
     }
 
-    public void removeMember(int memberId) {
-        this.members.removeIf(u -> u.getId() == memberId);
-    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        StudentOrganization that = (StudentOrganization) o;
-        if (this.id != 0 && that.getId() != 0) return this.id == that.getId();
-        return Objects.equals(name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(name);
-    }
 
     @Override
     public String asLine() {

@@ -5,7 +5,6 @@ import model.enumeration.AttestationType;
 import utils.FieldValidator;
 
 import java.util.Date;
-import java.util.Objects;
 
 public class Enrollment extends SerializableModel {
 
@@ -107,28 +106,6 @@ public class Enrollment extends SerializableModel {
 
     public double getGpa() {
         return mark.getGpa();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Enrollment enr = (Enrollment) o;
-
-        if (id != 0 || enr.getId() != 0) {
-            return id != 0 && id == enr.getId();
-        }
-        return Objects.equals(course, enr.course)
-                && Objects.equals(student, enr.student)
-                && Objects.equals(mark, enr.mark);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(course, student, mark);
     }
 
     @Override

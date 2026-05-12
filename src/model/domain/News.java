@@ -3,7 +3,6 @@ package model.domain;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import model.enumeration.NewsUrgencyLevel;
 import utils.FieldValidator;
@@ -97,22 +96,6 @@ public class News extends SerializableModel {
             return removeComment(comment.getId());
         }
         return comments.remove(comment);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        News news = (News) o;
-        if (this.id != 0 && news.getId() != 0) return this.id == news.getId();
-        return Objects.equals(title, news.title);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(title);
     }
 
     @Override

@@ -11,6 +11,7 @@ import model.enumeration.NewsUrgencyLevel;
 import services.events.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Comparators;
+import utils.Logger;
 
 public class NewsService extends BaseService<News>{
 
@@ -33,6 +34,7 @@ public class NewsService extends BaseService<News>{
 
     public void assignComment(News news, Comment comment) {
         news.addComment(comment);
+        Logger.log("Assign comment by sender (" + comment.getSender().asLine() + ") to news (" + news.getId() + ")");
         this.update(news);
     }
     

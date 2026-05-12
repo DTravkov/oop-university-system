@@ -16,6 +16,7 @@ import model.domain.User;
 import model.enumeration.TeacherType;
 import services.events.CourseDeleteEvent;
 import services.events.UserDeleteEvent;
+import utils.Logger;
 
 public class CourseService extends BaseService<Course>  {
 
@@ -53,6 +54,7 @@ public class CourseService extends BaseService<Course>  {
             course.addPracticeTeacher(teacher);
         }
 
+        Logger.log("Add teacher (" + teacher.asLine() + ") to course (" + course.getId() + ") as (" + type + ")");
         this.update(course);
     }
 
@@ -68,6 +70,7 @@ public class CourseService extends BaseService<Course>  {
             course.removePracticeTeacher(teacher);
         }
 
+        Logger.log("Remove teacher (" + teacher.asLine() + ") from course (" + course.getId() + ") as (" + type + ")");
         this.update(course);
     }
 

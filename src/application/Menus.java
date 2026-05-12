@@ -16,15 +16,21 @@ import model.domain.Manager;
 import model.domain.Message;
 import model.domain.News;
 import model.domain.GraduateStudent;
+import model.domain.ResearchPaper;
+import model.domain.ResearcherProfile;
 import model.domain.Student;
+import model.domain.StudentOrganization;
 import model.domain.Teacher;
+import model.domain.TechRequest;
 import model.domain.TechSupportSpecialist;
 import model.domain.User;
 import model.enumeration.AttestationType;
 import model.enumeration.ComplaintUrgencyLevel;
 import model.enumeration.CourseType;
+import model.enumeration.LanguagePreference;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
+import model.enumeration.TechRequestStatus;
 import model.enumeration.UIMessage;
 import model.factories.UserFactory;
 import services.ComplaintService;
@@ -32,14 +38,20 @@ import services.CourseService;
 import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
+import services.ResearchService;
+import services.StudentOrganizationService;
 import services.TeacherService;
+import services.TechRequestService;
 import services.UserService;
 import settings.AppSettings;
+import utils.Comparators;
 import utils.LogEntry;
 import utils.Logger;
 import utils.StringUtils;
 import utils.Translator;
 import utils.UIForms;
+
+import java.util.Comparator;
 
 public class Menus extends BaseApp{
 
@@ -50,15 +62,19 @@ public class Menus extends BaseApp{
     static final ComplaintService complaintService = services.complaintService;
     static final MessageService messageService = services.messageService;
     static final NewsService newsService = services.newsService;
+    static final TechRequestService techRequestService = services.techRequestService;
+    static final StudentOrganizationService organizationService = services.studentOrganizationService;
+    static final ResearchService researchService = services.researchService;
 
     public static MenuBuilder getMainMenu(){
 
         User activeUser = getActiveUser();
 
         MenuBuilder menu = new MenuBuilder("University System v0.0001");
-        menu.addAction("My profile", () -> getProfileMenu().start());
+        menu.addAction("My Profile", () -> getProfileMenu().start());
         if(activeUser instanceof Student){
-            menu.addAction("My transcript", () -> printStudentTranscript());
+            menu.addAction("My Transcript", () -> printStudentTranscript());
+            menu.addAction("Student Organization Menu", () -> getStudentOrgMenu().start());
         }
         menu.addAction("Research Menu", () -> getResearcherMenu().start());
         menu.addAction("News Menu", () -> getNewsMenu().start());
@@ -88,7 +104,129 @@ public class Menus extends BaseApp{
         return menu;
     }
 
+
+    public static void changeLanguage() {
+        LanguagePreference choice = UIForms.readLanguagePreference(scanner);
+        AppSettings.setLanguage(choice);
+        printSuccess(Translator.translate(UIMessage.AUTH_CHANGE_LANG));
+    }
+
+    private static MenuBuilder getStudentOrgMenu() {
+        User activeUser = getActiveUser();
+
+        boolean isMember = organizationService.isMember(activeUser);
     
+        MenuBuilder menu = new MenuBuilder("Student Organizations");
+        menu.addAction("View all organizations", () -> printAllStudentOrgs());
+        menu.addAction("View organization detail", () -> printAllStudentOrgs());
+        if(isMember){
+            menu.addAction("View my organization", () -> getMyOrgMenu().start());
+        }else{
+            menu.addAction("Join an organization", () -> joinStudentOrg());
+            menu.addAction("Create an organization", () -> createStudentOrg());
+        }
+        
+        menu.addAction("Exit", () -> menu.stop());
+        return menu;
+    }
+
+    private static void joinStudentOrg() {
+        Student student = (Student) getActiveUser();
+        List<StudentOrganization> orgs = organizationService.getAll();
+        if(orgs.isEmpty()){
+            println("No organizations");
+            return;
+        }
+        StudentOrganization org = UIForms.readIdFromList(scanner, UIMessage.INPUT_ORG_ID, orgs);
+        organizationService.addMember(org, student);
+        printSuccess("Joined " + org.getName() + ".");
+    }
+
+    private static void createStudentOrg() {
+        Student student = (Student) getActiveUser();
+        String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_ORG_NAME);
+        String description = UIForms.readNonEmpty(scanner, UIMessage.INPUT_ORG_DESC);
+        StudentOrganization org = new StudentOrganization(name, description, student);
+        organizationService.create(org);
+        printSuccess("Organization \"" + name + "\" created.");
+    }
+
+
+    private static void printAllStudentOrgs() {
+        List<StudentOrganization> orgs = organizationService.getAll();
+        if(orgs.isEmpty()){
+            println("No organizations");
+            return;
+        }
+        printHeader("Organizations");
+        orgs.forEach(o -> println(o.asLine()));
+    }
+
+
+    private static MenuBuilder getMyOrgMenu() {
+        User activeUser = getActiveUser();
+
+        StudentOrganization org = organizationService.getOrganizationByMember(activeUser);
+        MenuBuilder menu = new MenuBuilder("");
+        menu.addLabel(org.asTable());
+        if(org.getPresident().equals(activeUser)){
+            menu.addAction("Add member", () -> {
+                addMemberToOrg(org);
+                menu.stop();
+                getMyOrgMenu().start();
+            });
+            menu.addAction("Remove member", () -> {
+                removeMemberFromOrg(org);
+                menu.stop();
+                getMyOrgMenu().start();
+            });
+            menu.addAction("Delete organization", () -> {
+                deleteStudentOrg(org);
+                menu.stop();
+            });
+        }else{
+            menu.addAction("Leave organization", () -> getMyOrgMenu().start());
+        }
+        menu.addAction("Exit", () -> menu.stop());
+        return menu;
+    }
+
+    private static void addMemberToOrg(StudentOrganization org) {
+        List<Student> candidates = userService.getAllByClass(Student.class).stream()
+                .filter(s -> !organizationService.isMember(s))
+                .toList();
+        if(candidates.isEmpty()){
+            printFail("No students available to add.");
+            return;
+        }
+        printHeader("Students");
+        candidates.forEach(s -> println(s.asLine()));
+        Student student = UIForms.readIdFromList(scanner, UIMessage.INPUT_STUDENT_ID, candidates);
+        organizationService.addMember(org, student);
+        printSuccess(student.getFullname() + " added to " + org.getName() + ".");
+    }
+
+    private static void removeMemberFromOrg(StudentOrganization org) {
+        List<Student> removable = org.getMembers().stream()
+                .filter(m -> !m.equals(org.getPresident()))
+                .toList();
+        if(removable.isEmpty()){
+            printFail("No members to remove.");
+            return;
+        }
+        printHeader("Members");
+        removable.forEach(m -> println(m.asLine()));
+        Student student = UIForms.readIdFromList(scanner, UIMessage.INPUT_STUDENT_ID, removable);
+        organizationService.removeMember(org, student);
+        printSuccess(student.getFullname() + " removed from " + org.getName() + ".");
+    }
+
+    private static void deleteStudentOrg(StudentOrganization org) {
+        organizationService.delete(org);
+        printSuccess("Organization \"" + org.getName() + "\" deleted.");
+    }
+
+
     private static void printStudentTranscript() {
         Student student = (Student) getActiveUser();
         List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(student);
@@ -117,15 +255,221 @@ public class Menus extends BaseApp{
     }
 
     private static MenuBuilder getResearcherMenu() {
+        User activeUser = getActiveUser();
         MenuBuilder menu = new MenuBuilder("Research Menu");
+        menu.addAction("View all researchers", () -> printAllResearchers());
+        menu.addAction("View researcher papers", () -> printResearcherPapers());
+        menu.addAction("View all papers", () -> getPaperMenu().start());
+        if(!researchService.isResearcher(activeUser)){
+            menu.addAction("Become researcher", () -> {
+                becomeResearcher();
+                menu.stop();
+                menu.start();
+            });
+        }else{
+            menu.addAction("Manage my papers", () -> getManagePapersMenu().start());
+        }
         menu.addAction("Back", () -> menu.stop());
         return menu;
     }
 
+    private static void printAllResearchers() {
+        List<ResearcherProfile> profiles = researchService.getAll();
+        if(profiles.isEmpty()){
+            println("No researchers");
+            return;
+        }
+        printHeader("Researchers");
+        profiles.forEach(p -> println(p.asLine()));
+    }
+
+    private static void becomeResearcher() {
+        researchService.createResearcherProfile(getActiveUser());
+        printSuccess("You are now a researcher.");
+    }
+
+    private static void printResearcherPapers() {
+        List<ResearcherProfile> profiles = researchService.getAll();
+        if(profiles.isEmpty()){
+            println("No researchers");
+            return;
+        }
+        printHeader("Researchers");
+        profiles.forEach(p -> println(p.asLine()));
+        ResearcherProfile profile = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, profiles);
+        List<ResearchPaper> papers = researchService.getPapersByAuthor(profile.getUser());
+        if(papers.isEmpty()){
+            printFail(profile.getUser().getFullname() + " has no papers.");
+            return;
+        }
+        printHeader(profile.getUser().getFullname() + "'s Papers");
+        papers.forEach(p -> println(p.asLine()));
+    }
+
+    private static MenuBuilder getPaperMenu() {
+        MenuBuilder menu = new MenuBuilder("Papers");
+        menu.addAction("View all (by publish date)", () -> printPapersSorted(Comparators.RESEARCH_PAPER_BY_DATE));
+        menu.addAction("View all (by citations)", () -> printPapersSorted(Comparators.RESEARCH_PAPER_BY_CITATIONS_DESC));
+        menu.addAction("View all (by views)", () -> printPapersSorted(Comparators.RESEARCH_PAPER_BY_VIEWS_DESC));
+        menu.addAction("View paper detail", () -> openPaper());
+        menu.addAction("Cite a paper", () -> citePaper());
+        menu.addAction("Back", () -> menu.stop());
+        return menu;
+    }
+
+    private static void printPapersSorted(Comparator<ResearchPaper> comparator) {
+        List<ResearchPaper> papers = researchService.getAllPapers().stream().sorted(comparator).toList();
+        if(papers.isEmpty()){
+            println("No papers");
+            return;
+        }
+        printHeader("Papers");
+        papers.forEach(p -> println(p.asLine()));
+    }
+
+    private static void openPaper() {
+        List<ResearchPaper> papers = researchService.getAllPapers();
+        if(papers.isEmpty()){
+            println("No papers");
+            return;
+        }
+        printHeader("Papers");
+        papers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, papers);
+        researchService.incrementViews(paper);
+        println(paper.asTable());
+        if(!paper.getResearchers().isEmpty()){
+            printHeader("Participants");
+            paper.getResearchers().forEach(r -> println(r.getUser().asLine()));
+        }
+    }
+
+    private static void citePaper() {
+        List<ResearchPaper> papers = researchService.getAllPapers();
+        if(papers.isEmpty()){
+            println("No papers");
+            return;
+        }
+        printHeader("Papers");
+        papers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, papers);
+        researchService.citePaper(paper);
+        printSuccess("Paper cited.");
+    }
+
+    private static MenuBuilder getManagePapersMenu() {
+        MenuBuilder menu = new MenuBuilder("Manage Papers");
+        menu.addAction("Create paper", () -> createPaper());
+        menu.addAction("Delete paper", () -> deletePaper());
+        menu.addAction("Add participant", () -> addPaperParticipant());
+        menu.addAction("Remove participant", () -> removePaperParticipant());
+        menu.addAction("Add reference", () -> addPaperReference());
+        menu.addAction("Back", () -> menu.stop());
+        return menu;
+    }
+
+    private static void createPaper() {
+        String title = UIForms.readNonEmpty(scanner, UIMessage.INPUT_PAPER_TITLE);
+        ResearchPaper paper = researchService.createPaper(getActiveUser(), title);
+        printSuccess("Paper \"" + paper.getTitle() + "\" created.");
+    }
+
+    private static void deletePaper() {
+        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        if(myPapers.isEmpty()){
+            printFail("You have no papers.");
+            return;
+        }
+        printHeader("My Papers");
+        myPapers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+        researchService.deletePaper(paper);
+        printSuccess("Paper deleted.");
+    }
+
+    private static void addPaperParticipant() {
+        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        if(myPapers.isEmpty()){
+            printFail("You have no papers.");
+            return;
+        }
+        printHeader("My Papers");
+        myPapers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+
+        List<ResearcherProfile> candidates = researchService.getAll().stream()
+                .filter(rp -> paper.getResearchers().stream().noneMatch(r -> r.getId() == rp.getId()))
+                .toList();
+        if(candidates.isEmpty()){
+            printFail("No researchers available.");
+            return;
+        }
+        printHeader("Researchers");
+        candidates.forEach(c -> println(c.asLine()));
+        ResearcherProfile participant = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, candidates);
+        researchService.addParticipant(paper, participant);
+        printSuccess("Participant added.");
+    }
+
+    private static void removePaperParticipant() {
+        ResearcherProfile myProfile = researchService.getProfile(getActiveUser());
+        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        if(myPapers.isEmpty()){
+            printFail("You have no papers.");
+            return;
+        }
+        printHeader("My Papers");
+        myPapers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+
+        List<ResearcherProfile> participants = paper.getResearchers().stream()
+                .filter(rp -> rp.getId() != myProfile.getId())
+                .toList();
+        if(participants.isEmpty()){
+            printFail("No other participants to remove.");
+            return;
+        }
+        printHeader("Participants");
+        participants.forEach(p -> println(p.asLine()));
+        ResearcherProfile target = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, participants);
+        researchService.removeParticipant(paper, target);
+        printSuccess("Participant removed.");
+    }
+
+    private static void addPaperReference() {
+        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        if(myPapers.isEmpty()){
+            printFail("You have no papers.");
+            return;
+        }
+        printHeader("My Papers");
+        myPapers.forEach(p -> println(p.asLine()));
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+
+        List<ResearchPaper> candidates = researchService.getAllPapers().stream()
+                .filter(p -> p.getId() != paper.getId())
+                .filter(p -> paper.getReferences().stream().noneMatch(r -> r.getId() == p.getId()))
+                .toList();
+        if(candidates.isEmpty()){
+            printFail("No papers available to reference.");
+            return;
+        }
+        printHeader("Available Papers");
+        candidates.forEach(p -> println(p.asLine()));
+        ResearchPaper reference = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, candidates);
+        researchService.addReference(paper, reference);
+        printSuccess("Reference added.");
+    }
+
     private static MenuBuilder getNewsMenu() {
+        List<News> news = newsService.getAll();
         MenuBuilder menu = new MenuBuilder("News Menu");
-        for(News news : newsService.getAll()){
-            menu.addAction(news.asLine(), () -> openNews(news));
+        if(news.isEmpty()){
+            menu.addLabel("No news");
+        }else{
+            for(News n : news){
+                menu.addAction(n.asLine(), () -> openNews(n));
+            }
         }
         menu.addAction("Back", () -> menu.stop());
         return menu;
@@ -248,9 +592,38 @@ public class Menus extends BaseApp{
 
     private static MenuBuilder getTechRequestMenu() {
         MenuBuilder menu = new MenuBuilder("Technical Request Menu");
+        menu.addAction("View my requests", () -> printTechRequests());
+        menu.addAction("Send a new request", () -> sendTechRequest());
         menu.addAction("Back", () -> menu.stop());
         return menu;
     }
+
+    private static void sendTechRequest() {
+        Employee employee = (Employee) getActiveUser();
+        List<TechSupportSpecialist> specialists = userService.getAllByClass(TechSupportSpecialist.class);
+        if (specialists.isEmpty()) {
+            printFail("No tech support specialists available.");
+            return;
+        }
+        printHeader("Tech Support Specialists");
+        specialists.forEach(s -> println(s.asLine()));
+        TechSupportSpecialist specialist = UIForms.readIdFromList(scanner, UIMessage.INPUT_RECEIVER_ID, specialists);
+        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
+        techRequestService.create(new TechRequest(employee, specialist, content));
+        printSuccess("Tech request sent.");
+    }
+
+
+    private static void printTechRequests() {
+        Employee employee = (Employee) getActiveUser();
+        List<TechRequest> requests = techRequestService.getAllByEmployee(employee);
+        if (requests.isEmpty()) {
+            printFail("You have no tech requests yet.");
+            return;
+        }
+        requests.forEach(r -> println(r.asLine()));
+    }
+
 
     private static MenuBuilder getComplaintMenu() {
         MenuBuilder menu = new MenuBuilder("Complaint Menu");
@@ -292,7 +665,7 @@ public class Menus extends BaseApp{
             String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
 
             TeacherComplaint complaint = new TeacherComplaint(urgency, teacher, dean, student, content);
-            complaintService.sendComplaint(complaint);
+            complaintService.create(complaint);
             printSuccess("Complaint sent.");
     }
 
@@ -404,7 +777,7 @@ public class Menus extends BaseApp{
             return;
         }
         printHeader("User");
-        users.forEach(u -> println(u.asLine()));
+        users.stream().filter(u -> !u.equals(getActiveUser())).forEach(u -> println(u.asLine()));
         User user = UIForms.readIdFromList(scanner, UIMessage.INPUT_USER_ID, users);
         userService.ban(user);
         printSuccess("User " + user.asLine() + " is banned");
@@ -670,8 +1043,51 @@ public class Menus extends BaseApp{
 
     private static MenuBuilder getTechSupportSpecMenu() {
         MenuBuilder menu = new MenuBuilder("Technical Specialist Menu");
+        menu.addAction("View all requests", () -> printSpecialistRequests());
+        menu.addAction("View requests (by status)", () -> printSpecialistRequestsByStatus());
+        menu.addAction("Update request", () -> updateTechRequest());
         menu.addAction("Back", () -> menu.stop());
         return menu;
+    }
+
+    private static void printSpecialistRequests() {
+        TechSupportSpecialist specialist = (TechSupportSpecialist) getActiveUser();
+        List<TechRequest> requests = techRequestService.getAllBySpecialist(specialist);
+        if (requests.isEmpty()) {
+            printFail("No requests");
+            return;
+        }
+        requests.forEach(r -> println(r.asLine()));
+    }
+
+    private static void printSpecialistRequestsByStatus() {
+        TechSupportSpecialist specialist = (TechSupportSpecialist) getActiveUser();
+        TechRequestStatus status = UIForms.readTechRequestStatus(scanner);
+        List<TechRequest> requests = techRequestService.getAllBySpecialist(specialist).stream()
+                .filter(r -> r.getStatus() == status)
+                .toList();
+        if (requests.isEmpty()) {
+            printFail("No requests with status " + status + ".");
+            return;
+        }
+        printHeader(status + " Requests");
+        requests.forEach(r -> println(r.asLine()));
+    }
+
+    private static void updateTechRequest() {
+        TechSupportSpecialist specialist = (TechSupportSpecialist) getActiveUser();
+        List<TechRequest> requests = techRequestService.getAllBySpecialist(specialist);
+        if (requests.isEmpty()) {
+            printFail("You have no tech requests.");
+            return;
+        }
+        printHeader("My Requests");
+        requests.forEach(r -> println(r.asLine()));
+        TechRequest request = UIForms.readIdFromList(scanner, UIMessage.INPUT_REQUEST_ID, requests);
+        TechRequestStatus status = UIForms.readTechRequestStatus(scanner);
+        request.setStatus(status);
+        techRequestService.update(request);
+        printSuccess("Request updated.");
     }
 
     public static MenuBuilder getProfileMenu() {

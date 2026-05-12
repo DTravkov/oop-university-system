@@ -3,7 +3,6 @@ package model.domain;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import exceptions.OperationNotAllowed;
@@ -74,25 +73,6 @@ public class Chat extends SerializableModel {
     public boolean removeMessage(Message message) {
         FieldValidator.requireNonNull(message, "Message");
         return messages.remove(message);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Chat chat = (Chat) o;
-        if (id != 0 && chat.getId() != 0) {
-            return id == chat.getId();
-        }
-        return Objects.equals(this.members, chat.members);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id != 0) {
-            return Integer.hashCode(id);
-        }
-        return Objects.hash(members);
     }
 
     @Override

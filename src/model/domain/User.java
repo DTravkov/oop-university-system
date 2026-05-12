@@ -100,30 +100,6 @@ public class User extends SerializableModel{
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (super.equals(o)) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		User other = (User) o;
-		
-		if (id == 0 && other.id == 0) {
-			return Objects.equals(login, other.login);
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		if (id != 0) {
-			return Integer.hashCode(id);
-		}
-		return Objects.hash(login);
-	}
-
-	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "[id=" + this.getId() + ", name=" + this.getName() + ", surname=" + this.getSurname() +"]";
 	}
