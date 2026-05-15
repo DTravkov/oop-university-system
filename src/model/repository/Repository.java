@@ -6,6 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+
+/**
+ * this class is pretty interesting, because it provides CRUD and serialization for many objects at once.
+ * we can pass any *.class variable to its constructor, and database will automatically create storage for this *.class
+ * interesting fact, i made 3 refactors because i didnt like previous repository layers 
+ */
 public class Repository<T extends SerializableModel>{
 
     private static final Database DB = Database.getInstance();
@@ -18,6 +24,7 @@ public class Repository<T extends SerializableModel>{
         this.baseName = this.getClass().getSimpleName().replace("Repository", "");
     }
 
+
     public T save(T entity) {
         return DB.save(baseClass, entity);
     }
@@ -26,16 +33,8 @@ public class Repository<T extends SerializableModel>{
         DB.saveAll();
     }
 
-    public T update(T entity) {
-        return DB.update(baseClass, entity);
-    }
-
-
     public void delete(T entity) {
         DB.delete(baseClass, entity);
-    }
-    public void delete(int entityId) {
-        DB.delete(baseClass, entityId);
     }
 
     @SuppressWarnings("unchecked")
@@ -56,6 +55,12 @@ public class Repository<T extends SerializableModel>{
                         .filter(query)
                         .findFirst()
                         .orElse(null);
+    }
+
+    public List<T> findAll(Predicate<T> query){
+        return getAll().stream()
+                        .filter(query)
+                        .toList();
     }
 
     public boolean exists(T entity) {

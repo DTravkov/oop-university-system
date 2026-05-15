@@ -43,10 +43,6 @@ public class ResearcherProfile extends SerializableModel {
         return papers.remove(paper);
     }
 
-    public boolean removePaper(int paperId) {
-        return papers.removeIf(p -> p.getId() == paperId);
-    }
-
     @Override
     public String asLine() {
         return String.format("ID: %d | Researcher: %s | Papers: %d",

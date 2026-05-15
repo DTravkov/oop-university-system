@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import exceptions.OperationNotAllowed;
 import model.enumeration.NewsUrgencyLevel;
 import utils.FieldValidator;
 
@@ -30,6 +31,13 @@ public class News extends SerializableModel {
         this.urgencyLevel = urgencyLevel;
         this.publishedDate = new Date();
         this.comments = new ArrayList<>();
+    }
+
+
+    public void deleteBy(Manager manager){
+        if(!getPublisher().equals(manager)){
+            throw new OperationNotAllowed("deleting news while not being its publisher");
+        }
     }
 
     public String getTitle() {

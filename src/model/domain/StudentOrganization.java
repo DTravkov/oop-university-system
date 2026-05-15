@@ -5,7 +5,6 @@ import java.util.List;
 
 import exceptions.AlreadyExists;
 import exceptions.OperationNotAllowed;
-import settings.AppSettings;
 import utils.FieldValidator;
 
 public class StudentOrganization extends SerializableModel {
@@ -45,21 +44,21 @@ public class StudentOrganization extends SerializableModel {
         this.description = description;
     }
 
-    public User getPresident() {
+    public Student getPresident() {
         return president;
     }
 
     public void setPresident(Student president) {
         FieldValidator.requireNonNull(president, "President");
         if(this.president.getId() == president.getId()){
-            throw new AlreadyExists("this user os already a president");
+            throw new AlreadyExists("this user is already a president");
         }
         this.president = president;
         this.addMember(president);
     }
 
     public void removePresident() {
-        this.president = AppSettings.DELETED_STUDENT;
+        this.president.markAsDeleted();
         this.removeMember(president);
     }
 
@@ -68,21 +67,23 @@ public class StudentOrganization extends SerializableModel {
         return List.copyOf(members);
     }
 
+    public boolean isMember(Student student){
+        return getMembers().stream().anyMatch(s -> s.getId() == student.getId());
+    }
+
     public void addMember(Student member) {
         FieldValidator.requireNonNull(member, "Member");
-        if(this.members.contains(member))
+        if(isMember(member))
             throw new AlreadyExists("member of " + getName() + " organization with id=" + member.getId());
         this.members.add(member);
     }
 
     public boolean removeMember(Student member) {
-        if(member.equals(president)){
+        if(member.equals(president) && !president.isDeleted()){
             throw new OperationNotAllowed("deleting actual president");
         }
         return members.remove(member);
     }
-
-
 
     @Override
     public String asLine() {

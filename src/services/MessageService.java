@@ -8,17 +8,23 @@ import model.domain.Chat;
 import model.domain.Employee;
 import model.domain.Message;
 import model.domain.User;
-import services.events.UserDeleteEvent;
+import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
 
+/**
+ * MessageService is a concrete service. It implements logic for employee chats: sending messages inside a chat,
+ * opening a chats between two employees, and removing chats when a participant is deleted.
+ */
 public class MessageService extends BaseService<Chat>{
 
 
     public MessageService() {
         super(Chat.class);
-        subscribeToEvents();
     }
 
+    // CREATE / UPDATE / DELETE (SENDING MUTATES CHAT STATE)
+
+    // has a few overloads to send messages with different sets of data.
     public Chat sendMessage(Chat chat, Message msg) {
         Employee sender = (Employee) msg.getSender();
         if (!chat.isMember(sender)) {
@@ -26,7 +32,7 @@ public class MessageService extends BaseService<Chat>{
         }
         chat.sendMessage(msg);
         Logger.log("Send message by sender (" + sender.asLine() + ") in chat (" + chat.getId() + ")");
-        update(chat);
+        repository.save(chat);
         return chat;
     }
 
@@ -35,14 +41,14 @@ public class MessageService extends BaseService<Chat>{
         Employee sender = (Employee) msg.getSender();
         Employee receiver = (Employee) to;
 
-        if(sender.getId() <= 0 || receiver.getId() <= 0){
+        if(sender.isBanned() || receiver.isDeleted()){
             throw new OperationNotAllowed(" sending messages to/from deleted accounts");
         }
         
         Chat chat;
 
         if(exists(sender, receiver)){
-            chat = get(sender, receiver);
+            chat = getChatByMembers(sender, receiver);
             chat.sendMessage(msg);
             Logger.log("Send message by sender (" + sender.asLine() + ") to receiver (" + receiver.asLine() + ") in chat (" + chat.getId() + ")");
             update(chat);
@@ -52,17 +58,18 @@ public class MessageService extends BaseService<Chat>{
         chat = this.create(new Chat(sender, receiver));
         chat.sendMessage(msg);
         Logger.log("Send message by sender (" + sender.asLine() + ") to receiver (" + receiver.asLine() + ") in chat (" + chat.getId() + ")");
-        update(chat);
+        repository.save(chat);
         return chat;
     }
 
 
+    // QUERIES
 
-    public List<Chat> getAllChats(Employee chatMember){
-        return getAll().stream().filter(ch -> ch.isMember(chatMember)).toList();
+    public List<Chat> getChatsByMember(Employee chatMember){
+        return getAll(ch -> ch.isMember(chatMember));
     }
 
-    public Chat get(Employee memberOne, Employee memberTwo){
+    public Chat getChatByMembers(Employee memberOne, Employee memberTwo){
         return getAll().stream()
                        .filter(chat -> chat.isMember(memberOne) && chat.isMember(memberTwo))
                        .findFirst()
@@ -71,14 +78,16 @@ public class MessageService extends BaseService<Chat>{
 
     public boolean exists(Employee memberOne, Employee memberTwo){
         try{
-            get(memberOne, memberTwo);
+            getChatByMembers(memberOne, memberTwo);
             return true;
         }
-        catch (Exception e){
+        catch (DoesNotExist e){
             return false;
         }
     }
 
+
+    // EVENT HANDLING
 
     @Override
     public void subscribeToEvents(){
@@ -89,7 +98,7 @@ public class MessageService extends BaseService<Chat>{
 
     public void onUserDelete(User deletedUser) {
         if(deletedUser instanceof Employee chatMember){
-            getAllChats(chatMember).forEach(chat->{
+            getChatsByMember(chatMember).forEach(chat->{
                 this.delete(chat);
             });
         }

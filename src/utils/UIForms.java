@@ -16,7 +16,12 @@ import java.util.Scanner;
 
 import exceptions.DoesNotExist;
 
+/**
+ * UIForms is bunch of static methods that help with taking data from user in app layar.
+ */
 public class UIForms {
+
+    // BASIC CONSOLE READS
 
     public static String readNonEmpty(Scanner scanner, UIMessage prompt) {
         return readNonEmpty(scanner, Translator.translate(prompt));
@@ -115,6 +120,9 @@ public class UIForms {
             }
         }
     }
+
+    // ENUM AND DOMAIN MENUS
+
     public static TeacherType askTeacherType(Scanner scanner) {
         while (true) {
             System.out.print(Translator.translate(UIMessage.INPUT_TEACHER_TYPE));

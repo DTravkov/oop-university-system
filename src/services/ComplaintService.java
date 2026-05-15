@@ -2,41 +2,44 @@ package services;
 
 import java.util.List;
 
-import exceptions.OperationNotAllowed;
 import model.domain.Dean;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
 import model.domain.User;
-import services.events.UserDeleteEvent;
+import services.events.concrete.UserDeleteEvent;
+import utils.Logger;
 
+/**
+ * ComplaintService is a concrete service. It implements logic for managing teacher complaints addressed to deans.
+ */
 public class ComplaintService extends BaseService<TeacherComplaint>{
 
 
-    public ComplaintService(UserService userService) {
+    public ComplaintService() {
         super(TeacherComplaint.class);
-        subscribeToEvents();
     }
 
-    
+    // CREATE / UPDATE / DELETE
+
     public void closeComplaint(TeacherComplaint complaint, Dean dean) {
-        if(complaint.getDean().getId() != dean.getId()){
-            throw new OperationNotAllowed("closing other deans' complaints");
-        }
-        this.delete(complaint);
+        complaint.closeBy(dean);
+        Logger.log("Closed complaint (" + complaint.getId() + ")" );
+        repository.save(complaint);
     }
 
-    public List<TeacherComplaint> getTeacherComplaints(Teacher teacher) {
-        return getAll().stream()
-                       .filter(comp -> comp.getTeacher().getId() == teacher.getId())
-                       .toList();
+
+    // QUERIES
+
+    public List<TeacherComplaint> getComplaintsByTeacher(Teacher teacher) {
+        return getAll(comp -> comp.getTeacher().getId() == teacher.getId());
     }
 
-    public List<TeacherComplaint> getDeanComplaints(Dean dean) {
-        return getAll().stream()
-                       .filter(comp -> comp.getDean().getId() == dean.getId())
-                       .toList();
+    public List<TeacherComplaint> getComplaintsByDean(Dean dean) {
+        return getAll(comp -> comp.getDean().getId() == dean.getId());
     }
 
+
+    // EVENT HANDLING
 
     @Override
     public void subscribeToEvents(){
@@ -47,7 +50,7 @@ public class ComplaintService extends BaseService<TeacherComplaint>{
     public void onUserDelete(User user) {
         if(user instanceof Dean || user instanceof Teacher){
             getAll().forEach(comp -> {
-                if(comp.getTeacher().getId() == user.getId() || comp.getDean().getId() == user.getId()){
+                if(comp.getTeacher().equals(user) || comp.getDean().equals(user)){
                     this.delete(comp);
                 }
             });

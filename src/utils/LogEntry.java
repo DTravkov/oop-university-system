@@ -5,6 +5,10 @@ import java.util.Date;
 import model.domain.SerializableModel;
 import model.domain.User;
 
+/**
+ * LogEntry stores user+time+action of a user in the system.
+ * Implemented in base service, so each action is logged
+ */
 public class LogEntry extends SerializableModel {
     private static final long serialVersionUID = 1L;
 

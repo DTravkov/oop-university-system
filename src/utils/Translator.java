@@ -5,15 +5,21 @@ import java.util.ResourceBundle;
 import java.util.Locale;
 
 import model.enumeration.UIMessage;
-import settings.SessionData;
+import settings.AppSettings;
 
+/**
+ * Translator loads translations from java bundles from {@code messages_*.properties} for the language preference {@link Locale},
+ *  Many messages has arguments, so it format them with {@link MessageFormat}.
+ */
 public class Translator {
     private static final String BUNDLE_NAME = "messages";
 
     private static ResourceBundle getBundle() {
-        Locale locale = SessionData.getInstance().getLanguage();
+        Locale locale = AppSettings.getLanguage();
         return ResourceBundle.getBundle(BUNDLE_NAME, locale);
     }
+
+    // PUBLIC TRANSLATE
 
     public static String translate(UIMessage msg, Object... args) { return translate(msg.getKey(), args); }
 

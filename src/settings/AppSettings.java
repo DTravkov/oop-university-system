@@ -14,32 +14,12 @@ public class AppSettings {
     public static final int ANONYMOUS_USER_ID = -1;
     public static final User ANONYMOUS_USER = new AnonymousUser();
 
-    // used as a placeholder in case user is deleted, but his data must be saved (examlpe : messages/news).
-    public static final int DELETED_USER_ID = -2;
-    public static final User DELETED_USER = new DeletedUser();
-
-    public static final int DELETED_TEACHER_ID = -3;
-    public static final Teacher DELETED_TEACHER = new DeletedTeacher();
-
-    public static final int DELETED_TECH_SUPPORT_SPECIALIST_ID = -4;
-    public static final TechSupportSpecialist DELETED_TECH_SUPPORT_SPECIALIST = new DeletedTechSupportSpecialist();
-
-    public static final int DELETED_STUDENT_ID = -5;
-    public static final Student DELETED_STUDENT = new DeletedStudent();
-
-    public static final int DELETED_RESEARCHER_PROFILE_ID = -6;
-    public static final ResearcherProfile DELETED_RESEARCHER_PROFILE = new DeletedResearcherProfile();
-
     public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "Admin", "Superuserovich");
 
 
     
     public static final List<User> DEFAULT_SYSTEM_USERS = List.of(
         ANONYMOUS_USER,
-        DELETED_USER,
-        DELETED_TEACHER,
-        DELETED_TECH_SUPPORT_SPECIALIST,
-        DELETED_STUDENT,
         DEFAULT_ADMIN
     );
 
@@ -51,20 +31,12 @@ public class AppSettings {
 
     public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
         AnonymousUser.class,
-        DeletedUser.class,
-        DeletedTeacher.class,
-        DeletedTechSupportSpecialist.class,
-        DeletedStudent.class,
         Employee.class,
         User.class
     );
 
     public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(
         AnonymousUser.class,
-        DeletedUser.class,
-        DeletedTeacher.class,
-        DeletedTechSupportSpecialist.class,
-        DeletedStudent.class,
         User.class,
         Student.class,
         GraduateStudent.class,

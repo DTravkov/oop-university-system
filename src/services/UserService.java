@@ -3,17 +3,21 @@ package services;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
+import exceptions.UserBannedOrDeleted;
 
 import java.util.List;
 import java.util.Objects;
 
 import model.domain.User;
-import services.events.UserCreateEvent;
-import services.events.UserDeleteEvent;
+import services.events.concrete.UserCreateEvent;
+import services.events.concrete.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Logger;
 
-
+/**
+ * UserService is a concrete service. It implements logic for user accounts: registration rules, login, ban, lookup by login or role,
+ * soft delete with events, and seeding default system users when the app starts.
+ */
 public class UserService extends BaseService<User> {
 
     public UserService() {
@@ -29,6 +33,8 @@ public class UserService extends BaseService<User> {
         }
     }
 
+    // CREATE / UPDATE / DELETE (AND RELATED COMMANDS)
+
     @Override
     public User create(User user) {
         if(existsByLogin(user.getLogin())){
@@ -41,7 +47,8 @@ public class UserService extends BaseService<User> {
 
     @Override
     public void delete(User user) {
-        super.delete(user);
+        user.markAsDeleted();
+        repository.save(user);
         eventSystem.publish(new UserDeleteEvent(user));
     }
 
@@ -52,11 +59,11 @@ public class UserService extends BaseService<User> {
         return user;
     }
 
-
-
     public User authenticate(String login, String password) {
-        User user = getByLogin(login);
-
+        User user = getUserByLogin(login);
+        if(user.isBanned() || user.isDeleted()){
+            throw new UserBannedOrDeleted();
+        }
         if (!user.getPassword().equals(password)) {
             throw new InvalidCredentials();
         }
@@ -67,24 +74,18 @@ public class UserService extends BaseService<User> {
     }
 
 
+    // QUERIES
 
-    public <U extends User> U get(int userId, Class<U> className){
-        return (U) getAllByClass(className).stream()
-                                        .filter(u -> u.getId() == userId)
-                                        .findFirst()
-                                        .orElseThrow(()-> new DoesNotExist(className.getSimpleName() + " with id=" + userId));
-    }
-    
     @SuppressWarnings("unchecked")
-    public <U extends User> List<U> getAllByClass(Class<U> className){
-        return (List<U>) repository.getAll()
+    public <U extends User> List<U> getUsersByClass(Class<U> className){
+        return (List<U>) getAll()
                         .stream()
                         .filter(u -> className.isAssignableFrom(u.getClass()))
                         .toList();
     }
 
-    public User getByLogin(String login){
-        for(User user : repository.getAll()){
+    public User getUserByLogin(String login){
+        for(User user : getAll()){
             if(Objects.equals(user.getLogin(), login)){
                 return user;
             }
@@ -93,12 +94,7 @@ public class UserService extends BaseService<User> {
     }
 
     public boolean existsByLogin(String login){
-        for(User user : repository.getAll()){
-            if(Objects.equals(user.getLogin(), login)){
-                return true;
-            }
-        }
-        return false;
+        return find(u -> u.getLogin().equals(login)) != null;
     }
 
 

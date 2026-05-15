@@ -12,6 +12,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Logger is a singleton used by services to log almost everyting used does
+ */
 public final class Logger {
 
     private static final Logger INSTANCE = new Logger();
@@ -26,6 +29,8 @@ public final class Logger {
         ensureFileExists();
         load();
     }
+
+    // PUBLIC API
 
     public static void setIsActive(boolean isActive){
         INSTANCE.isActive = isActive;
@@ -63,6 +68,7 @@ public final class Logger {
 
 
 
+    // FILE BACKING
 
     private void load() {
         File file = new File(path);

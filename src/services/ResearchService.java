@@ -9,11 +9,15 @@ import model.domain.ResearchPaper;
 import model.domain.ResearcherProfile;
 import model.domain.User;
 import model.repository.Repository;
-import services.events.UserCreateEvent;
-import services.events.UserDeleteEvent;
+import services.events.concrete.UserCreateEvent;
+import services.events.concrete.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Logger;
 
+/**
+ * ResearchService is a concrete service. It implements logic for researcher profiles and research papers (two repositories),
+ * including co-authors, references, citations, and automatically creates researcher profile for some user classses.
+ */
 public class ResearchService extends BaseService<ResearcherProfile> {
 
     private final Repository<ResearchPaper> paperRepository;
@@ -21,9 +25,9 @@ public class ResearchService extends BaseService<ResearcherProfile> {
     public ResearchService() {
         super(ResearcherProfile.class);
         this.paperRepository = new Repository<>(ResearchPaper.class);
-        subscribeToEvents();
     }
 
+    // CREATE / UPDATE / DELETE
 
     public ResearcherProfile createResearcherProfile(User user) {
         if (isResearcher(user)) {
@@ -34,7 +38,7 @@ public class ResearchService extends BaseService<ResearcherProfile> {
 
 
     public ResearchPaper createPaper(User author, String title) {
-        ResearcherProfile profile = getProfile(author);
+        ResearcherProfile profile = getProfileByUser(author);
         ResearchPaper paper = paperRepository.save(new ResearchPaper(title));
         paper.addResearcher(profile);
         profile.addPaper(paper);
@@ -46,7 +50,7 @@ public class ResearchService extends BaseService<ResearcherProfile> {
 
     public void deletePaper(ResearchPaper paper) {
         for (ResearcherProfile profile : paper.getResearchers()) {
-            profile.removePaper(paper.getId());
+            profile.removePaper(paper);
             update(profile);
         }
         paperRepository.delete(paper);
@@ -54,9 +58,6 @@ public class ResearchService extends BaseService<ResearcherProfile> {
     }
 
     public void addParticipant(ResearchPaper paper, ResearcherProfile profile) {
-        if (paper.getResearchers().stream().anyMatch(r -> r.getId() == profile.getId())) {
-            throw new AlreadyExists("participant in paper id=" + paper.getId());
-        }
         paper.addResearcher(profile);
         profile.addPaper(paper);
         paperRepository.save(paper);
@@ -65,21 +66,21 @@ public class ResearchService extends BaseService<ResearcherProfile> {
     }
 
     public void removeParticipant(ResearchPaper paper, ResearcherProfile profile) {
-        if (paper.getResearchers().stream().noneMatch(r -> r.getId() == profile.getId())) {
+        if (paper.getResearchers().stream().noneMatch(r -> r.equals(profile))) {
             throw new DoesNotExist("participant in paper id=" + paper.getId());
         }
         paper.removeResearcher(profile);
-        profile.removePaper(paper.getId());
+        profile.removePaper(paper);
         paperRepository.save(paper);
         update(profile);
         Logger.log("Remove participant (" + profile.asLine() + ") from paper (" + paper.getId() + ")");
     }
 
     public void addReference(ResearchPaper paper, ResearchPaper reference) {
-        if (paper.getId() == reference.getId()) {
+        if (paper.equals(reference)) {
             throw new OperationNotAllowed("paper cannot reference itself");
         }
-        if (paper.getReferences().stream().anyMatch(r -> r.getId() == reference.getId())) {
+        if (paper.getReferences().stream().anyMatch(r -> r.equals(reference))) {
             throw new AlreadyExists("reference to paper id=" + reference.getId());
         }
         paper.addReference(reference);
@@ -100,11 +101,13 @@ public class ResearchService extends BaseService<ResearcherProfile> {
 
     
     
+    // QUERIES
+
     public boolean isResearcher(User user) {
         return find(p -> p.getUser().getId() == user.getId()) != null;
     }
 
-    public ResearcherProfile getProfile(User user) {
+    public ResearcherProfile getProfileByUser(User user) {
         ResearcherProfile match = find(p -> p.getUser().getId() == user.getId());
         if (match == null) throw new DoesNotExist("researcher profile for user id=" + user.getId());
         return match;
@@ -114,7 +117,7 @@ public class ResearchService extends BaseService<ResearcherProfile> {
         return paperRepository.getAll();
     }
 
-    public ResearchPaper getPaper(int paperId) {
+    public ResearchPaper getPaperById(int paperId) {
         ResearchPaper paper = paperRepository.find(p -> p.getId() == paperId);
         if (paper == null) throw new DoesNotExist("paper with id=" + paperId);
         return paper;
@@ -126,6 +129,8 @@ public class ResearchService extends BaseService<ResearcherProfile> {
                 .toList();
     }
 
+
+    // EVENT HANDLING
 
     @Override
     public void subscribeToEvents() {
@@ -140,7 +145,7 @@ public class ResearchService extends BaseService<ResearcherProfile> {
         eventSystem.subscribe(UserDeleteEvent.class, event -> {
             User deletedUser = event.getUser();
             if (!isResearcher(deletedUser)) return;
-            ResearcherProfile profile = getProfile(deletedUser);
+            ResearcherProfile profile = getProfileByUser(deletedUser);
             for (ResearchPaper paper : profile.getPapers()) {
                 paper.removeResearcher(profile);
                 paperRepository.save(paper);

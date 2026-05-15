@@ -97,7 +97,7 @@ public class Enrollment extends SerializableModel {
         if (!isTeaching(teacher)) {
             throw new OperationNotAllowed("putting marks for other teacher students");
         }
-        mark.increment(attestationType, point);
+        mark.addPoints(attestationType, point);
     }
 
     public double getTotalPoint() {

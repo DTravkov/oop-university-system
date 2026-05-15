@@ -6,17 +6,21 @@ import exceptions.DoesNotExist;
 import model.domain.Student;
 import model.domain.StudentOrganization;
 import model.domain.User;
-import services.events.UserDeleteEvent;
-import settings.AppSettings;
+import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
 
+/**
+ * StudentOrganizationService is a concrete service. It implements logic for student clubs: president and members,
+ * uniqueness rules so one student does not sit in two orgs in conflicting roles, and cleanup when a student is deleted.
+ */
 public class StudentOrganizationService extends BaseService<StudentOrganization>  {
 
 
     public StudentOrganizationService() {
         super(StudentOrganization.class);
-        subscribeToEvents();
     }
+
+    // CREATE / UPDATE / DELETE
 
     @Override
     public StudentOrganization create(StudentOrganization org){
@@ -30,12 +34,14 @@ public class StudentOrganizationService extends BaseService<StudentOrganization>
         if(isPresident(student)){
             throw new AlreadyExists("student presidentship in other organization");
         }
+        Logger.log("Make student (" + student.getId() + ") a president of (" + org.getId() + ")");
         org.setPresident(student);
         update(org);
     }
 
     public void removePresident(StudentOrganization org){
         org.removePresident();
+        Logger.log("Remove president from organization (" + org.getId() + ")");
         update(org);
     }
 
@@ -58,48 +64,51 @@ public class StudentOrganizationService extends BaseService<StudentOrganization>
 
 
 
-    public StudentOrganization getOrganizationByMember(User member){
+    // QUERIES
+
+    public StudentOrganization getOrganizationByMember(Student member){
         StudentOrganization match = find(org -> org.getMembers().contains(member));
         if(match == null) throw new DoesNotExist("membership in any organization for student");
         return match;
     }
 
-    public StudentOrganization getOrganizationByPresident(User president){
+    public StudentOrganization getOrganizationByPresident(Student president){
         StudentOrganization match = find(org -> org.getPresident().equals(president));
-        if(match != null) throw new DoesNotExist("presidentship in any organization for student");
+        if(match == null) throw new DoesNotExist("presidentship in any organization for student");
         return match;
     }
 
-    public boolean isPresident(User user){
-        StudentOrganization match = find(org -> org.getPresident().equals(user));
+    public boolean isPresident(Student student){
+        StudentOrganization match = find(org -> org.getPresident().equals(student));
+        return match != null;
+    }
+    
+    public boolean isMember(Student student){
+        StudentOrganization match = find(org -> org.getMembers().contains(student));
         return match != null;
     }
 
-    public boolean isMember(User user){
-        StudentOrganization match = find(org -> org.getMembers().contains(user));
-        return match != null;
-    }
+    // EVENT HANDLING
 
     @Override
     public void subscribeToEvents(){
-        eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            cleanUpOrganizationData(event.getUser());
-        });
+        eventSystem.subscribe(UserDeleteEvent.class, event -> onUserDelete(event.getUser()));
     }
 
-    public void cleanUpOrganizationData(User deletedUser) {
-        if(AppSettings.ST_ORG_ALLOWED_PRESIDENT_CLASSES.contains(deletedUser.getClass())){
-            getAll().forEach(org -> {
-                if(org.getPresident().getId() == deletedUser.getId()){
-                    org.removePresident();
-                }
-            });
+
+    public void onUserDelete(User deletedUser) {
+        if(deletedUser instanceof Student student){
+            StudentOrganization org = find(o -> o.getMembers().contains(student));
+            if (org == null) return;
+            if(org.getPresident().equals(student)){
+                org.removePresident();
+            }else{
+                org.removeMember(student);
+            }
+
         }
-    }
 
         
-    
-
-
+    }
 
 }

@@ -7,6 +7,7 @@ import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import model.enumeration.CourseType;
+import model.enumeration.TeacherType;
 import utils.FieldValidator;
 
 public class Course extends SerializableModel {
@@ -21,7 +22,6 @@ public class Course extends SerializableModel {
     private List<Teacher> lectureTeachers = new ArrayList<>();
     private List<Teacher> practiceTeachers = new ArrayList<>();
 
-    private List<Enrollment> enrollments = new ArrayList<>();
 
     public Course(String name, String description, int credits, CourseType type) {
         this.name = name;
@@ -31,31 +31,68 @@ public class Course extends SerializableModel {
     }
 
 
-    
+    public void addTeacher(Teacher teacher, TeacherType typeToAdd){
+        if(typeToAdd == TeacherType.BOTH)
+            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
 
-    public List<Enrollment> getEnrollments() {
-        return List.copyOf(enrollments);
+        if(typeToAdd == TeacherType.LECTURE){
+            addLectureTeacher(teacher);
+        }
+        else if(typeToAdd == TeacherType.PRACTICE){
+            addPracticeTeacher(teacher);
+        }
     }
 
-    public void addEnrollment(Enrollment enrollment) {
 
-        if(this.enrollments.contains(enrollment))
-            throw new AlreadyExists("Enrollment with for " + enrollment.getStudent() + " on " + getName() + " course");
-
-        if(this.enrollments.stream().anyMatch(e -> e.getStudent().getId() == enrollment.getStudent().getId()))
-            throw new AlreadyExists("Enrollment with for " + enrollment.getStudent() + " on " + getName() + " course");
-
-        if(!this.getLectureTeachers().contains(enrollment.getLectureTeacher()) || !this.getPracticeTeachers().contains(enrollment.getPracticeTeacher()))
-            throw new DoesNotExist("Teacher does not lead the course");
-
-
-        this.enrollments.add(enrollment);
+    public void removeTeacher(Teacher teacher, TeacherType typeToDelete){
+        if(typeToDelete == TeacherType.BOTH)
+            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
+        if(typeToDelete == TeacherType.LECTURE){
+            removeLectureTeacher(teacher);
+        }
+        else if(typeToDelete == TeacherType.PRACTICE){
+            removePracticeTeacher(teacher);
+        }
+        return;
     }
 
-    public void removeEnrollment(Enrollment enrollment) {
-        this.enrollments.removeIf(e -> e.getId() == enrollment.getId());
+    private void addLectureTeacher(Teacher lectureTeacher) {
+        FieldValidator.requireNonNull(lectureTeacher, "Lecture teacher");
+        if(!lectureTeacher.isLecturer())
+            throw new OperationNotAllowed("Adding non-lecturer as a lecture teacher");
+        if(lectureTeachers.contains(lectureTeacher)){
+            throw new AlreadyExists("teacher with id=" + lectureTeacher.getId() + " as a lecture teacher");
+        }
+        this.lectureTeachers.add(lectureTeacher);
+        
     }
 
+    private void addPracticeTeacher(Teacher practiceTeacher) {
+        FieldValidator.requireNonNull(practiceTeacher, "Practice teacher");
+        if(!practiceTeacher.isPractice())
+            throw new OperationNotAllowed("Adding non-practice as a practice teacher");
+        if(practiceTeachers.contains(practiceTeacher)){
+            throw new AlreadyExists("teacher with id=" + practiceTeacher.getId() + " as a practice teacher");
+        }
+        this.practiceTeachers.add(practiceTeacher);
+        
+    }
+
+    public List<Teacher> getPracticeTeachers() {
+        return List.copyOf(practiceTeachers);
+    }
+
+    public List<Teacher> getLectureTeachers() {
+        return List.copyOf(lectureTeachers);
+    }
+
+    private void removeLectureTeacher(Teacher lectureTeacher) {
+        this.lectureTeachers.removeIf(t -> t.getId() == lectureTeacher.getId());
+    }
+
+    private void removePracticeTeacher(Teacher practiceTeacher) {
+        this.practiceTeachers.removeIf(t -> t.getId() == practiceTeacher.getId());
+    }
 
     public String getName() {
         return name;
@@ -89,45 +126,12 @@ public class Course extends SerializableModel {
         this.type = type;
     }
 
-    public List<Teacher> getLectureTeachers() {
-        return List.copyOf(lectureTeachers);
+
+    public void detachTeacher(Teacher teacher){
+        removeLectureTeacher(teacher);
+        removePracticeTeacher(teacher);
     }
 
-    public void addLectureTeacher(Teacher lectureTeacher) {
-        FieldValidator.requireNonNull(lectureTeacher, "Lecture teacher");
-        if(!lectureTeacher.isLecturer())
-            throw new OperationNotAllowed("Adding non-lecturer as a lecture teacher");
-        if(lectureTeachers.contains(lectureTeacher)){
-            throw new AlreadyExists("teacher with id=" + lectureTeacher.getId() + " as a lecture teacher");
-        }
-        if (!this.lectureTeachers.contains(lectureTeacher)) {
-            this.lectureTeachers.add(lectureTeacher);
-        }
-    }
-
-    public List<Teacher> getPracticeTeachers() {
-        return List.copyOf(practiceTeachers);
-    }
-
-    public void addPracticeTeacher(Teacher practiceTeacher) {
-        FieldValidator.requireNonNull(practiceTeacher, "Practice teacher");
-        if(!practiceTeacher.isPractice())
-            throw new OperationNotAllowed("Adding non-practice as a lecture teacher");
-        if(lectureTeachers.contains(practiceTeacher)){
-            throw new AlreadyExists("teacher with id=" + practiceTeacher.getId() + " as a practice teacher");
-        }
-        if (!this.practiceTeachers.contains(practiceTeacher)) {
-            this.practiceTeachers.add(practiceTeacher);
-        }
-    }
-
-    public void removeLectureTeacher(Teacher lectureTeacher) {
-        this.lectureTeachers.removeIf(t -> t.getId() == lectureTeacher.getId());
-    }
-
-    public void removePracticeTeacher(Teacher practiceTeacher) {
-        this.practiceTeachers.removeIf(t -> t.getId() == practiceTeacher.getId());
-    }
 
     @Override
     public String asLine() {
@@ -151,7 +155,6 @@ public class Course extends SerializableModel {
         for (Teacher t : practiceTeachers) {
             sb.append(t.asLine()).append('\n');
         }
-        sb.append("/Enrollments count/\n").append(enrollments.size()).append('\n');
         return sb.toString();
     }
 

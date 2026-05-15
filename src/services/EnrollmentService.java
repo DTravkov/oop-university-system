@@ -13,22 +13,26 @@ import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
 import model.enumeration.AttestationType;
-import services.events.UserDeleteEvent;
-import settings.AppSettings;
+import services.events.concrete.CourseDeleteEvent;
+import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
 
+/**
+ * EnrollmentService is a concrete service. It implements logic for enrollments. 
+ * Enrollments are a big part of our system, they connect all the course, teachers, students, and their scores.
+ */
 public class EnrollmentService extends BaseService<Enrollment>  {
 
     public EnrollmentService() {
         super(Enrollment.class);
-        subscribeToEvents();
     }
 
+    // CREATE / UPDATE / DELETE
 
     @Override
     public Enrollment create(Enrollment enrollment) {
-        if(this.find(e -> e.getStudent().getId() == enrollment.getStudent().getId() 
-            && e.getCourse().getId() == enrollment.getCourse().getId()) != null){
+        if(this.find(e -> e.getStudent().equals(enrollment.getStudent()) 
+            && e.getCourse().equals(enrollment.getCourse())) != null){
             throw new AlreadyExists("Enrollment to this course for this student");
         }
         return super.create(enrollment);
@@ -37,13 +41,15 @@ public class EnrollmentService extends BaseService<Enrollment>  {
     public void addPoints(Enrollment enrollment, Teacher teacher, AttestationType att, double points){
         enrollment.incrementMark(points, teacher, att);
         Logger.log("Add points (" + points + ") by teacher (" + teacher.asLine() + ") to enrollment (" + enrollment.getId() + ") for attestation (" + att + ")");
-        this.update(enrollment);
+        repository.save(enrollment);
     }
 
 
-    public double getStudentGpa(Student student) {
+    // QUERIES
+
+    public double getGpaByStudent(Student student) {
         double totalGpa = 0.0;
-        List<Enrollment> enrollments = getStudentEnrollments(student);
+        List<Enrollment> enrollments = getEnrollmentsByStudent(student);
         if(enrollments.isEmpty()) return 0.0;
         for(var enr : enrollments){
             totalGpa += enr.getGpa();
@@ -52,50 +58,40 @@ public class EnrollmentService extends BaseService<Enrollment>  {
         return Math.round(totalGpa * 100.0 ) / 100.0;
     }
 
-    public List<Enrollment> getStudentEnrollments(Student student) {
-        return getAll().stream()
-                .filter(e -> e.getStudent().getId() == student.getId())
-                .toList();
+    public List<Enrollment> getEnrollmentsByStudent(Student student) {
+        return getAll(e -> e.getStudent().getId() == student.getId());
     }
 
-    public List<Enrollment> getCourseEnrollments(Course course){
-        return getAll().stream()
-                       .filter(e -> e.getCourse().getId() == course.getId())
-                       .toList();
+    public List<Enrollment> getEnrollmentsByCourse(Course course){
+        return getAll(e -> e.getCourse().getId() == course.getId());
     }
 
-    public Map<Course, List<Enrollment>> getTeacherEnrollments(Teacher teacher) {
+    public Map<Course, List<Enrollment>> getEnrollmentsByTeacher(Teacher teacher) {
         Map<Course, List<Enrollment>> map = new HashMap<>();
-        List<Enrollment> allEnrollments = getAll().stream()
-                                        .filter(e -> e.isTeaching(teacher))
-                                        .toList();
-        for(var enr : allEnrollments){
+        for(Enrollment enr : getAll(e -> e.isTeaching(teacher))){
             map.computeIfAbsent(enr.getCourse(), (k) -> new ArrayList<>()).add(enr);
         }
         return map;
     }
 
 
+    // EVENT HANDLING
+
     @Override
     public void subscribeToEvents(){
         eventSystem.subscribe(UserDeleteEvent.class, event -> onUserDelete(event.getUser()));
+        eventSystem.subscribe(CourseDeleteEvent.class, event -> onCourseDelete(event.getCourse()));
     }
 
     public void onUserDelete(User user) {
-        if(user instanceof Student){
-            for (Enrollment enr : getAll()) {
-                if(enr.getStudent().getId() == user.getId()) this.delete(enr);
-            }
+        if(user instanceof Student student){
+            getEnrollmentsByStudent(student).forEach(e -> delete(e));
             repository.saveAll();
         }
-        if (user instanceof Teacher) {
-            for (Enrollment enr : getAll()) {
-                if (enr.getLectureTeacher().getId() == user.getId()) enr.setLectureTeacher(AppSettings.DELETED_TEACHER);
-                if (enr.getPracticeTeacher().getId() == user.getId()) enr.setPracticeTeacher(AppSettings.DELETED_TEACHER);
-            }
-            repository.saveAll();
-        }
+    }
 
+    public void onCourseDelete(Course course){
+        getEnrollmentsByCourse(course).forEach(enr -> delete(enr));
     }
 
 

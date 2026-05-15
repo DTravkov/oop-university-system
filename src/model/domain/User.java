@@ -1,11 +1,9 @@
 package model.domain;
 
-import java.util.*;
-
 import utils.FieldValidator;
 import utils.StringUtils;
 
-public class User extends SerializableModel{
+public abstract class User extends SerializableModel{
 	
     private static final long serialVersionUID = 1L;
 
@@ -14,6 +12,7 @@ public class User extends SerializableModel{
     private String name;
     private String surname;
     private boolean isBanned = false;
+	private boolean isDeleted = false;
 
     public User(User user) {
 		this(user.getLogin(),user.getPassword(),user.getName(), user.getSurname());
@@ -85,8 +84,26 @@ public class User extends SerializableModel{
 		isBanned = banned;
 	}
 
+	
+
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	public void markAsDeleted() {
+		this.isDeleted = true;
+	}
+
+	public void unmarkAsDeleted() {
+		this.isDeleted = false;
+	}
+
+
 	@Override
 	public String asLine() {
+		if(isDeleted){
+			return String.format("ID: %d | Deleted User", id);
+		}
 		return String.format("ID: %d | Name: %s ",
 				id, getFullname());
 	}
@@ -95,8 +112,26 @@ public class User extends SerializableModel{
 	public String asTable() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ID: ").append(id).append('\n');
+		if(isDeleted){
+			sb.append("Deleted User").append('\n');
+			return sb.toString();
+		}
 		sb.append("Name: ").append(getFullname()).append('\n');
 		return sb.toString();
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof User other)) return false;
+		if (id == 0 || other.id == 0) return false;
+		return id == other.id;
+	}
+
+		@Override
+	public int hashCode() {
+		return id != 0 ? Integer.hashCode(id) : super.hashCode();
 	}
 
 	@Override

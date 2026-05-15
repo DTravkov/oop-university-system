@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import exceptions.AlreadyExists;
+
 public class ResearchPaper extends SerializableModel {
     private static final long serialVersionUID = 1L;
 
@@ -68,7 +70,10 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void addResearcher(ResearcherProfile researcher) {
-        if (researcher != null && !researchers.contains(researcher)) {
+        if (getResearchers().stream().anyMatch(r -> r.equals(researcher))) {
+            throw new AlreadyExists("participant in paper id=" + getId());
+        }
+        if (!researchers.contains(researcher)) {
             researchers.add(researcher);
         }
     }

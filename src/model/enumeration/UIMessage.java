@@ -108,6 +108,7 @@ public enum UIMessage {
     ERR_ALREADY_EXISTS("err.already_exists"),
     ERR_DOES_NOT_EXIST("err.does_not_exist"),
     ERR_INVALID_CREDENTIALS("err.invalid_credentials"),
+    ERR_USER_BANNED_OR_DELETED("err.user_banned_or_deleted"),
     ERR_FIELD_REQUIRED("err.field_required"),
     ERR_FIELD_POSITIVE("err.field_positive"),
     ERR_FIELD_NON_NULL("err.field_non_null"),

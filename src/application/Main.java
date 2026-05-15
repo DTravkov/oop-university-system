@@ -4,12 +4,12 @@ package application;
 public class Main extends BaseApp{
 
     public static void main(String[] args){
-        Menus.changeLanguage();
+        MainMenu.changeLanguage();
 
-        Menus.getAuthMenu().start();
+        MainMenu.getAuthMenu().start();
 
         if(isAuthenticated()) 
-            Menus.getMainMenu().start();
+            MainMenu.getMainMenu().start();
         
         shutdown();
     }

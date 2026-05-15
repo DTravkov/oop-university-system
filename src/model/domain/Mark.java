@@ -44,33 +44,33 @@ public class Mark implements Serializable {
         return Math.round(gpa * 100.0) / 100.0;
     }
 
-    void increment(AttestationType attestationType, double delta) {
+    void addPoints(AttestationType attestationType, double delta) {
         switch (attestationType) {
             case FIRST_ATTESTATION:
-                incrementFirst(delta);
+                addToFirst(delta);
                 break;
             case SECOND_ATTESTATION:
-                incrementSecond(delta);
+                addToSecond(delta);
                 break;
             case FINAL_EXAM:
-                incrementThird(delta);
+                addToFinal(delta);
                 break;
         }
     }
 
-    private void incrementFirst(double delta) {
+    private void addToFirst(double delta) {
         double next = firstAttestationPoint + delta;
         FieldValidator.requireInRange(next, 0, 30, "First attestation point");
         this.firstAttestationPoint = next;
     }
 
-    private void incrementSecond(double delta) {
+    private void addToSecond(double delta) {
         double next = secondAttestationPoint + delta;
         FieldValidator.requireInRange(next, 0, 30, "Second attestation point");
         this.secondAttestationPoint = next;
     }
 
-    private void incrementThird(double delta) {
+    private void addToFinal(double delta) {
         double next = finalExamPoint + delta;
         FieldValidator.requireInRange(next, 0, 40, "Final exam point");
         this.finalExamPoint = next;

@@ -6,6 +6,9 @@ import model.enumeration.LanguagePreference;
 
 import java.util.Locale;
 
+/**
+ * SessionData is a singleton that stores data about user language and who the user is
+ */
 public class SessionData {
 
     private static SessionData instance = new SessionData();
@@ -15,24 +18,24 @@ public class SessionData {
 
     private SessionData() {}
 
-    public static SessionData getInstance() {
+    static SessionData getInstance() {
         if (instance == null) instance = new SessionData();
         return instance;
     }
 
-    public void setUser(User user) {
+    void setUser(User user) {
         this.user = user;
     }
 
-    public User getUser() {
+    User getUser() {
         return user;
     }
 
-    public void setLanguage(LanguagePreference languagePreference) {
+    void setLanguage(LanguagePreference languagePreference) {
         this.language = Locale.of(languagePreference.getCode());
     }
 
-    public Locale getLanguage() {
+    Locale getLanguage() {
         return language;
     }
 }

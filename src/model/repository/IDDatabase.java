@@ -16,8 +16,11 @@ import model.domain.SerializableModel;
 import settings.AppSettings;
 
 /**
- * Persists the last assigned numeric id per concrete {@link SerializableModel} type.
+ * This class separates id generation from {@link Database}
+ * Its the best choice, because this class can generate ids quickly (without looking at any data, that we already saved)
+ * Also, IDDatabase shares responsibility, so {@link Database} is cleaner
  */
+
 public class IDDatabase {
 
     private static IDDatabase instance;
@@ -27,7 +30,7 @@ public class IDDatabase {
 
     private IDDatabase(String path) {
         this.path = path;
-        ensureFileExists();
+        createFile();
         this.idData = load();
     }
 
@@ -38,14 +41,14 @@ public class IDDatabase {
         return instance;
     }
 
-    public int nextId(Class<? extends SerializableModel> entityClass) {
-        int next = idData.getOrDefault(entityClass, 0) + 1;
-        idData.put(entityClass, next);
-        persist();
+    public int nextId(Class<? extends SerializableModel> className) {
+        int next = idData.getOrDefault(className, 0) + 1;
+        idData.put(className, next);
+        writeToFile();
         return next;
     }
 
-    private void persist() {
+    private void writeToFile() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
             oos.writeObject(idData);
         } catch (IOException e) {
@@ -67,7 +70,7 @@ public class IDDatabase {
         }
     }
 
-    private void ensureFileExists() {
+    private void createFile() {
         try {
             Path pathObj = Paths.get(path);
             if (pathObj.getParent() != null) {

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import exceptions.AlreadyExists;
-import exceptions.OperationNotAllowed;
 
 import model.domain.Course;
 import model.domain.Enrollment;
@@ -14,10 +13,13 @@ import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
 import model.enumeration.TeacherType;
-import services.events.CourseDeleteEvent;
-import services.events.UserDeleteEvent;
+import services.events.concrete.CourseDeleteEvent;
+import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
 
+/**
+ * CourseService is a concrete service. It implements logic for managing courses.
+ */
 public class CourseService extends BaseService<Course>  {
 
     private final EnrollmentService enrollmentService;
@@ -25,9 +27,9 @@ public class CourseService extends BaseService<Course>  {
     public CourseService(EnrollmentService enrollmentService) {
         super(Course.class);
         this.enrollmentService = enrollmentService;
-        subscribeToEvents();
     }
 
+    // CREATE / UPDATE / DELETE
 
     @Override
     public Course create(Course course) {
@@ -38,48 +40,32 @@ public class CourseService extends BaseService<Course>  {
     }
 
     @Override
-    public void delete(int id) {
-        eventSystem.publish(new CourseDeleteEvent(get(id)));
-        super.delete(id);
+    public void delete(Course course) {
+        Course c = get(course);
+        eventSystem.publish(new CourseDeleteEvent(c));
+        super.delete(c);
     }
 
     public void addTeacher(Course course, Teacher teacher, TeacherType type){
-        if(type == TeacherType.BOTH)
-            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
-
-        if(type == TeacherType.LECTURE){
-            course.addLectureTeacher(teacher);
-        }
-        else if(type == TeacherType.PRACTICE){
-            course.addPracticeTeacher(teacher);
-        }
-
+        course.addTeacher(teacher, type);
         Logger.log("Add teacher (" + teacher.asLine() + ") to course (" + course.getId() + ") as (" + type + ")");
-        this.update(course);
+        repository.save(course);
     }
 
     public void removeTeacher(Course course, Teacher teacher, TeacherType type){
-        if(type == TeacherType.BOTH)
-            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
-
-
-        if(type == TeacherType.LECTURE){
-            course.removeLectureTeacher(teacher);
-        }
-        else if(type == TeacherType.PRACTICE){
-            course.removePracticeTeacher(teacher);
-        }
-
+        course.removeTeacher(teacher, type);
         Logger.log("Remove teacher (" + teacher.asLine() + ") from course (" + course.getId() + ") as (" + type + ")");
-        this.update(course);
+        repository.save(course);
     }
 
 
-    public List<Enrollment> getStudentEnrollments(Student student) {
-        return enrollmentService.getStudentEnrollments(student);
+    // QUERIES
+
+    public List<Enrollment> getEnrollmentsByStudent(Student student) {
+        return enrollmentService.getEnrollmentsByStudent(student);
     }
 
-    public Map<TeacherType, List<Course>> getAllByTeacher(Teacher teacher) {
+    public Map<TeacherType, List<Course>> getCoursesByTeacher(Teacher teacher) {
         Map<TeacherType, List<Course>> map = new HashMap<>();
         map.put(TeacherType.LECTURE, new ArrayList<>());
         map.put(TeacherType.PRACTICE, new ArrayList<>());
@@ -95,10 +81,11 @@ public class CourseService extends BaseService<Course>  {
     }
 
     public boolean existsByName(String name){
-        return repository.getAll()
-                        .stream()
-                        .anyMatch(c -> c.getName() == name);
+        return find(c -> c.getName().equals(name)) != null;
     }
+
+
+    // EVENT HANDLING
 
     @Override
     public void subscribeToEvents(){
@@ -107,10 +94,7 @@ public class CourseService extends BaseService<Course>  {
 
     public void onUserDelete(User user) {
         if(user instanceof Teacher  teacher){
-            this.getAll().forEach(course -> {
-                course.removePracticeTeacher(teacher);
-                course.removeLectureTeacher(teacher);
-            });
+            getAll().forEach(course -> course.detachTeacher(teacher));
             repository.saveAll();
         }
     }

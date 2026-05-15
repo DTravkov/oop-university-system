@@ -2,6 +2,7 @@ package model.domain;
 
 import java.util.Date;
 
+import exceptions.OperationNotAllowed;
 import model.enumeration.ComplaintUrgencyLevel;
 import utils.FieldValidator;
 
@@ -15,6 +16,7 @@ public class TeacherComplaint extends SerializableModel {
     private Student student;
     private String content;
     private Date sentDate;
+    private boolean isClosed = false;
 
     public TeacherComplaint(ComplaintUrgencyLevel urgencyLevel, Teacher sender, Dean receiver, Student student, String content) {
         FieldValidator.requireNonNull(urgencyLevel, "Urgency level");
@@ -28,6 +30,24 @@ public class TeacherComplaint extends SerializableModel {
         this.student = student;
         this.content = content;
         this.sentDate = new Date();
+    }
+
+    public void closeBy(Dean dean){
+        if(getDean().getId() != dean.getId()){
+            throw new OperationNotAllowed("closing other deans' complaints");
+        }
+        this.setClosed(true);
+        return;
+    }
+
+    
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    private void setClosed(boolean isClosed) {
+        this.isClosed = isClosed;
     }
 
     public ComplaintUrgencyLevel getUrgencyLevel() {

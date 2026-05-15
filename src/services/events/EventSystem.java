@@ -6,9 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import services.events.interfaces.Event;
 import utils.FieldValidator;
 
-
+/**
+ * My favourite pattern)
+ * Used by services to react to events, e.g Employee deletion leads to clean up of his messenger data.
+ * It was insired by Express.js event system, global in every service.
+ * .subscribe(eventClass, callback) subscription model.
+ */
 public class EventSystem {
 
     private static final EventSystem INSTANCE = new EventSystem();
@@ -16,33 +22,28 @@ public class EventSystem {
 
     private EventSystem() {}
 
+    @SuppressWarnings("unchecked")
     public <T extends Event> void subscribe(Class<T> eventType, Consumer<T> handler) {
-        FieldValidator.requireNonNull(eventType, "Event type");
-        FieldValidator.requireNonNull(handler, "Handler");
-
-        @SuppressWarnings("unchecked")
-        Consumer<Event> eventHandler = (Consumer<Event>) handler;
-        
         if(handlers.get(eventType) == null){
             handlers.put(eventType, new ArrayList<>());
         }
-
-        handlers.get(eventType).add(eventHandler);
-
+        // generic to concrete event cast, because map stores list of callbakcs with concrete types
+        handlers.get(eventType).add((Consumer<Event>) handler);
 
     }
-
+    
     public void publish(Event event) {
         FieldValidator.requireNonNull(event, "Event");
-        List<Consumer<Event>> list = handlers.get(event.getClass());
-        if(list == null || list.isEmpty()){
+        //event.getClass() because keys of map are actually class literals
+        List<Consumer<Event>> handlerList = handlers.get(event.getClass());
+        if(handlerList == null || handlerList.isEmpty()){
             return;
         }
-        for(Consumer<Event> handler : handlers.get(event.getClass())){
+
+        for(var handler : handlerList){
             if(handler != null){
                 handler.accept(event);
             }
-            
         }
         
     }
@@ -50,4 +51,5 @@ public class EventSystem {
     public static EventSystem getInstance() {
         return INSTANCE;
     }
+
 }
