@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.Locale;
 
-import model.enumeration.UIMessage;
 import settings.AppSettings;
 
 /**
@@ -21,7 +20,7 @@ public class Translator {
 
     // PUBLIC TRANSLATE
 
-    public static String translate(UIMessage msg, Object... args) { return translate(msg.getKey(), args); }
+    public static String translate(UIText msg, Object... args) { return translate(msg.getKey(), args); }
 
     public static String translate(String key, Object... args) {
         String pattern = getBundle().getString(key);

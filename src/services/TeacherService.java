@@ -7,6 +7,7 @@ import java.util.Map;
 
 import model.domain.Course;
 import model.domain.Enrollment;
+import model.domain.SerializableModel;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.enumeration.TeacherType;
@@ -15,20 +16,23 @@ import model.enumeration.TeacherType;
  * TeacherService is a helper service that forwards read-style queries to course and enrollment services.
  * Those queries keep teacher-related application code smaller and easier to follow.
  */
-public class TeacherService {
+public class TeacherService extends BaseService<SerializableModel> {
 
-    private final CourseService courseSerivce;
     private final EnrollmentService enrollmentService;
+    private final CourseService courseService;
 
     public TeacherService(CourseService courseService, EnrollmentService enrollmentService) {
-        this.courseSerivce = courseService;
+        //null here because there is no object associated with TeacherService,
+        // as teacher service is helper
+        super(null);
+        this.courseService = courseService;
         this.enrollmentService = enrollmentService;
     }
 
     // QUERIES
 
     public Map<TeacherType, List<Course>> getCoursesByTeacher(Teacher teacher){
-        return courseSerivce.getCoursesByTeacher(teacher);
+        return courseService.getCoursesByTeacher(teacher);
     }
 
     public Map<Course, List<Enrollment>> getEnrollmentsByTeacher(Teacher teacher) {

@@ -13,8 +13,8 @@ import utils.FieldValidator;
  * My favourite pattern)
  * Used by services to react to events, e.g Employee deletion leads to clean up of his messenger data.
  * It was insired by Express.js event system, global in every service.
- * .subscribe(eventClass, callback) subscription model.
  */
+
 public class EventSystem {
 
     private static final EventSystem INSTANCE = new EventSystem();

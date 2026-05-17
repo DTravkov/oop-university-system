@@ -3,11 +3,13 @@ package services;
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.InvalidCredentials;
+import exceptions.OperationNotAllowed;
 import exceptions.UserBannedOrDeleted;
 
 import java.util.List;
 import java.util.Objects;
 
+import model.domain.Admin;
 import model.domain.User;
 import services.events.concrete.UserCreateEvent;
 import services.events.concrete.UserDeleteEvent;
@@ -18,7 +20,7 @@ import utils.Logger;
  * UserService is a concrete service. It implements logic for user accounts: registration rules, login, ban, lookup by login or role,
  * soft delete with events, and seeding default system users when the app starts.
  */
-public class UserService extends BaseService<User> {
+public class UserService extends GenericService<User> {
 
     public UserService() {
         super(User.class);
@@ -52,7 +54,10 @@ public class UserService extends BaseService<User> {
         eventSystem.publish(new UserDeleteEvent(user));
     }
 
-    public User ban(User user) {
+    public User ban(User user, Admin admin) {
+        if(user.equals(admin)){
+            throw new OperationNotAllowed("banning yourself");
+        }
         user.setBanned(true);
         update(user);
         Logger.log("Ban " + baseName + "(" + user.getId() + ")");
@@ -76,6 +81,13 @@ public class UserService extends BaseService<User> {
 
     // QUERIES
 
+    /**
+     * returns the list of users of passed class (subclasses are also included).
+     * e.g, if we pass Student.class, we will get GraduateStudent as well.
+     * @param <U>
+     * @param className
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public <U extends User> List<U> getUsersByClass(Class<U> className){
         return (List<U>) getAll()

@@ -13,7 +13,7 @@ import utils.Logger;
  * NewsService is a concrete service. It implements logic for news and comments: publishing, filters,
  * manager-scoped deletes, and a sorted listing view for the application layer.
  */
-public class NewsService extends BaseService<News>{
+public class NewsService extends GenericService<News>{
 
 
     public NewsService() {

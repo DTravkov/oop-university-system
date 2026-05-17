@@ -1,4 +1,4 @@
-package application;
+package application.apps;
 
 import java.util.List;
 import java.util.Map;
@@ -12,15 +12,15 @@ import model.domain.Teacher;
 import model.enumeration.CourseType;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
-import model.enumeration.UIMessage;
 import services.CourseService;
 import services.EnrollmentService;
 import services.NewsService;
 import services.TeacherService;
 import services.UserService;
 import utils.UIForms;
+import utils.UIText;
 
-public class ManagerMenus extends BaseApp {
+public final class ManagerApp extends BaseApp {
 
     static final UserService userService = services.userService;
     static final CourseService courseService = services.courseService;
@@ -28,70 +28,69 @@ public class ManagerMenus extends BaseApp {
     static final NewsService newsService = services.newsService;
     static final TeacherService teacherService = services.teacherService;
 
+    public ManagerApp() {
+        super();
+    }
 
-    static MenuBuilder getManagerMenu() {
-        MenuBuilder menu = new MenuBuilder("Manager Menu");
-        menu.addAction("View all courses", () -> CommonMenus.printAllCourses());
-        menu.addAction("Create course", () -> createCourse());
-        menu.addAction("Delete course", () -> deleteCourse());
-        menu.addAction("Assign teacher to a course", () -> assignTeacherToCourse());
-
-        menu.addAction("View all news", () -> printAllNews());
-        menu.addAction("Create news", () -> createNews());
-        menu.addAction("Delete news", () -> deleteNews());
-
-        menu.addAction("Get Student GPA statistics", () -> printStudentGPAStats());
-        menu.addAction("Get Course GPA statistics", () -> printCourseGPAStats());
-        menu.addAction("Get Teacher GPA statistics", () -> printTeacherGPAStats());
-
-        menu.addAction("Back", () -> menu.stop());
-        return menu;
+    public static MenuBuilder getMenu() {
+        return new MenuBuilder("Manager Menu")
+                .addAction("View all courses", () -> CommonMenus.printAllCourses())
+                .addAction("Create course", () -> createCourse())
+                .addAction("Delete course", () -> deleteCourse())
+                .addAction("Assign teacher to a course", () -> assignTeacherToCourse())
+                .addAction("View all news", () -> printAllNews())
+                .addAction("Create news", () -> createNews())
+                .addAction("Delete news", () -> deleteNews())
+                .addAction("Get Student GPA statistics", () -> printStudentGPAStats())
+                .addAction("Get Course GPA statistics", () -> printCourseGPAStats())
+                .addAction("Get Teacher GPA statistics", () -> printTeacherGPAStats())
+                .addExit();
     }
 
     private static void createCourse() {
-            String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COURSE_NAME);
-            String description = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COURSE_DESC);
-            int credits = UIForms.readInt(scanner, UIMessage.INPUT_COURSE_CREDITS);
-            CourseType type = UIForms.readCourseType(scanner);
-            Course course = new Course(name, description, credits, type);
-            courseService.create(course);
-            printSuccess("Course created.");
+        String name = UIForms.readNonEmpty(scanner, UIText.INPUT_COURSE_NAME);
+        String description = UIForms.readNonEmpty(scanner, UIText.INPUT_COURSE_DESC);
+        int credits = UIForms.readInt(scanner, UIText.INPUT_COURSE_CREDITS);
+        CourseType type = UIForms.readCourseType(scanner);
+        Course course = new Course(name, description, credits, type);
+        courseService.create(course);
+        printSuccess("Course created.");
     }
 
     private static void deleteCourse() {
-            List<Course> courses = courseService.getAll();
-            if (courses.isEmpty()) {
-                println("No courses.");
-                return;
-            }
-            printHeader("Courses");
-            courses.forEach(c -> println(c.asLine()));
-            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
-            courseService.delete(course);
-            printSuccess("Course deleted.");
+        List<Course> courses = courseService.getAll();
+        if (courses.isEmpty()) {
+            println("No courses.");
+            return;
+        }
+        printHeader("Courses");
+        courses.forEach(c -> println(c.asLine()));
+        Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
+        courseService.delete(course);
+        printSuccess("Course deleted.");
     }
 
     private static void assignTeacherToCourse() {
-            List<Course> courses = courseService.getAll();
-            if (courses.isEmpty()) {
-                println("No courses.");
-                return;
-            }
-            courses.forEach(c -> {
-                println("\n" + c.asTable());
-            });
-            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
-            List<Teacher> teachers = userService.getUsersByClass(Teacher.class);
-            if (teachers.isEmpty()) {
-                println("No teachers.");
-                return;
-            }
-            printHeader("Teachers");
-            teachers.forEach(t -> println(t.asLine()));
-            Teacher teacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, teachers);
-            TeacherType role = UIForms.readLectureOrPractice(scanner);
-            courseService.addTeacher(course, teacher, role);
-            printSuccess("Teacher assigned to course.");
+        List<Course> courses = courseService.getAll();
+        if (courses.isEmpty()) {
+            println("No courses.");
+            return;
+        }
+        courses.forEach(c -> {
+            println("\n" + c.asTable());
+        });
+        Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
+        List<Teacher> teachers = userService.getUsersByClass(Teacher.class);
+        if (teachers.isEmpty()) {
+            println("No teachers.");
+            return;
+        }
+        printHeader("Teachers");
+        teachers.forEach(t -> println(t.asLine()));
+        Teacher teacher = UIForms.readIdFromList(scanner, UIText.INPUT_TEACHER_ID, teachers);
+        TeacherType role = UIForms.readLectureOrPractice(scanner);
+        courseService.addTeacher(course, teacher, role);
+        printSuccess("Teacher assigned to course.");
     }
 
     private static void printAllNews() {
@@ -105,27 +104,27 @@ public class ManagerMenus extends BaseApp {
     }
 
     private static void createNews() {
-            Manager manager = (Manager) getActiveUser();
-            String title = UIForms.readNonEmpty(scanner, "News title: ");
-            String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_MESSAGE_CONTENT);
-            NewsUrgencyLevel urgency = UIForms.readNewsUrgencyLevel(scanner);
-            News news = new News(manager, title, content, urgency);
-            newsService.create(news);
-            printSuccess("News posted.");
+        Manager manager = (Manager) getActiveUser();
+        String title = UIForms.readNonEmpty(scanner, "News title: ");
+        String content = UIForms.readNonEmpty(scanner, UIText.INPUT_MESSAGE_CONTENT);
+        NewsUrgencyLevel urgency = UIForms.readNewsUrgencyLevel(scanner);
+        News news = new News(manager, title, content, urgency);
+        newsService.create(news);
+        printSuccess("News posted.");
     }
 
     private static void deleteNews() {
-            Manager manager = (Manager) getActiveUser();
-            List<News> all = newsService.getAll();
-            if (all.isEmpty()) {
-                println("No news.");
-                return;
-            }
-            printHeader("News");
-            all.forEach(n -> println(n.asLine()));
-            News news = UIForms.readIdFromList(scanner, UIMessage.INPUT_NEWS_ID, all);
-            newsService.delete(news, manager);
-            printSuccess("News deleted.");
+        Manager manager = (Manager) getActiveUser();
+        List<News> all = newsService.getAll();
+        if (all.isEmpty()) {
+            println("No news.");
+            return;
+        }
+        printHeader("News");
+        all.forEach(n -> println(n.asLine()));
+        News news = UIForms.readIdFromList(scanner, UIText.INPUT_NEWS_ID, all);
+        newsService.delete(news, manager);
+        printSuccess("News deleted.");
     }
 
     private static void printStudentGPAStats() {
@@ -144,7 +143,7 @@ public class ManagerMenus extends BaseApp {
                 continue;
             }
             double gpa = 0;
-            for(var enr : enrollments){
+            for (var enr : enrollments) {
                 gpa += enr.getGpa();
             }
             gpa /= enrollments.size();
@@ -152,8 +151,9 @@ public class ManagerMenus extends BaseApp {
             totalStudents += 1;
             println(student.asLine() + " | Avg GPA: " + String.format("%.2f", gpa));
         }
-        if(totalStudents != 0)
+        if (totalStudents != 0) {
             println("Overall average GPA: " + totalGPA / totalStudents);
+        }
     }
 
     private static void printCourseGPAStats() {

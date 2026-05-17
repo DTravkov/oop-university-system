@@ -20,7 +20,7 @@ import utils.Logger;
 /**
  * CourseService is a concrete service. It implements logic for managing courses.
  */
-public class CourseService extends BaseService<Course>  {
+public class CourseService extends GenericService<Course>  {
 
     private final EnrollmentService enrollmentService;
 

@@ -8,7 +8,7 @@ import model.enumeration.LanguagePreference;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
 import model.enumeration.TechRequestStatus;
-import model.enumeration.UIMessage;
+import utils.UIText;
 import settings.AppSettings;
 
 import java.util.List;
@@ -23,8 +23,8 @@ public class UIForms {
 
     // BASIC CONSOLE READS
 
-    public static String readNonEmpty(Scanner scanner, UIMessage prompt) {
-        return readNonEmpty(scanner, Translator.translate(prompt));
+    public static String readNonEmpty(Scanner scanner, UIText prompt) {
+        return readNonEmpty(scanner, prompt.localized());
     }
 
     public static String readNonEmpty(Scanner scanner, String prompt) {
@@ -36,45 +36,45 @@ public class UIForms {
                 return input;
             }
 
-            System.out.println(Translator.translate(UIMessage.MSG_INPUT_EMPTY));
+            System.out.println(UIText.MSG_INPUT_EMPTY.localized());
         }
     }
 
-    public static String readOptional(Scanner scanner, UIMessage prompt) {
-        System.out.print(Translator.translate(prompt));
+    public static String readOptional(Scanner scanner, UIText prompt) {
+        System.out.print(prompt.localized());
         return scanner.nextLine().trim();
     }
 
-    public static int readInt(Scanner scanner, UIMessage prompt) {
+    public static int readInt(Scanner scanner, UIText prompt) {
         while (true) {
-            System.out.print(Translator.translate(prompt));
+            System.out.print(prompt.localized());
             String input = scanner.nextLine().trim();
 
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println(Translator.translate(UIMessage.MSG_INPUT_NUMBER));
+                System.out.println(UIText.MSG_INPUT_NUMBER.localized());
             }
         }
     }
 
-    public static double readDouble(Scanner scanner, UIMessage prompt) {
+    public static double readDouble(Scanner scanner, UIText prompt) {
         while (true) {
-            System.out.print(Translator.translate(prompt));
+            System.out.print(prompt.localized());
             String input = scanner.nextLine().trim();
 
             try {
                 double value = Double.parseDouble(input);
                 return Math.round(value * 100.0) / 100.0;
             } catch (NumberFormatException e) {
-                System.out.println(Translator.translate(UIMessage.MSG_INPUT_NUMBER));
+                System.out.println(UIText.MSG_INPUT_NUMBER.localized());
             }
         }
     }
 
-    public static int readChoice(Scanner scanner, UIMessage prompt, int min, int max) {
+    public static int readChoice(Scanner scanner, UIText prompt, int min, int max) {
         while (true) {
-            System.out.print(Translator.translate(prompt));
+            System.out.print(prompt.localized());
             String input = scanner.nextLine().trim();
             try {
                 int value = Integer.parseInt(input);
@@ -83,26 +83,26 @@ public class UIForms {
                 }
             } catch (NumberFormatException ignored) {
             }
-            System.out.println(Translator.translate(UIMessage.MSG_INPUT_RANGE));
+            System.out.println(UIText.MSG_INPUT_RANGE.localized());
         }
     }
 
-    public static boolean readYesNo(Scanner scanner, UIMessage prompt) {
+    public static boolean readYesNo(Scanner scanner, UIText prompt) {
         while (true) {
-            System.out.print(Translator.translate(prompt));
+            System.out.print(prompt.localized());
             String input = scanner.nextLine().trim().toLowerCase();
 
             if (input.equals("y")) return true;
             if (input.equals("n")) return false;
 
-            System.out.println(Translator.translate(UIMessage.MSG_INPUT_YES_NO));
+            System.out.println(UIText.MSG_INPUT_YES_NO.localized());
         }
     }
 
 
-    public static <T extends SerializableModel> T readIdFromList(Scanner scanner, UIMessage prompt, List<T> entityList) {
+    public static <T extends SerializableModel> T readIdFromList(Scanner scanner, UIText prompt, List<T> entityList) {
         while (true) {
-            System.out.print(Translator.translate(prompt));
+            System.out.print(prompt.localized());
             String input = scanner.nextLine().trim();
             int id = Integer.parseInt(input);
             try {
@@ -113,7 +113,7 @@ public class UIForms {
                 }
                 throw new DoesNotExist("Choice with id=" + id);
             } catch (NumberFormatException e) {
-                System.out.println(Translator.translate(UIMessage.MSG_INPUT_NUMBER));
+                System.out.println(UIText.MSG_INPUT_NUMBER.localized());
             }
             catch (DoesNotExist e) {
                 System.out.println(e.getMessage());
@@ -125,7 +125,7 @@ public class UIForms {
 
     public static TeacherType askTeacherType(Scanner scanner) {
         while (true) {
-            System.out.print(Translator.translate(UIMessage.INPUT_TEACHER_TYPE));
+            System.out.print(UIText.INPUT_TEACHER_TYPE.localized());
             String choice = scanner.nextLine().trim();
 
             switch (choice) {
@@ -136,7 +136,7 @@ public class UIForms {
                 case "3":
                     return TeacherType.BOTH;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    System.out.println(UIText.MSG_INVALID_CHOICE.localized());
             }
         }
     }
@@ -145,18 +145,18 @@ public class UIForms {
 
         List<Class<? extends User>> roles = AppSettings.REGISTRABLE_USER_CLASSES;
 
-        System.out.println(Translator.translate(UIMessage.INPUT_USER_ROLE));
+        System.out.println(UIText.INPUT_USER_ROLE.localized());
         for (int i = 0; i < roles.size(); i++) {
             System.out.println((i + 1) + "." + roles.get(i).getSimpleName());
         }
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, roles.size());
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, roles.size());
         return roles.get(choice - 1);
     }
 
     public static LanguagePreference readLanguagePreference(Scanner scanner) {
         while (true) {
-            System.out.println(Translator.translate(UIMessage.AUTH_CHANGE_LANG));
+            System.out.println(UIText.AUTH_CHANGE_LANG.localized());
             System.out.println("1. " + "English");
             System.out.println("2. " + "Kazakh");
             System.out.println("3. " + "Russian");
@@ -170,7 +170,7 @@ public class UIForms {
                 case "3":
                     return LanguagePreference.RU;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    System.out.println(UIText.MSG_INVALID_CHOICE.localized());
             }
         }
     }
@@ -179,45 +179,45 @@ public class UIForms {
 
         List<TechRequestStatus> roles = List.of(TechRequestStatus.values());
 
-        System.out.println(Translator.translate(UIMessage.INPUT_TECH_REQ_STATUS));
+        System.out.println(UIText.INPUT_TECH_REQ_STATUS.localized());
         for (int i = 0; i < roles.size(); i++) {
             System.out.println((i + 1) + "." + roles.get(i).toString());
         }
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, roles.size());
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, roles.size());
         return roles.get(choice - 1);
     }
 
     public static CourseType readCourseType(Scanner scanner) {
         List<CourseType> types = List.of(CourseType.values());
 
-        System.out.println(Translator.translate(UIMessage.INPUT_COURSE_TYPE));
+        System.out.println(UIText.INPUT_COURSE_TYPE.localized());
         for (int i = 0; i < types.size(); i++) {
             System.out.println((i + 1) + ". " + types.get(i).name());
         }
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, types.size());
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, types.size());
         return types.get(choice - 1);
     }
 
     public static TeacherType readLectureOrPractice(Scanner scanner) {
-        System.out.println(Translator.translate(UIMessage.INPUT_COURSE_TEACHER_TYPE));
+        System.out.println(UIText.INPUT_COURSE_TEACHER_TYPE.localized());
         System.out.println("1. " + TeacherType.LECTURE.name());
         System.out.println("2. " + TeacherType.PRACTICE.name());
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 2);
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, 2);
         return choice == 1 ? TeacherType.LECTURE : TeacherType.PRACTICE;
     }
 
     public static ComplaintUrgencyLevel readComplaintUrgencyLevel(Scanner scanner) {
         List<ComplaintUrgencyLevel> levels = List.of(ComplaintUrgencyLevel.values());
 
-        System.out.println(Translator.translate(UIMessage.INPUT_COMPLAINT_LEVEL));
+        System.out.println(UIText.INPUT_COMPLAINT_LEVEL.localized());
         for (int i = 0; i < levels.size(); i++) {
             System.out.println((i + 1) + ". " + levels.get(i).name());
         }
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, levels.size());
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, levels.size());
         return levels.get(choice - 1);
     }
 
@@ -229,7 +229,7 @@ public class UIForms {
             System.out.println((i + 1) + ". " + types.get(i).getLabel());
         }
 
-        int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, types.size());
+        int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, types.size());
         return types.get(choice - 1);
     }
 
@@ -240,7 +240,7 @@ public class UIForms {
             System.out.println("2. HIGH");
             System.out.println("3. AVERAGE");
             System.out.println("4. LOW");
-            int choice = readChoice(scanner, UIMessage.MENU_CHOOSE, 1, 4);
+            int choice = readChoice(scanner, UIText.MENU_CHOOSE, 1, 4);
             switch (choice) {
                 case 1:
                     return NewsUrgencyLevel.RESEARCH;
@@ -251,7 +251,7 @@ public class UIForms {
                 case 4:
                     return NewsUrgencyLevel.LOW;
                 default:
-                    System.out.println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
+                    System.out.println(UIText.MSG_INVALID_CHOICE.localized());
             }
         }
     }

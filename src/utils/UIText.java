@@ -1,6 +1,6 @@
-package model.enumeration;
+package utils;
 
-public enum UIMessage {
+public enum UIText {
 
     ADMIN_LOGS_ALL("admin.logs_all"),
     ADMIN_LOGS_BY_USER("admin.logs_by_user"),
@@ -118,8 +118,12 @@ public enum UIMessage {
 
     private final String key;
 
-    UIMessage(String key) {
+    UIText(String key) {
         this.key = key;
+    }
+
+    public String localized(Object... args){
+        return Translator.translate(key, args);
     }
 
     public String getKey() {

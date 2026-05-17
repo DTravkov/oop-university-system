@@ -12,7 +12,7 @@ import utils.Logger;
 /**
  * ComplaintService is a concrete service. It implements logic for managing teacher complaints addressed to deans.
  */
-public class ComplaintService extends BaseService<TeacherComplaint>{
+public class ComplaintService extends GenericService<TeacherComplaint>{
 
 
     public ComplaintService() {

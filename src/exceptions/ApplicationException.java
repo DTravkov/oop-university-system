@@ -1,17 +1,16 @@
 package exceptions;
 
-import model.enumeration.UIMessage;
-import utils.Translator;
+import utils.UIText;
 
 public abstract class ApplicationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final UIMessage message;
+    private final UIText message;
     private final Object[] args;
 
 
-    protected ApplicationException(UIMessage message, Object... args) {
+    protected ApplicationException(UIText message, Object... args) {
         this.message = message;
         this.args = (args != null) ? args : new Object[0];
             
@@ -19,6 +18,6 @@ public abstract class ApplicationException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return Translator.translate(message, args);
+        return message.localized(args);
     }
 }

@@ -14,9 +14,10 @@ import utils.Comparators;
  * TechRequestService is a concrete service. It implements logic for IT support tickets: listing by employee or specialist,
  * stable ordering for the UI, and reassigning work when a tech specialist account is removed.
  */
-public class TechRequestService extends BaseService<TechRequest>{
+public class TechRequestService extends GenericService<TechRequest>{
 
-    public final UserService userService;
+    private final UserService userService;
+
     public TechRequestService(UserService userService) {
         super(TechRequest.class);
         this.userService = userService;
@@ -59,6 +60,10 @@ public class TechRequestService extends BaseService<TechRequest>{
                             .stream().filter(s -> !s.isBanned() && !s.isDeleted() && !s.equals(specialist))
                             .toList();
 
+            if(otherSpecialists.isEmpty()){
+                getTechRequestsBySpecialist(specialist).forEach(tr -> delete(tr));
+                return;
+            }
             getTechRequestsBySpecialist(specialist).forEach(req -> {
                 if(otherSpecialists.isEmpty()){
                     return;
@@ -66,6 +71,7 @@ public class TechRequestService extends BaseService<TechRequest>{
                 TechSupportSpecialist replacement = otherSpecialists.get(random.nextInt(0, otherSpecialists.size()));
                 req.setSpecialist(replacement);
             });
+            repository.saveAll();
         }
 
     }

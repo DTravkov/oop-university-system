@@ -1,10 +1,11 @@
 package model.factories;
-import services.BaseService;
+
 import services.ComplaintService;
 import services.CourseService;
 import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
+import services.NotificationService;
 import services.ResearchService;
 import services.StudentOrganizationService;
 import services.TeacherService;
@@ -25,6 +26,7 @@ public final class ServiceRegistry {
     public final TechRequestService techRequestService;
     public final StudentOrganizationService studentOrganizationService;
     public final ResearchService researchService;
+    public final NotificationService notificationService;
 
     private ServiceRegistry() {
         //basic services, exist on their own
@@ -42,8 +44,8 @@ public final class ServiceRegistry {
 
         // helper services that are not related to any domain class directly
         teacherService = new TeacherService(courseService, enrollmentService);
+        notificationService = new NotificationService(userService);
     }
-
 
     public static ServiceRegistry getInstance() {
         return INSTANCE;

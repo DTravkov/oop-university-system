@@ -1,5 +1,9 @@
 package model.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import settings.AppSettings;
 import utils.FieldValidator;
 import utils.StringUtils;
 
@@ -14,6 +18,8 @@ public abstract class User extends SerializableModel{
     private boolean isBanned = false;
 	private boolean isDeleted = false;
 
+	private List<Notification> notifications = new ArrayList<>();
+
     public User(User user) {
 		this(user.getLogin(),user.getPassword(),user.getName(), user.getSurname());
     }
@@ -24,6 +30,8 @@ public abstract class User extends SerializableModel{
     	FieldValidator.requireNonBlank(surname, "Surname");
 		FieldValidator.requireSingleWord(name, "Name");
 		FieldValidator.requireSingleWord(surname, "Surname");
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION)
+			FieldValidator.requirePasswordValidation(password);
 		
     	this.login = login;
     	this.password = password;
@@ -31,6 +39,18 @@ public abstract class User extends SerializableModel{
     	this.surname = StringUtils.capitalize(surname);
     	this.isBanned = false;
     }
+
+
+
+	public void addNotification(Notification notification){
+		FieldValidator.requireNonNull(notification, "Notification");
+		this.notifications.add(notification);
+	}
+
+	public boolean removeNotification(Notification notification){
+		FieldValidator.requireNonNull(notification, "Notification");
+		return this.notifications.remove(notification);
+	}
 
 	public String getLogin() {
 		return login;
@@ -49,6 +69,10 @@ public abstract class User extends SerializableModel{
 	public void setPassword(String password) {
 		FieldValidator.requireNonBlank(password, "Password");
 		FieldValidator.requireSingleWord(password, "Password");
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION)
+			FieldValidator.requirePasswordValidation(password);
+        
+
 		this.password = password;
 	}
 
@@ -67,8 +91,8 @@ public abstract class User extends SerializableModel{
 	}
 
 	public void setSurname(String surname) {
-		FieldValidator.requireNonBlank(name, "Surname");
-		FieldValidator.requireSingleWord(name, "Surname");
+		FieldValidator.requireNonBlank(surname, "Surname");
+		FieldValidator.requireSingleWord(surname, "Surname");
 		this.surname = surname;
 	}
 
@@ -84,6 +108,14 @@ public abstract class User extends SerializableModel{
 		isBanned = banned;
 	}
 
+	/**
+	 * checks that user is not banned or soft-deleted
+	 * @return
+	 */
+	public boolean isAvailable() {
+		return !(isBanned || isDeleted);
+	}
+
 	
 
 	public boolean isDeleted() {
@@ -97,6 +129,8 @@ public abstract class User extends SerializableModel{
 	public void unmarkAsDeleted() {
 		this.isDeleted = false;
 	}
+
+	
 
 
 	@Override

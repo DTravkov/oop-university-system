@@ -28,6 +28,22 @@ public class StudentOrganization extends SerializableModel {
 
     }
 
+    public void setPresident(Student president) {
+        FieldValidator.requireNonNull(president, "President");
+        if(this.president.getId() == president.getId()){
+            throw new AlreadyExists("this user is already a president");
+        }
+        this.president = president;
+        this.addMember(president);
+    }
+
+    public void removePresident(Student substitute) {
+        FieldValidator.requireNonNull(substitute, "new president");
+        this.removeMember(president);
+        this.setPresident(substitute); // president cant be null, so we need someone here
+        
+    }
+
     public String getName() {
         return name;
     }
@@ -46,20 +62,6 @@ public class StudentOrganization extends SerializableModel {
 
     public Student getPresident() {
         return president;
-    }
-
-    public void setPresident(Student president) {
-        FieldValidator.requireNonNull(president, "President");
-        if(this.president.getId() == president.getId()){
-            throw new AlreadyExists("this user is already a president");
-        }
-        this.president = president;
-        this.addMember(president);
-    }
-
-    public void removePresident() {
-        this.president.markAsDeleted();
-        this.removeMember(president);
     }
 
 

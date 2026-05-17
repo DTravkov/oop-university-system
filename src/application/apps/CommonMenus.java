@@ -1,4 +1,4 @@
-package application;
+package application.apps;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +12,6 @@ import model.domain.ResearcherProfile;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
-import model.enumeration.UIMessage;
 import services.CourseService;
 import services.EnrollmentService;
 import services.NewsService;
@@ -20,6 +19,7 @@ import services.ResearchService;
 import services.UserService;
 import utils.Comparators;
 import utils.UIForms;
+import utils.UIText;
 
 public class CommonMenus extends BaseApp {
 
@@ -76,7 +76,7 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void becomeResearcher() {
-        researchService.createResearcherProfile(getActiveUser());
+        researchService.createProfile(getActiveUser());
         printSuccess("You are now a researcher.");
     }
 
@@ -88,7 +88,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Researchers");
         profiles.forEach(p -> println(p.asLine()));
-        ResearcherProfile profile = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, profiles);
+        ResearcherProfile profile = UIForms.readIdFromList(scanner, UIText.INPUT_RESEARCH_PROFILE_USER_ID, profiles);
         List<ResearchPaper> papers = researchService.getPapersByAuthor(profile.getUser());
         if(papers.isEmpty()){
             printFail(profile.getUser().getFullname() + " has no papers.");
@@ -116,7 +116,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Papers");
         papers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, papers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, papers);
         researchService.incrementViews(paper);
         println(paper.asTable());
         if(!paper.getResearchers().isEmpty()){
@@ -133,7 +133,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Papers");
         papers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, papers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, papers);
         researchService.citePaper(paper);
         printSuccess("Paper cited.");
     }
@@ -150,7 +150,7 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void createPaper() {
-        String title = UIForms.readNonEmpty(scanner, UIMessage.INPUT_PAPER_TITLE);
+        String title = UIForms.readNonEmpty(scanner, UIText.INPUT_PAPER_TITLE);
         ResearchPaper paper = researchService.createPaper(getActiveUser(), title);
         printSuccess("Paper \"" + paper.getTitle() + "\" created.");
     }
@@ -163,7 +163,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("My Papers");
         myPapers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
         researchService.deletePaper(paper);
         printSuccess("Paper deleted.");
     }
@@ -176,7 +176,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("My Papers");
         myPapers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
 
         List<ResearcherProfile> candidates = researchService.getAll().stream()
                 .filter(rp -> paper.getResearchers().stream().noneMatch(r -> r.getId() == rp.getId()))
@@ -187,7 +187,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Researchers");
         candidates.forEach(c -> println(c.asLine()));
-        ResearcherProfile participant = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, candidates);
+        ResearcherProfile participant = UIForms.readIdFromList(scanner, UIText.INPUT_RESEARCH_PROFILE_USER_ID, candidates);
         researchService.addParticipant(paper, participant);
         printSuccess("Participant added.");
     }
@@ -201,7 +201,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("My Papers");
         myPapers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
 
         List<ResearcherProfile> participants = paper.getResearchers().stream()
                 .filter(rp -> rp.getId() != myProfile.getId())
@@ -212,7 +212,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Participants");
         participants.forEach(p -> println(p.asLine()));
-        ResearcherProfile target = UIForms.readIdFromList(scanner, UIMessage.INPUT_RESEARCH_PROFILE_USER_ID, participants);
+        ResearcherProfile target = UIForms.readIdFromList(scanner, UIText.INPUT_RESEARCH_PROFILE_USER_ID, participants);
         researchService.removeParticipant(paper, target);
         printSuccess("Participant removed.");
     }
@@ -225,7 +225,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("My Papers");
         myPapers.forEach(p -> println(p.asLine()));
-        ResearchPaper paper = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, myPapers);
+        ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
 
         List<ResearchPaper> candidates = researchService.getAllPapers().stream()
                 .filter(p -> p.getId() != paper.getId())
@@ -237,7 +237,7 @@ public class CommonMenus extends BaseApp {
         }
         printHeader("Available Papers");
         candidates.forEach(p -> println(p.asLine()));
-        ResearchPaper reference = UIForms.readIdFromList(scanner, UIMessage.INPUT_PAPER_ID, candidates);
+        ResearchPaper reference = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, candidates);
         researchService.addReference(paper, reference);
         printSuccess("Reference added.");
     }
@@ -271,7 +271,7 @@ public class CommonMenus extends BaseApp {
 
     private static void leaveComment(News news) {
         User activeUser = getActiveUser();
-        String content = UIForms.readNonEmpty(scanner, UIMessage.INPUT_COMMENT);
+        String content = UIForms.readNonEmpty(scanner, UIText.INPUT_COMMENT);
         newsService.assignComment(news, new Comment(activeUser, content));
         openNews(news);
     }
@@ -313,7 +313,7 @@ public class CommonMenus extends BaseApp {
             }
             println("Choose a course:");
             courses.forEach(c -> println(c.asLine()));
-            Course course = UIForms.readIdFromList(scanner, UIMessage.INPUT_COURSE_ID, courses);
+            Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
 
             List<Teacher> lectures = course.getLectureTeachers();
             List<Teacher> practices = course.getPracticeTeachers();
@@ -325,13 +325,15 @@ public class CommonMenus extends BaseApp {
 
             println("Choose your lecture teacher:");
             lectures.forEach(l -> println(l.asLine()));
-            Teacher lectureTeacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, lectures);
+            Teacher lectureTeacher = UIForms.readIdFromList(scanner, UIText.INPUT_TEACHER_ID, lectures);
 
             println("Choose your practice teacher:");
             practices.forEach(p -> println(p.asLine()));
-            Teacher practiceTeacher = UIForms.readIdFromList(scanner, UIMessage.INPUT_TEACHER_ID, practices);
+            Teacher practiceTeacher = UIForms.readIdFromList(scanner, UIText.INPUT_TEACHER_ID, practices);
 
             enrollmentService.create(new Enrollment(course, student, lectureTeacher, practiceTeacher));
             printSuccess("Enrolled in " + course.getName() + ".");
     }
+
+
 }

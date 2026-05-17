@@ -1,16 +1,16 @@
 package exceptions;
 
-import model.enumeration.UIMessage;
+import utils.UIText;
 
 public class InvalidCredentials extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
     public InvalidCredentials() {
-        super(UIMessage.ERR_INVALID_CREDENTIALS);
+        super(UIText.ERR_INVALID_CREDENTIALS);
     }
 
     public InvalidCredentials(Object... args) {
-        super(UIMessage.ERR_INVALID_CREDENTIALS, args);
+        super(UIText.ERR_INVALID_CREDENTIALS, args);
     }
 }

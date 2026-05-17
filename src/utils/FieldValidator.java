@@ -16,6 +16,14 @@ public final class FieldValidator {
     }
 
 
+
+    public static void requirePasswordValidation(String value) {
+        if (value == null || value.isBlank()) {
+            throw new FieldRequiredException(UIText.INPUT_PASSWORD.localized());
+        }
+    }
+
+
     public static void requireNonBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new FieldRequiredException(fieldName);

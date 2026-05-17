@@ -1,16 +1,16 @@
 package exceptions;
 
-import model.enumeration.UIMessage;
+import utils.UIText;
 
 public class UserBannedOrDeleted extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
     public UserBannedOrDeleted() {
-        super(UIMessage.ERR_USER_BANNED_OR_DELETED);
+        super(UIText.ERR_USER_BANNED_OR_DELETED);
     }
 
     public UserBannedOrDeleted(Object... args) {
-        super(UIMessage.ERR_USER_BANNED_OR_DELETED, args);
+        super(UIText.ERR_USER_BANNED_OR_DELETED, args);
     }
 }

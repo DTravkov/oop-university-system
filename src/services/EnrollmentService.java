@@ -21,7 +21,7 @@ import utils.Logger;
  * EnrollmentService is a concrete service. It implements logic for enrollments. 
  * Enrollments are a big part of our system, they connect all the course, teachers, students, and their scores.
  */
-public class EnrollmentService extends BaseService<Enrollment>  {
+public class EnrollmentService extends GenericService<Enrollment>  {
 
     public EnrollmentService() {
         super(Enrollment.class);

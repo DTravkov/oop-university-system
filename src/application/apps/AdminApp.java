@@ -1,41 +1,42 @@
-package application;
+package application.apps;
 
 import java.util.Date;
 import java.util.List;
 
+import model.domain.Admin;
 import model.domain.GraduateStudent;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
-import model.enumeration.TeacherType;
-import model.enumeration.UIMessage;
-import model.factories.UserFactory;
+import model.factories.UserBuilder;
 import services.UserService;
 import settings.AppSettings;
 import utils.LogEntry;
 import utils.Logger;
-import utils.Translator;
 import utils.UIForms;
+import utils.UIText;
 
-public class AdminMenus extends BaseApp {
+public final class AdminApp extends BaseApp {
 
     static final UserService userService = services.userService;
 
-    
-    static MenuBuilder getAdminMenu() {
-        MenuBuilder menu = new MenuBuilder("Admin Menu");
-        menu.addAction("Get all logs", () -> printAllLogs());
-        menu.addAction("Get recent logs", () -> printRecentLogs());
-        menu.addAction("Get logs by user id", () -> printAllLogsByUserId());
-        menu.addAction("Get all users", () -> printAllUsersByClass(User.class));
-        menu.addAction("Create User", () -> createUser());
-        menu.addAction("Delete User", () -> deleteUser());
-        menu.addAction("Ban User", () -> banUser());
-        menu.addAction("Back", () -> menu.stop());
-        return menu;
+    private AdminApp() {
+    }
+
+    public static MenuBuilder getMenu() {
+        return new MenuBuilder("Admin Menu")
+                .addAction("Get all logs", () -> printAllLogs())
+                .addAction("Get recent logs", () -> printRecentLogs())
+                .addAction("Get logs by user id", () -> printAllLogsByUserId())
+                .addAction("Get all users", () -> printAllUsersByClass(User.class))
+                .addAction("Create User", () -> createUser())
+                .addAction("Delete User", () -> deleteUser())
+                .addAction("Ban User", () -> banUser())
+                .addExit();
     }
 
     private static void banUser() {
+        Admin admin = (Admin) getActiveUser();
         List<User> users = userService.getUsersByClass(User.class);
         if (users.isEmpty()) {
             println("No users found.");
@@ -43,8 +44,8 @@ public class AdminMenus extends BaseApp {
         }
         printHeader("User");
         users.stream().filter(u -> !u.equals(getActiveUser())).forEach(u -> println(u.asLine()));
-        User user = UIForms.readIdFromList(scanner, UIMessage.INPUT_USER_ID, users);
-        userService.ban(user);
+        User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, users);
+        userService.ban(user, admin);
         printSuccess("User " + user.asLine() + " is banned");
     }
 
@@ -56,37 +57,41 @@ public class AdminMenus extends BaseApp {
         }
         printHeader("User");
         users.forEach(u -> println(u.asLine()));
-        User user = UIForms.readIdFromList(scanner, UIMessage.INPUT_USER_ID, users);
+        User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, users);
         userService.delete(user);
         printSuccess("User " + user.asLine() + " is deleted");
     }
 
     private static void createUser() {
-            Class<? extends User> className = UIForms.readUserClass(scanner);
+        Class<? extends User> className = UIForms.readUserClass(scanner);
 
-            String login = UIForms.readNonEmpty(scanner, UIMessage.INPUT_LOGIN);
-            String password = UIForms.readNonEmpty(scanner, UIMessage.INPUT_PASSWORD);
-            String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_NAME);
-            String surname = UIForms.readNonEmpty(scanner, UIMessage.INPUT_SURNAME);
+        String login = UIForms.readNonEmpty(scanner, UIText.INPUT_LOGIN);
+        String password = UIForms.readNonEmpty(scanner, UIText.INPUT_PASSWORD);
+        String name = UIForms.readNonEmpty(scanner, UIText.INPUT_NAME);
+        String surname = UIForms.readNonEmpty(scanner, UIText.INPUT_SURNAME);
 
-            Date admissionDate = null;
-            TeacherType teacherType = null;
+        UserBuilder builder = new UserBuilder()
+                .userClass(className)
+                .login(login)
+                .password(password)
+                .name(name)
+                .surname(surname);
 
-            if (className == Student.class || className == GraduateStudent.class) {
-                admissionDate = new Date();
-            }
-            if (className == Teacher.class) {
-                teacherType = UIForms.askTeacherType(scanner);
-            }
+        if (className == Student.class || className == GraduateStudent.class) {
+            builder.admissionDate(new Date());
+        }
+        if (className == Teacher.class) {
+            builder.teacherType(UIForms.askTeacherType(scanner));
+        }
 
-            User user = UserFactory.createFromClass(className, login, password, name, surname, admissionDate, teacherType);
-            User saved = userService.create(user);
-            printSuccess(Translator.translate(UIMessage.AUTH_WELCOME, saved.getName()));
+        User user = builder.build();
+        userService.create(user);
+        printSuccess(UIText.MSG_CREATED.localized());
     }
 
     private static <U extends User> void printAllUsersByClass(Class<U> className) {
         List<U> users = userService.getUsersByClass(className);
-        if(users == null || users.isEmpty()){
+        if (users == null || users.isEmpty()) {
             println("No users found.");
             return;
         }
@@ -95,7 +100,7 @@ public class AdminMenus extends BaseApp {
     }
 
     private static void printAllLogsByUserId() {
-        int userId = UIForms.readInt(scanner, UIMessage.INPUT_USER_ID);
+        int userId = UIForms.readInt(scanner, UIText.INPUT_USER_ID);
         List<LogEntry> logs = Logger.getUserLogs(userId);
         if (logs.isEmpty()) {
             println("No logs found.");

@@ -1,23 +1,34 @@
-package application;
+package application.apps;
 
 import java.util.List;
 
 import model.domain.Enrollment;
 import model.domain.Student;
 import model.domain.StudentOrganization;
-import model.enumeration.UIMessage;
 import services.EnrollmentService;
 import services.StudentOrganizationService;
 import services.UserService;
 import utils.UIForms;
+import utils.UIText;
 
-public class StudentMenus extends BaseApp {
+public class StudentApp extends BaseApp {
 
     static final UserService userService = services.userService;
     static final EnrollmentService enrollmentService = services.enrollmentService;
     static final StudentOrganizationService organizationService = services.studentOrganizationService;
 
-    static MenuBuilder getStudentOrgMenu() {
+    public StudentApp() {
+        super();
+    }
+
+    public static MenuBuilder getMenu() {
+        return new MenuBuilder("Student Menu")
+                .addAction("My Transcript", () -> printTranscript())
+                .addAction("Student Organization Menu", () -> getOrgMenu().start())
+                .addExit();
+    }
+
+    public static MenuBuilder getOrgMenu() {
         Student activeStudent = (Student) getActiveUser();
 
         boolean isOrganizationMember = organizationService.isMember(activeStudent);
@@ -25,29 +36,28 @@ public class StudentMenus extends BaseApp {
         MenuBuilder menu = new MenuBuilder("Student Organizations");
         menu.addAction("View all organizations", () -> printAllStudentOrgs());
         menu.addAction("View organization detail", () -> printAllStudentOrgs());
-        if(isOrganizationMember){
+        if (isOrganizationMember) {
             menu.addAction("View my organization", () -> {
                 getMyOrgMenu().start();
                 menu.stop();
-                getStudentOrgMenu().start();
+                getOrgMenu().start();
             });
-        }else{
+        } else {
             menu.addAction("Join an organization", () -> {
                 joinStudentOrg();
                 menu.stop();
-                getStudentOrgMenu().start();
+                getOrgMenu().start();
             });
             menu.addAction("Create an organization", () -> {
                 createStudentOrg();
                 menu.stop();
-                getStudentOrgMenu().start();
+                getOrgMenu().start();
             });
         }
 
-        menu.addAction("Exit", () -> menu.stop());
+        menu.addExit();
         return menu;
     }
-
 
     private static MenuBuilder getMyOrgMenu() {
         Student activeStudent = (Student) getActiveUser();
@@ -55,7 +65,7 @@ public class StudentMenus extends BaseApp {
         StudentOrganization org = organizationService.getOrganizationByMember(activeStudent);
         MenuBuilder menu = new MenuBuilder("");
         menu.addLabel(org.asTable());
-        if(org.getPresident().equals(activeStudent)){
+        if (org.getPresident().equals(activeStudent)) {
             menu.addAction("Add member", () -> {
                 addMemberToOrg(org);
                 menu.stop();
@@ -70,8 +80,11 @@ public class StudentMenus extends BaseApp {
                 deleteStudentOrg(org);
                 menu.stop();
             });
-        }else{
-            menu.addAction("Leave organization", () -> getMyOrgMenu().start());
+        } else {
+            menu.addAction("Leave organization", () -> {
+                leaveStudentOrg(org);
+                menu.stop();
+            });
         }
         menu.addAction("Exit", () -> menu.stop());
         return menu;
@@ -80,19 +93,19 @@ public class StudentMenus extends BaseApp {
     private static void joinStudentOrg() {
         Student student = (Student) getActiveUser();
         List<StudentOrganization> orgs = organizationService.getAll();
-        if(orgs.isEmpty()){
+        if (orgs.isEmpty()) {
             println("No organizations");
             return;
         }
-        StudentOrganization org = UIForms.readIdFromList(scanner, UIMessage.INPUT_ORG_ID, orgs);
+        StudentOrganization org = UIForms.readIdFromList(scanner, UIText.INPUT_ORG_ID, orgs);
         organizationService.addMember(org, student);
         printSuccess("Joined " + org.getName() + ".");
     }
 
     private static void createStudentOrg() {
         Student student = (Student) getActiveUser();
-        String name = UIForms.readNonEmpty(scanner, UIMessage.INPUT_ORG_NAME);
-        String description = UIForms.readNonEmpty(scanner, UIMessage.INPUT_ORG_DESC);
+        String name = UIForms.readNonEmpty(scanner, UIText.INPUT_ORG_NAME);
+        String description = UIForms.readNonEmpty(scanner, UIText.INPUT_ORG_DESC);
         StudentOrganization org = new StudentOrganization(name, description, student);
         organizationService.create(org);
         printSuccess("Organization \"" + name + "\" created.");
@@ -100,7 +113,7 @@ public class StudentMenus extends BaseApp {
 
     private static void printAllStudentOrgs() {
         List<StudentOrganization> orgs = organizationService.getAll();
-        if(orgs.isEmpty()){
+        if (orgs.isEmpty()) {
             println("No organizations");
             return;
         }
@@ -112,13 +125,13 @@ public class StudentMenus extends BaseApp {
         List<Student> candidates = userService.getUsersByClass(Student.class).stream()
                 .filter(s -> !organizationService.isMember(s))
                 .toList();
-        if(candidates.isEmpty()){
+        if (candidates.isEmpty()) {
             printFail("No students available to add.");
             return;
         }
         printHeader("Students");
         candidates.forEach(s -> println(s.asLine()));
-        Student student = UIForms.readIdFromList(scanner, UIMessage.INPUT_STUDENT_ID, candidates);
+        Student student = UIForms.readIdFromList(scanner, UIText.INPUT_STUDENT_ID, candidates);
         organizationService.addMember(org, student);
         printSuccess(student.getFullname() + " added to " + org.getName() + ".");
     }
@@ -127,13 +140,13 @@ public class StudentMenus extends BaseApp {
         List<Student> removable = org.getMembers().stream()
                 .filter(m -> !m.equals(org.getPresident()))
                 .toList();
-        if(removable.isEmpty()){
+        if (removable.isEmpty()) {
             printFail("No members to remove.");
             return;
         }
         printHeader("Members");
         removable.forEach(m -> println(m.asLine()));
-        Student student = UIForms.readIdFromList(scanner, UIMessage.INPUT_STUDENT_ID, removable);
+        Student student = UIForms.readIdFromList(scanner, UIText.INPUT_STUDENT_ID, removable);
         organizationService.removeMember(org, student);
         printSuccess(student.getFullname() + " removed from " + org.getName() + ".");
     }
@@ -143,10 +156,16 @@ public class StudentMenus extends BaseApp {
         printSuccess("Organization \"" + org.getName() + "\" deleted.");
     }
 
-    static void printStudentTranscript() {
+    private static void leaveStudentOrg(StudentOrganization org) {
+        Student activeStudent = (Student) getActiveUser();
+        organizationService.removeMember(org, activeStudent);
+        printSuccess("You left " + org.getName() + ".");
+    }
+
+    public static void printTranscript() {
         Student student = (Student) getActiveUser();
         List<Enrollment> enrollments = enrollmentService.getEnrollmentsByStudent(student);
-        if(enrollments.isEmpty()){
+        if (enrollments.isEmpty()) {
             printFail("You are not enrolled on any course yet");
             return;
         }

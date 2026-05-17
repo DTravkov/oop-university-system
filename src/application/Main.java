@@ -1,18 +1,36 @@
 package application;
 
 
-public class Main extends BaseApp{
 
+import application.apps.BaseApp;
+
+import application.apps.UniversityApplication;
+
+
+
+public class Main{
+
+    /**
+     * starts main logic (language->auth->menu->logout) by using {@link UniversityApplication}
+     * UniversityApplication inherits {@link BaseApp}, 
+     * but it only renders menu based on who the user is.
+     */
     public static void main(String[] args){
-        MainMenu.changeLanguage();
+        UniversityApplication.changeLanguage();
 
-        MainMenu.getAuthMenu().start();
+        UniversityApplication.authenticate();
 
-        if(isAuthenticated()) 
-            MainMenu.getMainMenu().start();
-        
-        shutdown();
+        if(UniversityApplication.isAuthenticated())
+            UniversityApplication.start();
+
+        UniversityApplication.kill();
+
     }
 
 
+
+
+
 }
+
+

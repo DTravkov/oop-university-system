@@ -1,4 +1,4 @@
-package application;
+package application.apps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,57 +6,62 @@ import java.util.Scanner;
 
 import exceptions.ApplicationException;
 import model.domain.User;
-import model.enumeration.UIMessage;
 import model.factories.ServiceRegistry;
 import settings.AppSettings;
 import utils.Translator;
 import utils.UIForms;
+import utils.UIText;
 
 public abstract class BaseApp {
 
     protected static final Scanner scanner = new Scanner(System.in);
     protected static final ServiceRegistry services = ServiceRegistry.getInstance();
 
-    protected BaseApp() {
-    }
-
-    protected static void shutdown() {
+    public static void kill() {
         System.exit(0);
     }
 
-    protected static void print(String data) {
+    public static User getActiveUser() {
+        return AppSettings.getActiveUser();
+    }
+
+    public static boolean isAuthenticated() {
+        return AppSettings.getActiveUser().getId() != AppSettings.ANONYMOUS_USER_ID;
+    }
+
+    public static void print(String data) {
         System.out.print(data);
     }
 
-    protected static void print(Object data) {
+    public static void print(Object data) {
         System.out.print(data);
     }
 
-    protected static void println(String data) {
+    public static void println(String data) {
         System.out.println(data);
     }
 
-    protected static void println(Object data) {
+    public static void println(Object data) {
         System.out.println(data);
     }
 
-    protected static void printHeader(String data) {
-        System.out.println("||| " + data + " |||");
-    }
-    
-    protected static void printHeader(Object data) {
+    public static void printHeader(String data) {
         System.out.println("||| " + data + " |||");
     }
 
-    protected static void printSuccess(String data) {
-        System.out.println( "[" + Translator.translate(UIMessage.SUCCESS) + "] " + data);
+    public static void printHeader(Object data) {
+        System.out.println("||| " + data + " |||");
     }
 
-    protected static void printFail(String data) {
-        System.out.println("[" + Translator.translate(UIMessage.FAIL) + "] " + data);
+    public static void printSuccess(String data) {
+        System.out.println("[" + UIText.SUCCESS.localized() + "] " + data);
     }
 
-    protected static void printExceptionDetails(ApplicationException exc) {
+    public static void printFail(String data) {
+        System.out.println("[" + UIText.FAIL.localized() + "] " + data);
+    }
+
+    public static void printExceptionDetails(ApplicationException exc) {
         printFail(exc.getMessage());
     }
 
@@ -68,21 +73,8 @@ public abstract class BaseApp {
         }
     }
 
-
-    protected static void printInvalidChoice() {
-        println(Translator.translate(UIMessage.MSG_INVALID_CHOICE));
-    }
-
-    protected static User getActiveUser(){
-        return AppSettings.getActiveUser();
-    }
-
-    protected static boolean isAuthenticated() {
-        return AppSettings.getActiveUser().getId() != AppSettings.ANONYMOUS_USER_ID;
-    }
-
-    public static void logout() {
-        AppSettings.clearActiveUser();
+    public static void printInvalidChoice() {
+        println(Translator.translate(UIText.MSG_INVALID_CHOICE));
     }
 
     protected static class MenuBuilder {
@@ -92,27 +84,29 @@ public abstract class BaseApp {
         private boolean isRunning;
 
         protected MenuBuilder(String menuTitle) {
-            if(menuTitle.isBlank()){
+            if (menuTitle.isBlank()) {
                 this.menuTitle = "";
                 return;
             }
             this.menuTitle = "\n||| " + menuTitle + " |||";
         }
 
-        protected MenuBuilder(UIMessage msg, Object... args) {
-            this(Translator.translate(msg, args));
+        protected MenuBuilder(String menuTitle, boolean withExit) {
+            this(menuTitle);
         }
 
-        protected void start() {
+        public void start() {
             isRunning = true;
+            int actionCount = actions.size();
+
             while (isRunning) {
                 println(menuTitle);
-                for (int i = 0; i < actions.size(); i++) {
-                    String actionNumber = i + 1 + ".";
+                for (int i = 0; i < actionCount; i++) {
+                    String prefix = String.valueOf(i+1) + ". ";
                     String actionTitle = actions.get(i).title;
-                    println(actionNumber + " " + actionTitle);
+                    println(prefix + " " + actionTitle);
                 }
-                int choice = UIForms.readChoice(scanner, UIMessage.MENU_CHOOSE, 1, actions.size());
+                int choice = UIForms.readChoice(scanner, UIText.MENU_CHOOSE, 1, actionCount);
                 actions.get(choice - 1).run();
             }
         }
@@ -121,21 +115,27 @@ public abstract class BaseApp {
             isRunning = false;
         }
 
-        protected MenuBuilder addLabel(String label){
+        protected MenuBuilder addLabel(String label) {
             this.menuTitle += "\n" + label;
             return this;
         }
 
-        protected MenuBuilder addAction(String actionTitle, Runnable callback){
+        protected MenuBuilder addAction(String actionTitle, Runnable callback) {
             actions.add(new Action(actionTitle, callback));
             return this;
         }
 
-        private final class Action{
+        protected MenuBuilder addExit() {
+            actions.add(new Action(UIText.MENU_EXIT.localized(), this::stop));
+            return this;
+        }
+
+        private final class Action {
+
             public final String title;
             public final Runnable callback;
 
-            public Action(String title, Runnable callback){
+            public Action(String title, Runnable callback) {
                 this.title = title;
                 this.callback = callback;
             }
@@ -143,8 +143,6 @@ public abstract class BaseApp {
             public void run() {
                 BaseApp.handleExceptions(callback);
             }
-
         }
-
     }
 }

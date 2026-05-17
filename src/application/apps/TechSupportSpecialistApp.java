@@ -1,26 +1,28 @@
-package application;
+package application.apps;
 
 import java.util.List;
 
 import model.domain.TechRequest;
 import model.domain.TechSupportSpecialist;
 import model.enumeration.TechRequestStatus;
-import model.enumeration.UIMessage;
 import services.TechRequestService;
 import utils.UIForms;
+import utils.UIText;
 
-public class TechSupportMenus extends BaseApp {
+public final class TechSupportSpecialistApp extends BaseApp {
 
     static final TechRequestService techRequestService = services.techRequestService;
 
+    public TechSupportSpecialistApp() {
+        super();
+    }
 
-    static MenuBuilder getTechSupportSpecMenu() {
-        MenuBuilder menu = new MenuBuilder("Technical Specialist Menu");
-        menu.addAction("View all requests", () -> printSpecialistRequests());
-        menu.addAction("View requests (by status)", () -> printSpecialistRequestsByStatus());
-        menu.addAction("Update request", () -> updateTechRequest());
-        menu.addAction("Back", () -> menu.stop());
-        return menu;
+    public static MenuBuilder getMenu() {
+        return new MenuBuilder("Technical Specialist Menu")
+                .addAction("View all requests", () -> printSpecialistRequests())
+                .addAction("View requests (by status)", () -> printSpecialistRequestsByStatus())
+                .addAction("Update request", () -> updateTechRequest())
+                .addExit();
     }
 
     private static void printSpecialistRequests() {
@@ -56,7 +58,7 @@ public class TechSupportMenus extends BaseApp {
         }
         printHeader("My Requests");
         requests.forEach(r -> println(r.asLine()));
-        TechRequest request = UIForms.readIdFromList(scanner, UIMessage.INPUT_REQUEST_ID, requests);
+        TechRequest request = UIForms.readIdFromList(scanner, UIText.INPUT_REQUEST_ID, requests);
         TechRequestStatus status = UIForms.readTechRequestStatus(scanner);
         request.setStatus(status);
         techRequestService.update(request);

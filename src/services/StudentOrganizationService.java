@@ -13,7 +13,7 @@ import utils.Logger;
  * StudentOrganizationService is a concrete service. It implements logic for student clubs: president and members,
  * uniqueness rules so one student does not sit in two orgs in conflicting roles, and cleanup when a student is deleted.
  */
-public class StudentOrganizationService extends BaseService<StudentOrganization>  {
+public class StudentOrganizationService extends GenericService<StudentOrganization>  {
 
 
     public StudentOrganizationService() {
@@ -36,12 +36,6 @@ public class StudentOrganizationService extends BaseService<StudentOrganization>
         }
         Logger.log("Make student (" + student.getId() + ") a president of (" + org.getId() + ")");
         org.setPresident(student);
-        update(org);
-    }
-
-    public void removePresident(StudentOrganization org){
-        org.removePresident();
-        Logger.log("Remove president from organization (" + org.getId() + ")");
         update(org);
     }
 
@@ -100,15 +94,12 @@ public class StudentOrganizationService extends BaseService<StudentOrganization>
         if(deletedUser instanceof Student student){
             StudentOrganization org = find(o -> o.getMembers().contains(student));
             if (org == null) return;
-            if(org.getPresident().equals(student)){
-                org.removePresident();
-            }else{
-                org.removeMember(student);
+            if(!org.getPresident().equals(student)){
+                org.removeMember(student); // i dont remove president here because president place cant be null
+                update(org);
             }
 
         }
-
-        
     }
 
 }

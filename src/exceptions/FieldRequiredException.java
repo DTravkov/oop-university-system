@@ -1,12 +1,12 @@
 package exceptions;
 
-import model.enumeration.UIMessage;
+import utils.UIText;
 
 public class FieldRequiredException extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
     public FieldRequiredException(String fieldName) {
-        super(UIMessage.ERR_FIELD_REQUIRED, fieldName);
+        super(UIText.ERR_FIELD_REQUIRED, fieldName);
     }
 }

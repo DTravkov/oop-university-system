@@ -15,7 +15,7 @@ import utils.Logger;
  * MessageService is a concrete service. It implements logic for employee chats: sending messages inside a chat,
  * opening a chats between two employees, and removing chats when a participant is deleted.
  */
-public class MessageService extends BaseService<Chat>{
+public class MessageService extends GenericService<Chat>{
 
 
     public MessageService() {
@@ -27,6 +27,12 @@ public class MessageService extends BaseService<Chat>{
     // has a few overloads to send messages with different sets of data.
     public Chat sendMessage(Chat chat, Message msg) {
         Employee sender = (Employee) msg.getSender();
+        Employee receiver = (Employee) chat.getOtherMember(sender);
+
+        if(!sender.isAvailable() || !receiver.isAvailable()){
+            throw new OperationNotAllowed(" sending messages to/from deleted accounts");
+        }
+        
         if (!chat.isMember(sender)) {
             throw new DoesNotExist(msg.getSender() + " is not a member of the chat");
         }
@@ -41,7 +47,7 @@ public class MessageService extends BaseService<Chat>{
         Employee sender = (Employee) msg.getSender();
         Employee receiver = (Employee) to;
 
-        if(sender.isBanned() || receiver.isDeleted()){
+        if(!sender.isAvailable() || !receiver.isAvailable()){
             throw new OperationNotAllowed(" sending messages to/from deleted accounts");
         }
         
