@@ -9,7 +9,8 @@ import model.enumeration.LanguagePreference;
 public class AppSettings {
 
     public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
-
+    public static boolean REQUIRE_PASSWORD_VALIDATION = false;
+    
     // used as a placeholder for unauthourized account OR while testing our application layer.
     public static final int ANONYMOUS_USER_ID = -1;
     public static final User ANONYMOUS_USER = new AnonymousUser();

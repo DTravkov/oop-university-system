@@ -65,9 +65,6 @@ public class TechRequestService extends GenericService<TechRequest>{
                 return;
             }
             getTechRequestsBySpecialist(specialist).forEach(req -> {
-                if(otherSpecialists.isEmpty()){
-                    return;
-                }
                 TechSupportSpecialist replacement = otherSpecialists.get(random.nextInt(0, otherSpecialists.size()));
                 req.setSpecialist(replacement);
             });

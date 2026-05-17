@@ -14,7 +14,7 @@ import utils.Logger;
  * BaseService is an abstract class that gives CRUD methods, provides serialization and data access through repositories.
  * Each service has a reference to the event system; subscriptions are meant for side effects (cleanup, cascades), not core flows.
  */
-public abstract class GenericService<T extends SerializableModel>  extends BaseService<T>{
+public abstract class GenericService<T extends SerializableModel> extends BaseService<T>{
 
     protected GenericService(Class<T> className) {
         super(className);

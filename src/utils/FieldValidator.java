@@ -18,7 +18,7 @@ public final class FieldValidator {
 
 
     public static void requirePasswordValidation(String value) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.isBlank() || value.length() < 8 || value.toLowerCase().equals(value)) {
             throw new FieldRequiredException(UIText.INPUT_PASSWORD.localized());
         }
     }

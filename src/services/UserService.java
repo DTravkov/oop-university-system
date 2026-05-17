@@ -66,11 +66,12 @@ public class UserService extends GenericService<User> {
 
     public User authenticate(String login, String password) {
         User user = getUserByLogin(login);
+
         if(user.isBanned() || user.isDeleted()){
-            throw new UserBannedOrDeleted();
+            throw new UserBannedOrDeleted(); // exception
         }
         if (!user.getPassword().equals(password)) {
-            throw new InvalidCredentials();
+            throw new InvalidCredentials(); // exception
         }
 
         AppSettings.setActiveUser(user);

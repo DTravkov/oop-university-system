@@ -32,10 +32,11 @@ public class MessageService extends GenericService<Chat>{
         if(!sender.isAvailable() || !receiver.isAvailable()){
             throw new OperationNotAllowed(" sending messages to/from deleted accounts");
         }
-        
+
         if (!chat.isMember(sender)) {
             throw new DoesNotExist(msg.getSender() + " is not a member of the chat");
         }
+        
         chat.sendMessage(msg);
         Logger.log("Send message by sender (" + sender.asLine() + ") in chat (" + chat.getId() + ")");
         repository.save(chat);

@@ -26,4 +26,6 @@ public final class StringUtils {
         String trimmed = value.trim();
         return trimmed.substring(0, 1).toUpperCase() + trimmed.substring(1).toLowerCase();
     }
+
+    
 }

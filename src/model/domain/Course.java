@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.AlreadyExists;
-import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import model.enumeration.CourseType;
 import model.enumeration.TeacherType;
@@ -69,11 +68,14 @@ public class Course extends SerializableModel {
 
     private void addPracticeTeacher(Teacher practiceTeacher) {
         FieldValidator.requireNonNull(practiceTeacher, "Practice teacher");
+
         if(!practiceTeacher.isPractice())
             throw new OperationNotAllowed("Adding non-practice as a practice teacher");
+
         if(practiceTeachers.contains(practiceTeacher)){
             throw new AlreadyExists("teacher with id=" + practiceTeacher.getId() + " as a practice teacher");
         }
+        
         this.practiceTeachers.add(practiceTeacher);
         
     }

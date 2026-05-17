@@ -23,6 +23,9 @@ public abstract class BaseService<T extends SerializableModel> {
         this.baseName = this.getClass().getSimpleName().replace("Service", "");
         subscribeToEvents();
     }
+
+
+    
     // EVENT HANDLING
 
     protected void subscribeToEvents() {

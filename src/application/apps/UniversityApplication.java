@@ -23,7 +23,8 @@ public class UniversityApplication extends BaseApp {
         User user = getActiveUser();
 
         MenuBuilder menu = new MenuBuilder("University System v0.0001")
-        .addAction("My Profile", () -> println("\n" + getActiveUser().asTable()))
+        
+        .addAction("My Profile", () -> println(getActiveUser().asTable()))
         .addAction("Research Menu", () -> CommonMenus.getResearcherMenu().start())
         .addAction("News Menu", () -> CommonMenus.getNewsMenu().start())
         .addAction("Course Menu", () -> CommonMenus.getCourseMenu().start());
@@ -55,6 +56,7 @@ public class UniversityApplication extends BaseApp {
 
         menu.start();
     }
+
 
 
     public static void authenticate() {
