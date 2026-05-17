@@ -29,7 +29,7 @@ public class NotificationService extends BaseService<Notification> {
             throw new RuntimeException("You cant send unicast notifications as multicast");
         repository.save(notification);
 
-        getMulticastReceivers(notification)
+        userService.getAll()
             .forEach(u -> u.addNotification(notification));
 
         //saveAll also saves other models, users in this case
