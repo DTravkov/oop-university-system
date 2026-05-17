@@ -20,17 +20,15 @@ public abstract class User extends SerializableModel{
 
 	private List<Notification> notifications = new ArrayList<>();
 
-    public User(User user) {
-		this(user.getLogin(),user.getPassword(),user.getName(), user.getSurname());
-    }
-    public User(String login, String password, String name, String surname) {
+
+	public User(String login, String password, String name, String surname) {
     	FieldValidator.requireNonBlank(login, "Login");
     	FieldValidator.requireNonBlank(password, "Password");
     	FieldValidator.requireNonBlank(name, "Name");
     	FieldValidator.requireNonBlank(surname, "Surname");
 		FieldValidator.requireSingleWord(name, "Name");
 		FieldValidator.requireSingleWord(surname, "Surname");
-		if(AppSettings.REQUIRE_PASSWORD_VALIDATION)
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && !AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
 			FieldValidator.requirePasswordValidation(password);
 		
     	this.login = login;
@@ -69,7 +67,7 @@ public abstract class User extends SerializableModel{
 	public void setPassword(String password) {
 		FieldValidator.requireNonBlank(password, "Password");
 		FieldValidator.requireSingleWord(password, "Password");
-		if(AppSettings.REQUIRE_PASSWORD_VALIDATION)
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
 			FieldValidator.requirePasswordValidation(password);
         
 

@@ -47,6 +47,7 @@ public class UserService extends GenericService<User> {
         return savedUser;
     }
 
+
     @Override
     public void delete(User user) {
         user.markAsDeleted();

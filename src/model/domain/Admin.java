@@ -1,5 +1,6 @@
 package model.domain;
 
+
 public class Admin extends Employee {
 
 	private static final long serialVersionUID = 1L;

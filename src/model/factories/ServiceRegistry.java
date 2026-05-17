@@ -6,7 +6,6 @@ import services.EnrollmentService;
 import services.MessageService;
 import services.NewsService;
 import services.NotificationService;
-import services.ProfileStatusService;
 import services.ResearchService;
 import services.StudentOrganizationService;
 import services.TeacherService;
@@ -28,7 +27,6 @@ public final class ServiceRegistry {
     public final StudentOrganizationService studentOrganizationService;
     public final ResearchService researchService;
     public final NotificationService notificationService;
-    public final ProfileStatusService profileStatusService;
 
     private ServiceRegistry() {
         //basic services, exist on their own
@@ -39,7 +37,6 @@ public final class ServiceRegistry {
         studentOrganizationService = new StudentOrganizationService();
         researchService = new ResearchService();
         complaintService = new ComplaintService();
-        profileStatusService = new ProfileStatusService();
 
         // services that depend on basic services
         techRequestService = new TechRequestService(userService);

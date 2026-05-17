@@ -1,5 +1,6 @@
 package settings;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Locale;
 
@@ -9,33 +10,20 @@ import model.enumeration.LanguagePreference;
 public class AppSettings {
 
     public static final LanguagePreference DEFAULT_LANGUAGE = LanguagePreference.RU;
-    public static boolean REQUIRE_PASSWORD_VALIDATION = false;
     
-    // used as a placeholder for unauthourized account OR while testing our application layer.
+    // default users
     public static final int ANONYMOUS_USER_ID = -1;
     public static final User ANONYMOUS_USER = new AnonymousUser();
 
     public static final User DEFAULT_ADMIN = new Admin("admin", "admin", "Admin", "Superuserovich");
 
-
-    
     public static final List<User> DEFAULT_SYSTEM_USERS = List.of(
         ANONYMOUS_USER,
         DEFAULT_ADMIN
     );
 
 
-    public static final int RECENT_LOG_HOURS = 12;
-
-    public static final String DEFAULT_DATA_DIRECTORY = "data/";
-
-
-    public static final List<Class<? extends User>> SYSTEM_CLASSES = List.of(
-        AnonymousUser.class,
-        Employee.class,
-        User.class
-    );
-
+    // class lists, for different purposes
     public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(
         AnonymousUser.class,
         User.class,
@@ -50,8 +38,10 @@ public class AppSettings {
 
 
 
+    
     public static final List<Class<? extends User>> REGISTRABLE_USER_CLASSES = ALL_USER_CLASSES.stream()
-                                                                                               .filter(cls -> !SYSTEM_CLASSES.contains(cls))
+                                                                                               .filter(cls -> !Modifier.isAbstract(cls.getModifiers()))
+                                                                                               .filter(cls -> cls != AnonymousUser.class)
                                                                                                .toList();
 
 
@@ -65,7 +55,15 @@ public class AppSettings {
         GraduateStudent.class
     );
 
+    // general defautls
+    public static final String DEFAULT_DATA_DIRECTORY = "data/";
+    public static final int RECENT_LOG_HOURS = 12;
 
+    //global validation rules
+    public static boolean REQUIRE_PASSWORD_VALIDATION = false;
+
+
+    //helpers and etc.
     public static void setLanguage(LanguagePreference pref){
         SessionData.getInstance().setLanguage(pref);
     }
