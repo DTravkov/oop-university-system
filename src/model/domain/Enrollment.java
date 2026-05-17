@@ -1,5 +1,6 @@
 package model.domain;
 
+import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import model.enumeration.AttestationType;
 import utils.FieldValidator;
@@ -10,19 +11,22 @@ public class Enrollment extends SerializableModel {
 
     private static final long serialVersionUID = 1L;
 
-    private Course course;
-    private Student student;
+    private final Course course;
+    private final Student student;
+    private final Mark mark;
+
     private Date enrollmentDate;
 
     private Teacher lectureTeacher;
     private Teacher practiceTeacher;
 
-    private final Mark mark;
-
     public Enrollment(Course course, Student student, Teacher lectureTeacher, Teacher practiceTeacher) {
         FieldValidator.requireNonNull(course, "Course");
         FieldValidator.requireNonNull(student, "Student");
         this.course = course;
+        if (course.getLectureTeachers().isEmpty() || course.getPracticeTeachers().isEmpty()) {
+            throw new DoesNotExist("At least one lecture teacher and one practice teacher on this course");
+        }
         this.student = student;
         this.enrollmentDate = new Date();
         this.mark = new Mark();
@@ -55,18 +59,8 @@ public class Enrollment extends SerializableModel {
         return course;
     }
 
-    public void setCourse(Course course) {
-        FieldValidator.requireNonNull(course, "Course");
-        this.course = course;
-    }
-
     public Student getStudent() {
         return student;
-    }
-
-    public void setStudent(Student student) {
-        FieldValidator.requireNonNull(student, "Student");
-        this.student = student;
     }
 
     public Date getEnrollmentDate() {

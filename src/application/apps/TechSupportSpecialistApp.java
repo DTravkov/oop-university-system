@@ -60,8 +60,7 @@ public final class TechSupportSpecialistApp extends BaseApp {
         requests.forEach(r -> println(r.asLine()));
         TechRequest request = UIForms.readIdFromList(scanner, UIText.INPUT_REQUEST_ID, requests);
         TechRequestStatus status = UIForms.readTechRequestStatus(scanner);
-        request.setStatus(status);
-        techRequestService.update(request);
+        techRequestService.updateStatus(request, status);
         printSuccess("Request updated.");
     }
 }

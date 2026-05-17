@@ -5,11 +5,13 @@ import java.util.function.Predicate;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
-import exceptions.OperationNotAllowed;
+import model.domain.Notification;
 import model.domain.ResearchPaper;
 import model.domain.ResearcherProfile;
+import model.domain.SerializableModel;
 import model.domain.User;
 import model.repository.Repository;
+import services.events.concrete.NotificationCreateEvent;
 import services.events.concrete.UserCreateEvent;
 import services.events.concrete.UserDeleteEvent;
 import settings.AppSettings;
@@ -19,121 +21,119 @@ import utils.Logger;
  * ResearchService is a concrete service. It implements logic for researcher profiles and research papers (two repositories),
  * including co-authors, references, citations, and automatically creates researcher profile for some user classses.
  */
-public class ResearchService extends BaseService<ResearcherProfile> {
+public class ResearchService extends BaseService<SerializableModel> {
 
     private final Repository<ResearchPaper> paperRepository;
+    private final Repository<ResearcherProfile> profileRepository;
 
     public ResearchService() {
-        super(ResearcherProfile.class);
+        // null here because service manages 2 repositories manually.
+        // not the best style, but i didt want to create another service for papers. 
+        super(null);
         this.paperRepository = new Repository<>(ResearchPaper.class);
+        this.profileRepository = new Repository<>(ResearcherProfile.class);
     }
 
-    // CREATE / UPDATE / DELETE
-
+    // RESEARCHERS
     public ResearcherProfile createProfile(User user) {
         if (isResearcher(user)) {
             throw new AlreadyExists("researcher profile for user id=" + user.getId());
         }
-        return createProfile(new ResearcherProfile(user));
+
+        ResearcherProfile profile = profileRepository.save(new ResearcherProfile(user));
+
+        this.eventSystem.publish(new NotificationCreateEvent(
+            new Notification("You are now a researcher.", user)
+        ));
+        return profile;
     }
 
-    public ResearchPaper createPaper(User author, String title) {
-        ResearcherProfile profile = getProfileByUser(author);
-        ResearchPaper paper = paperRepository.save(new ResearchPaper(title));
-        paper.addResearcher(profile);
-        profile.addPaper(paper);
+
+    // PAPERS
+    public ResearchPaper createPaper(ResearchPaper paper) {
         paperRepository.save(paper);
-        updateProfile(profile);
-        Logger.log("Create paper (" + paper.getId() + ") by author (" + author.asLine() + ")");
+        Logger.log("Create paper (" + paper.getId() + ")");
         return paper;
     }
 
     public void deletePaper(ResearchPaper paper) {
         for (ResearcherProfile profile : paper.getResearchers()) {
-            profile.removePaper(paper);
-            updateProfile(profile);
+            // will automatically clear researcher's references as well
+            paper.removeResearcher(profile); 
         }
         paperRepository.delete(paper);
+        profileRepository.saveAll();
         Logger.log("Delete paper (" + paper.getId() + ")");
     }
 
     public void addParticipant(ResearchPaper paper, ResearcherProfile profile) {
         paper.addResearcher(profile);
-        profile.addPaper(paper);
         paperRepository.save(paper);
-        updateProfile(profile);
-        Logger.log("Add participant (" + profile.asLine() + ") to paper (" + paper.getId() + ")");
+        profileRepository.save(profile);
+        this.eventSystem.publish(new NotificationCreateEvent(
+            new Notification("You have been added as a researcher to paper with id: " + paper.getId(), profile.getUser())
+        ));
     }
 
     public void removeParticipant(ResearchPaper paper, ResearcherProfile profile) {
-        if (paper.getResearchers().stream().noneMatch(r -> r.equals(profile))) {
-            throw new DoesNotExist("participant in paper id=" + paper.getId());
-        }
         paper.removeResearcher(profile);
-        profile.removePaper(paper);
         paperRepository.save(paper);
-        updateProfile(profile);
-        Logger.log("Remove participant (" + profile.asLine() + ") from paper (" + paper.getId() + ")");
+        profileRepository.save(profile);
     }
 
     public void addReference(ResearchPaper paper, ResearchPaper reference) {
-        if (paper.equals(reference)) {
-            throw new OperationNotAllowed("paper cannot reference itself");
-        }
-        if (paper.getReferences().stream().anyMatch(r -> r.equals(reference))) {
-            throw new AlreadyExists("reference to paper id=" + reference.getId());
-        }
         paper.addReference(reference);
         paperRepository.save(paper);
-        Logger.log("Add reference (" + reference.getId() + ") to paper (" + paper.getId() + ")");
     }
 
     public void citePaper(ResearchPaper paper) {
-        paper.setCitations(paper.getCitations() + 1);
+        paper.cite();
         paperRepository.save(paper);
-        Logger.log("Cite paper (" + paper.getId() + ")");
     }
 
     public void incrementViews(ResearchPaper paper) {
-        paper.setViews(paper.getViews() + 1);
+        paper.incrementViews();
         paperRepository.save(paper);
     }
 
     // QUERIES
 
-    public List<ResearcherProfile> getAll() {
-        return repository.getAll();
-    }
-
     public boolean isResearcher(User user) {
-        return findProfile(p -> p.getUser().getId() == user.getId()) != null;
+        return profileRepository.find(p -> p.getUser().equals(user)) != null;
     }
 
-    public ResearcherProfile getProfileByUser(User user) {
-        ResearcherProfile match = findProfile(p -> p.getUser().getId() == user.getId());
+    public ResearcherProfile getProfile(User user) {
+        ResearcherProfile match = profileRepository.find(p -> p.getUser().equals(user));
         if (match == null) {
             throw new DoesNotExist("researcher profile for user id=" + user.getId());
         }
         return match;
     }
 
+    public List<ResearcherProfile> getAllProfiles(){
+        return profileRepository.getAll();
+    }
+
+    public List<ResearcherProfile> getAllProfiles(Predicate<ResearcherProfile> query){
+        return profileRepository.findAll(query);
+    }
+
+
+
     public List<ResearchPaper> getAllPapers() {
         return paperRepository.getAll();
     }
 
-    public ResearchPaper getPaperById(int paperId) {
-        ResearchPaper paper = paperRepository.find(p -> p.getId() == paperId);
-        if (paper == null) {
-            throw new DoesNotExist("paper with id=" + paperId);
-        }
-        return paper;
+    public List<ResearchPaper> getAllPapers(User user) {
+        ResearcherProfile profile = getProfile(user);
+        return paperRepository.findAll(p -> p.getResearchers().contains(profile));
     }
 
-    public List<ResearchPaper> getPapersByAuthor(User user) {
-        return getAllPapers().stream()
-                .filter(p -> p.getResearchers().stream().anyMatch(r -> r.getUser().getId() == user.getId()))
-                .toList();
+    public List<ResearchPaper> getAllPapers(Predicate<ResearchPaper> query) {
+        return paperRepository.findAll(query);
     }
+
+
 
     // EVENT HANDLING
 
@@ -149,51 +149,6 @@ public class ResearchService extends BaseService<ResearcherProfile> {
                 }
         });
 
-        eventSystem.subscribe(UserDeleteEvent.class, event -> {
-            User deletedUser = event.getUser();
-            if (!isResearcher(deletedUser)) {
-                return;
-            }
-            ResearcherProfile profile = getProfileByUser(deletedUser);
-            for (ResearchPaper paper : profile.getPapers()) {
-                paper.removeResearcher(profile);
-                paperRepository.save(paper);
-            }
-            deleteProfile(profile);
-        });
     }
 
-    // profile repository helpers (same idea as GenericService, but on BaseService repository)
-
-    private ResearcherProfile createProfile(ResearcherProfile profile) {
-        if (repository.exists(profile.getId())) {
-            throw new AlreadyExists("ResearcherProfile with id " + profile.getId());
-        }
-        ResearcherProfile saved = repository.save(profile);
-        Logger.log("Create ResearcherProfile (" + saved.getId() + ")");
-        return saved;
-    }
-
-    private void updateProfile(ResearcherProfile profile) {
-        if (!repository.exists(profile)) {
-            throw new DoesNotExist("ResearcherProfile object with id : " + profile.getId());
-        }
-        if (profile.getId() == 0) {
-            throw new OperationNotAllowed("ResearcherProfile non-existing object can not be updated");
-        }
-        Logger.log("Update ResearcherProfile (" + profile.getId() + ")");
-        repository.save(profile);
-    }
-
-    private void deleteProfile(ResearcherProfile profile) {
-        if (!repository.exists(profile)) {
-            throw new DoesNotExist("ResearcherProfile object with id " + profile.getId());
-        }
-        Logger.log("Delete ResearcherProfile (" + profile.getId() + ")");
-        repository.delete(profile);
-    }
-
-    private ResearcherProfile findProfile(Predicate<ResearcherProfile> query) {
-        return repository.find(query);
-    }
 }

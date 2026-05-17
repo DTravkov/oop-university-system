@@ -58,6 +58,7 @@ public class AppSettings {
     // general defautls
     public static final String DEFAULT_DATA_DIRECTORY = "data/";
     public static final int RECENT_LOG_HOURS = 12;
+    public static final Class<?> NOTIFICATION_BROADCAST_CLASS = User.class;
 
     //global validation rules
     public static boolean REQUIRE_PASSWORD_VALIDATION = false;

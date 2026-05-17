@@ -1,5 +1,6 @@
 package model.domain;
 
+import exceptions.OperationNotAllowed;
 import model.enumeration.TechRequestStatus;
 import utils.FieldValidator;
 
@@ -16,6 +17,9 @@ public class TechRequest extends SerializableModel {
         FieldValidator.requireNonNull(employee, "Employee");
         FieldValidator.requireNonNull(specialist, "Specialist");
         FieldValidator.requireNonBlank(content, "Content");
+        if(specialist.equals(employee)){
+            throw new OperationNotAllowed("sending tech requests to self");
+        }
         this.employee = employee;
         this.specialist = specialist;
         this.content = content;
@@ -28,6 +32,9 @@ public class TechRequest extends SerializableModel {
 
     public void setStatus(TechRequestStatus status) {
         FieldValidator.requireNonNull(status, "Status");
+        if(status.getStage() < getStatus().getStage() || status.equals(getStatus())){
+            throw new OperationNotAllowed("updating status to previous state");
+        }
         this.status = status;
     }
 
@@ -38,8 +45,6 @@ public class TechRequest extends SerializableModel {
     public TechSupportSpecialist getSpecialist() {
         return specialist;
     }
-
-
 
     public void setSpecialist(TechSupportSpecialist specialist) {
         FieldValidator.requireNonNull(specialist, "Specialist");
@@ -53,8 +58,8 @@ public class TechRequest extends SerializableModel {
 
     @Override
     public String asLine() {
-        return String.format("ID: %d | Status: %s | From: %s | To: %s",
-                id, status, employee.getFullname(), specialist.getFullname());
+        return String.format("ID: %d | Status: %s | From: %s | To: %s | Content: %s",
+                id, status, employee.getFullname(), specialist.getFullname(), content);
     }
 
     @Override

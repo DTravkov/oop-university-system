@@ -4,11 +4,15 @@ import java.util.List;
 import java.util.Random;
 
 import model.domain.Employee;
+import model.domain.Notification;
 import model.domain.TechRequest;
 import model.domain.TechSupportSpecialist;
 import model.domain.User;
+import model.enumeration.TechRequestStatus;
+import services.events.concrete.NotificationCreateEvent;
 import services.events.concrete.UserDeleteEvent;
 import utils.Comparators;
+import utils.Logger;
 
 /**
  * TechRequestService is a concrete service. It implements logic for IT support tickets: listing by employee or specialist,
@@ -23,6 +27,27 @@ public class TechRequestService extends GenericService<TechRequest>{
         this.userService = userService;
     }
 
+    // CREATE, READ, UPDATE
+
+    @Override
+    public TechRequest create(TechRequest request) {
+        eventSystem.publish(new NotificationCreateEvent(
+            new Notification("Your got a new technical request. Sender: " + request.getEmployee().getFullname(), request.getSpecialist())
+        ));
+        return repository.save(request);
+    }
+
+    
+    public void updateStatus(TechRequest request, TechRequestStatus status){
+        request.setStatus(status);
+        repository.save(request);
+        Logger.log(baseName + "status update. From" + request.getStatus().toString() + " to " + status.toString());
+        if(status == TechRequestStatus.DONE){
+            eventSystem.publish(new NotificationCreateEvent(
+                new Notification("Your techical request " + request.getId() +  " is done",request.getEmployee())
+            ));
+        }
+    }
     // QUERIES
 
     @Override

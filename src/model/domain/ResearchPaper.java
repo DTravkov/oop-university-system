@@ -5,6 +5,9 @@ import java.util.Date;
 import java.util.List;
 
 import exceptions.AlreadyExists;
+import exceptions.DoesNotExist;
+import exceptions.OperationNotAllowed;
+import utils.FieldValidator;
 
 public class ResearchPaper extends SerializableModel {
     private static final long serialVersionUID = 1L;
@@ -16,35 +19,29 @@ public class ResearchPaper extends SerializableModel {
     private List<ResearcherProfile> researchers = new ArrayList<>();
     private List<ResearchPaper> references = new ArrayList<>();
 
-    
-
     public ResearchPaper(String title) {
+        FieldValidator.requireNonBlank(title, "Paper title");
         this.title = title;
         this.views = 0;
         this.citations = 0;
         this.publishDate = new Date();
     }
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
+        FieldValidator.requireNonBlank(title, "Paper title");
         this.title = title;
     }
+
     public String getTitle() {
         return title;
     }
+
     public int getViews() {
         return views;
     }
 
-    public void setViews(int views) {
-        this.views = views;
-    }
-
     public int getCitations() {
         return citations;
-    }
-
-    public void setCitations(int citations) {
-        this.citations = citations;
     }
 
     public Date getPublishDate() {
@@ -52,42 +49,65 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void setPublishDate(Date publishDate) {
+        FieldValidator.requireNonNull(publishDate, "Publish date");
         this.publishDate = publishDate;
     }
 
     public List<ResearchPaper> getReferences() {
         return List.copyOf(references);
     }
-    
-    public void addReference(ResearchPaper paper) {
-        if (paper != null && !references.contains(paper)) {
-            references.add(paper);
+
+    public void addReference(ResearchPaper reference) {
+        FieldValidator.requireNonNull(reference, "Reference");
+        if (this.equals(reference)) {
+            throw new OperationNotAllowed("paper cannot reference itself");
         }
+        if (references.contains(reference)) {
+            throw new AlreadyExists("reference to paper id=" + reference.getId());
+        }
+        references.add(reference);
     }
 
     public List<ResearcherProfile> getResearchers() {
         return List.copyOf(researchers);
     }
 
-    public void addResearcher(ResearcherProfile researcher) {
-        if (getResearchers().stream().anyMatch(r -> r.equals(researcher))) {
-            throw new AlreadyExists("participant in paper id=" + getId());
-        }
+    public ResearcherProfile addResearcher(ResearcherProfile researcher) {
+        FieldValidator.requireNonNull(researcher, "Researcher");
+
         if (!researchers.contains(researcher)) {
             researchers.add(researcher);
         }
+        if (!researcher.getPapers().contains(this)) {
+            researcher.addPaper(this);
+        }
+
+        return researcher;
     }
 
     public void removeResearcher(ResearcherProfile researcher) {
-        if (researchers.contains(researcher)) {
+        FieldValidator.requireNonNull(researcher, "Researcher");
+        if(researchers.contains(researcher)){
             researchers.remove(researcher);
         }
+        if(researcher.getPapers().contains(this)){
+            researcher.removePaper(this);
+        }
+        
+    }
+
+    public void cite() {
+        citations++;
+    }
+
+    public void incrementViews() {
+        views++;
     }
 
     @Override
     public String asLine() {
-        return String.format("ID: %d | Title: %s | Views: %d | Citations: %d",
-                id, title, views, citations);
+        return String.format("ID: %d | Title: %s | Researchers: %s | Views: %d | Citations: %d",
+                id, title, researchers.size(), views, citations);
     }
 
     @Override

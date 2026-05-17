@@ -14,6 +14,11 @@ import settings.AppSettings;
 import utils.UIForms;
 import utils.UIText;
 
+/**
+ * Main menu for our application, each user will see this(or part of it)
+ * It adds custom menus for every user, 
+ * e.g Teacher will additionally have teacher-specific menus
+ */
 public class UniversityApplication extends BaseApp {
 
     static final UserService userService = services.userService;
@@ -24,7 +29,7 @@ public class UniversityApplication extends BaseApp {
 
         MenuBuilder menu = new MenuBuilder("University System v0.0001")
         
-        .addAction("My Profile", () -> println(getActiveUser().asTable()))
+        .addAction("My Profile", () -> println(user.asTable()))
         .addAction("Research Menu", () -> CommonMenus.getResearcherMenu().start())
         .addAction("News Menu", () -> CommonMenus.getNewsMenu().start())
         .addAction("Course Menu", () -> CommonMenus.getCourseMenu().start());
@@ -51,6 +56,8 @@ public class UniversityApplication extends BaseApp {
         if (user instanceof Teacher) {
             menu.addAction("Teacher Menu", () -> TeacherApp.getMenu().start());
         }
+
+        menu.addAction("Notifications", () -> CommonMenus.getNotificationMenu().start());
 
         menu.addExit();
 

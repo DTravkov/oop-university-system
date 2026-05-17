@@ -1,7 +1,12 @@
 package model.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import settings.AppSettings;
 import utils.FieldValidator;
@@ -18,7 +23,8 @@ public abstract class User extends SerializableModel{
     private boolean isBanned = false;
 	private boolean isDeleted = false;
 
-	private List<Notification> notifications = new ArrayList<>();
+	// boolean here to check if notification is read by user
+	private Map<Notification, Boolean> notifications = new HashMap<>(); 
 
 
 	public User(String login, String password, String name, String surname) {
@@ -42,12 +48,47 @@ public abstract class User extends SerializableModel{
 
 	public void addNotification(Notification notification){
 		FieldValidator.requireNonNull(notification, "Notification");
-		this.notifications.add(notification);
+		this.notifications.put(notification, false); 
 	}
 
 	public boolean removeNotification(Notification notification){
 		FieldValidator.requireNonNull(notification, "Notification");
-		return this.notifications.remove(notification);
+		Set<Entry<Notification, Boolean>> set = new HashSet<>();
+		for(var entry : notifications.entrySet()){
+			if(entry.getKey().equals(notification)){
+				set.add(entry);
+			}
+		}
+		set.forEach(entry -> notifications.remove(entry.getKey()));
+		return set.size() > 0;
+	}
+
+	public Map<Notification, Boolean> getNotifications(){
+		return Map.copyOf(notifications);
+	}
+
+	public List<Notification> getReadNotifications(){
+		List<Notification> readNotifications = new ArrayList<>();
+		notifications.entrySet().forEach(e -> {
+			if(e.getValue() == true)
+				readNotifications.add(e.getKey());
+		});
+		return List.copyOf(readNotifications);
+	}
+
+	public List<Notification> getUnreadNotifications(){
+		List<Notification> unreadNotifications = new ArrayList<>();
+		notifications.entrySet().forEach(e -> {
+			if(e.getValue() == false)
+				unreadNotifications.add(e.getKey());
+		});
+		return List.copyOf(unreadNotifications);
+	}
+
+	public void markNotificationsRead(){
+		for(var entry : notifications.entrySet()){
+			entry.setValue(true);
+		}
 	}
 
 	public String getLogin() {

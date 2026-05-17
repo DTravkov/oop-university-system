@@ -2,11 +2,15 @@ package application.apps;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import model.domain.Comment;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.News;
+import model.domain.Notification;
 import model.domain.ResearchPaper;
 import model.domain.ResearcherProfile;
 import model.domain.Student;
@@ -15,6 +19,7 @@ import model.domain.User;
 import services.CourseService;
 import services.EnrollmentService;
 import services.NewsService;
+import services.NotificationService;
 import services.ResearchService;
 import services.UserService;
 import utils.Comparators;
@@ -28,14 +33,13 @@ public class CommonMenus extends BaseApp {
     static final EnrollmentService enrollmentService = services.enrollmentService;
     static final NewsService newsService = services.newsService;
     static final ResearchService researchService = services.researchService;
-
+    static final NotificationService notificationService = services.notificationService;
 
     static MenuBuilder getResearcherMenu() {
         User activeUser = getActiveUser();
         MenuBuilder menu = new MenuBuilder("Research Menu");
-        menu.addAction("View all researchers", () -> printAllResearchers());
-        menu.addAction("View researcher papers", () -> printResearcherPapers());
-        menu.addAction("View all papers", () -> getPaperMenu().start());
+        menu.addAction("View all researchers", () -> getAllReseracherViewMenu().start());
+        menu.addAction("Paper Menu", () -> getPaperMenu().start());
         if(!researchService.isResearcher(activeUser)){
             menu.addAction("Become researcher", () -> {
                 becomeResearcher();
@@ -61,12 +65,52 @@ public class CommonMenus extends BaseApp {
         return menu;
     }
 
+    private static MenuBuilder getAllReseracherViewMenu(){
+        MenuBuilder menu = new MenuBuilder("Researchers");
+        for(ResearcherProfile profile : researchService.getAllProfiles()){
+            menu.addAction("[" +profile.asLine() +"]", () -> openResearcher(profile));
+        }
+        menu.addAction("Back", () -> menu.stop());
+        return menu;
+    }
+
+    public static MenuBuilder getNotificationMenu(){
+        User user = getActiveUser();
+
+        List<Notification> readNotifications = user.getReadNotifications();
+        List<Notification> unreadNotifications = user.getUnreadNotifications();
+
+        MenuBuilder menu = new MenuBuilder("Notifications " + "("+unreadNotifications.size()+")");
+        //reads notification and prints each unread with "!" at the start
+        readNotifications.forEach(n -> menu.addLabel(n.asLine()));
+        unreadNotifications.forEach(n -> menu.addLabel("!!!" + n.asLine()));
+
+        if(readNotifications.size() + unreadNotifications.size() == 0){
+            menu.addLabel("You have no notifications");
+        }
+
+        menu.addAction("Mark all read", () -> {
+            notificationService.markNotificationsRead(user);
+            userService.update(user);
+            menu.stop();
+            getNotificationMenu().start();
+        });
+
+        menu.addExit();
+        return menu;
+    }
+
+    public static void printUserNotifications(){
+        User user = getActiveUser();
+        Map<Notification, Boolean> userNotifications = user.getNotifications();
+        userNotifications.entrySet().forEach(entry -> println(entry.getKey().asLine()));
+    }
 
 
     
 
     private static void printAllResearchers() {
-        List<ResearcherProfile> profiles = researchService.getAll();
+        List<ResearcherProfile> profiles = researchService.getAllProfiles();
         if(profiles.isEmpty()){
             println("No researchers");
             return;
@@ -80,8 +124,12 @@ public class CommonMenus extends BaseApp {
         printSuccess("You are now a researcher.");
     }
 
+    private static void openResearcher(ResearcherProfile profile){
+        println("\n" + profile.asTable());
+    }
+
     private static void printResearcherPapers() {
-        List<ResearcherProfile> profiles = researchService.getAll();
+        List<ResearcherProfile> profiles = researchService.getAllProfiles();
         if(profiles.isEmpty()){
             println("No researchers");
             return;
@@ -89,7 +137,7 @@ public class CommonMenus extends BaseApp {
         printHeader("Researchers");
         profiles.forEach(p -> println(p.asLine()));
         ResearcherProfile profile = UIForms.readIdFromList(scanner, UIText.INPUT_RESEARCH_PROFILE_USER_ID, profiles);
-        List<ResearchPaper> papers = researchService.getPapersByAuthor(profile.getUser());
+        List<ResearchPaper> papers = researchService.getAllPapers(p -> p.getResearchers().contains(profile));
         if(papers.isEmpty()){
             printFail(profile.getUser().getFullname() + " has no papers.");
             return;
@@ -140,6 +188,9 @@ public class CommonMenus extends BaseApp {
 
     private static MenuBuilder getManagePapersMenu() {
         MenuBuilder menu = new MenuBuilder("Manage Papers");
+        menu.addAction("View all my papers", () -> {
+            researchService.getAllPapers(getActiveUser()).forEach(p -> println(p.asLine()));
+        });
         menu.addAction("Create paper", () -> createPaper());
         menu.addAction("Delete paper", () -> deletePaper());
         menu.addAction("Add participant", () -> addPaperParticipant());
@@ -150,13 +201,15 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void createPaper() {
+        ResearcherProfile profile = researchService.getProfile(getActiveUser());
         String title = UIForms.readNonEmpty(scanner, UIText.INPUT_PAPER_TITLE);
-        ResearchPaper paper = researchService.createPaper(getActiveUser(), title);
+        ResearchPaper paper = researchService.createPaper(new ResearchPaper(title));
+        researchService.addParticipant(paper, profile);
         printSuccess("Paper \"" + paper.getTitle() + "\" created.");
     }
 
     private static void deletePaper() {
-        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        List<ResearchPaper> myPapers = researchService.getAllPapers(getActiveUser());
         if(myPapers.isEmpty()){
             printFail("You have no papers.");
             return;
@@ -169,7 +222,7 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void addPaperParticipant() {
-        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        List<ResearchPaper> myPapers = researchService.getAllPapers(getActiveUser());
         if(myPapers.isEmpty()){
             printFail("You have no papers.");
             return;
@@ -178,7 +231,7 @@ public class CommonMenus extends BaseApp {
         myPapers.forEach(p -> println(p.asLine()));
         ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
 
-        List<ResearcherProfile> candidates = researchService.getAll().stream()
+        List<ResearcherProfile> candidates = researchService.getAllProfiles().stream()
                 .filter(rp -> paper.getResearchers().stream().noneMatch(r -> r.getId() == rp.getId()))
                 .toList();
         if(candidates.isEmpty()){
@@ -193,8 +246,8 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void removePaperParticipant() {
-        ResearcherProfile myProfile = researchService.getProfileByUser(getActiveUser());
-        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        ResearcherProfile myProfile = researchService.getProfile(getActiveUser());
+        List<ResearchPaper> myPapers = researchService.getAllPapers(getActiveUser());
         if(myPapers.isEmpty()){
             printFail("You have no papers.");
             return;
@@ -204,7 +257,7 @@ public class CommonMenus extends BaseApp {
         ResearchPaper paper = UIForms.readIdFromList(scanner, UIText.INPUT_PAPER_ID, myPapers);
 
         List<ResearcherProfile> participants = paper.getResearchers().stream()
-                .filter(rp -> rp.getId() != myProfile.getId())
+                .filter(p -> !p.equals(myProfile))
                 .toList();
         if(participants.isEmpty()){
             printFail("No other participants to remove.");
@@ -218,7 +271,8 @@ public class CommonMenus extends BaseApp {
     }
 
     private static void addPaperReference() {
-        List<ResearchPaper> myPapers = researchService.getPapersByAuthor(getActiveUser());
+        ResearcherProfile profile = researchService.getProfile(getActiveUser());
+        List<ResearchPaper> myPapers = researchService.getAllPapers(p -> p.getResearchers().contains(profile));
         if(myPapers.isEmpty()){
             printFail("You have no papers.");
             return;
@@ -250,7 +304,7 @@ public class CommonMenus extends BaseApp {
             menu.addLabel("No news");
         }else{
             for(News n : news){
-                menu.addAction(n.asLine(), () -> openNews(n));
+                menu.addAction("["+n.getTitle()+"]", () -> openNews(n));
             }
         }
         menu.addAction("Back", () -> menu.stop());
@@ -279,9 +333,12 @@ public class CommonMenus extends BaseApp {
 
     static MenuBuilder getCourseMenu() {
         User activeUser = getActiveUser();
+        List<Course> courses = courseService.getAll();
+
         MenuBuilder menu = new MenuBuilder("Course Menu");
-        menu.addAction("View all courses", () -> printAllCourses());
-        menu.addAction("View all teachers", () -> printAllTeachersForCourseMenu());
+        for(var course : courses){
+            menu.addAction("[" +course.getName() + "]", () -> println(course.asTable()));
+        }
         if (activeUser instanceof Student) {
             menu.addAction("Enroll to a course", () -> enrollStudentInCourse((Student) activeUser));
         }
@@ -317,11 +374,6 @@ public class CommonMenus extends BaseApp {
 
             List<Teacher> lectures = course.getLectureTeachers();
             List<Teacher> practices = course.getPracticeTeachers();
-
-            if (lectures.isEmpty() || practices.isEmpty()) {
-                printFail("This course must have at least one lecture teacher and one practice teacher before you can enroll.");
-                return;
-            }
 
             println("Choose your lecture teacher:");
             lectures.forEach(l -> println(l.asLine()));

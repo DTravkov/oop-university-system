@@ -10,9 +10,9 @@ import services.events.interfaces.Event;
 import utils.FieldValidator;
 
 /**
- * My favourite pattern)
  * Used by services to react to events, e.g Employee deletion leads to clean up of his messenger data.
- * It was insired by Express.js event system, global in every service.
+ * It was insired by Express.js event system, and is global in every service.
+ * My favourite pattern :3
  */
 
 public class EventSystem {

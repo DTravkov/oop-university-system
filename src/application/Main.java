@@ -20,10 +20,14 @@ public class Main{
 
         UniversityApplication.authenticate();
 
+        //MockDataFactory.seedDemo();
+        
         if(UniversityApplication.isAuthenticated())
             UniversityApplication.start();
 
         UniversityApplication.kill();
+
+
 
     }
 

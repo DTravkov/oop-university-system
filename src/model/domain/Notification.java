@@ -2,6 +2,7 @@ package model.domain;
 
 import java.util.Date;
 
+import settings.AppSettings;
 import utils.StringUtils;
 
 public class Notification extends SerializableModel {
@@ -9,7 +10,7 @@ public class Notification extends SerializableModel {
     private final String content;
     private final Date sentDate;
     private User receiver = null;
-    private Class<? extends User> multicastGroupClass = null;
+    private Class<? extends User> multicastClass = null;
 
     public Notification(String content, User receiver){
         this.content = content;
@@ -17,10 +18,10 @@ public class Notification extends SerializableModel {
         this.receiver = receiver;
     }
 
-    public Notification(String content, Class<? extends User> multicastGroupClass){
+    public Notification(String content, Class<? extends User> multicastClass){
         this.content = content;
         this.sentDate = new Date();
-        this.multicastGroupClass = multicastGroupClass;
+        this.multicastClass = multicastClass;
     }
 
     public String getContent() {
@@ -35,8 +36,8 @@ public class Notification extends SerializableModel {
         return receiver;
     }
 
-    public Class<? extends User> getMulticastGroupClass() {
-        return multicastGroupClass;
+    public Class<? extends User> getMulticastClass() {
+        return multicastClass;
     }
 
     public boolean isUnicast() {
@@ -44,8 +45,9 @@ public class Notification extends SerializableModel {
     }
 
     public boolean isMulticast() {
-        return multicastGroupClass != null;
+        return multicastClass != null;
     }
+
 
     @Override
     public String asLine(){

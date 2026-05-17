@@ -24,8 +24,13 @@ public final class EmployeeApp extends BaseApp {
 
     public static MenuBuilder getMessengerMenu() {
         Employee employee = (Employee) getActiveUser();
+
         MenuBuilder menu = new MenuBuilder("Messenger");
-        menu.addAction("Start new chat", () -> startChat());
+        menu.addAction("Start new chat", () -> {
+            startChat();
+            menu.stop();
+            getMessengerMenu().start();
+        });
         for (Chat chat : messageService.getChatsByMember(employee)) {
             menu.addAction(chat.getTitleFor(employee), () -> openChat(chat));
         }
