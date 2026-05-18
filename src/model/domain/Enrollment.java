@@ -52,6 +52,7 @@ public class Enrollment extends SerializableModel {
     }
 
     public boolean isTeaching(Teacher teacher) {
+        if(teacher == null) return false;
         return this.lectureTeacher.equals(teacher)
                 || this.practiceTeacher.equals(teacher);
     }

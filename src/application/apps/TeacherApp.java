@@ -135,11 +135,15 @@ public final class TeacherApp extends BaseApp {
 
     private static void becomeSupervisor(){
         Teacher teacher = (Teacher) getActiveUser();
+
         List<GraduateStudent> graduates = userService.getUsersByClass(GraduateStudent.class);
+        graduates = graduates.stream().filter(g -> g.getSupervisor() == null).toList();
+
         if(graduates.isEmpty()){
             println(UIText.MSG_NO_GRADUATE_STUDENTS);
             return;
         }
+        
         graduates.forEach(gs -> println(gs.asLine()));
         GraduateStudent graduate = UIForms.readIdFromList(scanner, UIText.INPUT_STUDENT_ID, graduates);
         teacherService.becomeSupervisor(graduate, teacher);

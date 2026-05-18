@@ -30,11 +30,6 @@ public class UniversityApplication extends BaseApp {
 
         User user = getActiveUser();
 
-        //banned or self deleted
-        if(!user.isAvailable()){
-            throw new UserBannedOrDeleted();
-        }
-
         MenuBuilder menu = new MenuBuilder(UIText.MENU_TITLE_UNIVERSITY)
         
         .addAction(UIText.MENU_MY_PROFILE, () -> println(user.asTable()))

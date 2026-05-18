@@ -21,7 +21,7 @@ public class StudentApp extends BaseApp {
     static final EnrollmentService enrollmentService = services.enrollmentService;
     static final StudentOrganizationService organizationService = services.studentOrganizationService;
     static final TeacherService teacherService = services.teacherService;
-    
+
     public StudentApp() {
         super();
     }
@@ -73,6 +73,9 @@ public class StudentApp extends BaseApp {
     private static void printSupervisor(){
         GraduateStudent graduate = (GraduateStudent) getActiveUser();
         Teacher supervisor = graduate.getSupervisor();
+        if(supervisor == null){
+            return;
+        }
         println(supervisor.asLine());
     }
 

@@ -30,6 +30,10 @@ public class NewsService extends GenericService<News>{
         repository.delete(news);
     }
 
+    /**
+     * this method must not be used. it doesnt check that manager owns news.
+     * instead, use other override
+     */
     @Override
     public void delete(News news) {
         throw new OperationNotAllowed(UIText.ERR_NEWS_DELETE_METHOD);
