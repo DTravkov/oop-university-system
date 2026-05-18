@@ -12,8 +12,8 @@ public class Comment extends SerializableModel {
     private final Date sentDate;
 
     public Comment(User sender, String content) {
-        FieldValidator.requireNonNull(sender, "Sender");
-        FieldValidator.requireNonBlank(content, "Content");
+        FieldValidator.requireNonNull(sender);
+        FieldValidator.requireNonBlank(content);
         this.sender = sender;
         this.content = content;
         this.sentDate = new Date();
@@ -33,8 +33,7 @@ public class Comment extends SerializableModel {
 
     @Override
     public String asLine() {
-        String preview = content.length() > 36 ? content.substring(0, 33) + "..." : content;
-        return String.format(" %s | %s", sender.getFullname(), preview);
+        return String.format(" %s | %s", sender.getFullname(), getContent());
     }
 
     @Override

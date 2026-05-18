@@ -13,9 +13,9 @@ import model.domain.User;
 import model.repository.Repository;
 import services.events.concrete.NotificationCreateEvent;
 import services.events.concrete.UserCreateEvent;
-import services.events.concrete.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * ResearchService is a concrete service. It implements logic for researcher profiles and research papers (two repositories),
@@ -37,13 +37,13 @@ public class ResearchService extends BaseService<SerializableModel> {
     // RESEARCHERS
     public ResearcherProfile createProfile(User user) {
         if (isResearcher(user)) {
-            throw new AlreadyExists("researcher profile for user id=" + user.getId());
+            throw new AlreadyExists("A researcher profile already exists for this user.");
         }
 
         ResearcherProfile profile = profileRepository.save(new ResearcherProfile(user));
 
         this.eventSystem.publish(new NotificationCreateEvent(
-            new Notification("You are now a researcher.", user)
+            new Notification(UIText.NOTIFY_RESEARCHER_PROFILE, user)
         ));
         return profile;
     }
@@ -71,7 +71,7 @@ public class ResearchService extends BaseService<SerializableModel> {
         paperRepository.save(paper);
         profileRepository.save(profile);
         this.eventSystem.publish(new NotificationCreateEvent(
-            new Notification("You have been added as a researcher to paper with id: " + paper.getId(), profile.getUser())
+            new Notification(UIText.NOTIFY_PAPER_PARTICIPANT, profile.getUser())
         ));
     }
 
@@ -105,7 +105,7 @@ public class ResearchService extends BaseService<SerializableModel> {
     public ResearcherProfile getProfile(User user) {
         ResearcherProfile match = profileRepository.find(p -> p.getUser().equals(user));
         if (match == null) {
-            throw new DoesNotExist("researcher profile for user id=" + user.getId());
+            throw new DoesNotExist("No researcher profile exists for this user.");
         }
         return match;
     }

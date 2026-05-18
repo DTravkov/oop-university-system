@@ -60,19 +60,19 @@ public class Mark implements Serializable {
 
     private void addToFirst(double delta) {
         double next = firstAttestationPoint + delta;
-        FieldValidator.requireInRange(next, 0, 30, "First attestation point");
+        FieldValidator.requireInRange(next, 0, 30);
         this.firstAttestationPoint = next;
     }
 
     private void addToSecond(double delta) {
         double next = secondAttestationPoint + delta;
-        FieldValidator.requireInRange(next, 0, 30, "Second attestation point");
+        FieldValidator.requireInRange(next, 0, 30);
         this.secondAttestationPoint = next;
     }
 
     private void addToFinal(double delta) {
         double next = finalExamPoint + delta;
-        FieldValidator.requireInRange(next, 0, 40, "Final exam point");
+        FieldValidator.requireInRange(next, 0, 40);
         this.finalExamPoint = next;
     }
 

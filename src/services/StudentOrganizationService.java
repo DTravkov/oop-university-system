@@ -3,11 +3,14 @@ package services;
 
 import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
+import model.domain.Notification;
 import model.domain.Student;
 import model.domain.StudentOrganization;
 import model.domain.User;
+import services.events.concrete.NotificationCreateEvent;
 import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * StudentOrganizationService is a concrete service. It implements logic for student clubs: president and members,
@@ -25,23 +28,33 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
     @Override
     public StudentOrganization create(StudentOrganization org){
         if(isPresident(org.getPresident()) || isMember(org.getPresident())){
-            throw new AlreadyExists("nominated person's presidentship/membership in other organization");
+            throw new AlreadyExists("The nominated person already leads or belongs to another organization.");
         }
-        return super.create(org);
+        org = super.create(org);
+        eventSystem.publish(new NotificationCreateEvent(
+            new Notification(UIText.NOTIFY_ORG_PRESIDENT, org.getPresident())
+        ));
+        return org;
     }
 
     public void makePresident(StudentOrganization org, Student student){
         if(isPresident(student)){
-            throw new AlreadyExists("student presidentship in other organization");
+            throw new AlreadyExists("This student already leads another organization.");
         }
-        Logger.log("Make student (" + student.getId() + ") a president of (" + org.getId() + ")");
         org.setPresident(student);
         update(org);
+        Logger.log("Make student (" + student.getId() + ") a president of (" + org.getId() + ")");
+        eventSystem.publish(new NotificationCreateEvent(
+            new Notification(UIText.NOTIFY_ORG_PRESIDENT, org.getPresident())
+        ));
+        eventSystem.publish(new NotificationCreateEvent(
+            new Notification(UIText.NOTIFY_ORG_NEW_PRESIDENT, org.getMembers())
+        ));
     }
 
     public void addMember(StudentOrganization org, Student student){
         if(isMember(student)){
-            throw new AlreadyExists("student membership in other organization");
+            throw new AlreadyExists("This student already belongs to another organization.");
         }
         org.addMember(student);
         Logger.log("Add member (" + student.asLine() + ") to organization (" + org.getId() + ")");
@@ -50,7 +63,7 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public void removeMember(StudentOrganization org, Student student){
         if(!org.removeMember(student)){
-            throw new DoesNotExist("student membership in " + org.getName());
+            throw new DoesNotExist("This student is not a member of " + org.getName() + ".");
         }
         Logger.log("Remove member (" + student.asLine() + ") from organization (" + org.getId() + ")");
         update(org);
@@ -62,13 +75,13 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public StudentOrganization getOrganizationByMember(Student member){
         StudentOrganization match = find(org -> org.getMembers().contains(member));
-        if(match == null) throw new DoesNotExist("membership in any organization for student");
+        if(match == null) throw new DoesNotExist("This student is not a member of any organization.");
         return match;
     }
 
     public StudentOrganization getOrganizationByPresident(Student president){
         StudentOrganization match = find(org -> org.getPresident().equals(president));
-        if(match == null) throw new DoesNotExist("presidentship in any organization for student");
+        if(match == null) throw new DoesNotExist("This student is not a president of any organization.");
         return match;
     }
 

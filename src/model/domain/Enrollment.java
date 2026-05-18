@@ -21,11 +21,11 @@ public class Enrollment extends SerializableModel {
     private Teacher practiceTeacher;
 
     public Enrollment(Course course, Student student, Teacher lectureTeacher, Teacher practiceTeacher) {
-        FieldValidator.requireNonNull(course, "Course");
-        FieldValidator.requireNonNull(student, "Student");
+        FieldValidator.requireNonNull(course);
+        FieldValidator.requireNonNull(student);
         this.course = course;
         if (course.getLectureTeachers().isEmpty() || course.getPracticeTeachers().isEmpty()) {
-            throw new DoesNotExist("At least one lecture teacher and one practice teacher on this course");
+            throw new DoesNotExist("This course must have at least one lecture teacher and one practice teacher.");
         }
         this.student = student;
         this.enrollmentDate = new Date();
@@ -51,8 +51,8 @@ public class Enrollment extends SerializableModel {
     }
 
     public boolean isTeaching(Teacher teacher) {
-        return this.lectureTeacher.getId() == teacher.getId()
-                || this.practiceTeacher.getId() == teacher.getId();
+        return this.lectureTeacher.equals(teacher)
+                || this.practiceTeacher.equals(teacher);
     }
 
     public Course getCourse() {
@@ -89,7 +89,7 @@ public class Enrollment extends SerializableModel {
 
     public void incrementMark(double point, Teacher teacher, AttestationType attestationType) {
         if (!isTeaching(teacher)) {
-            throw new OperationNotAllowed("putting marks for other teacher students");
+            throw new OperationNotAllowed("You cannot grade students assigned to another teacher.");
         }
         mark.addPoints(attestationType, point);
     }

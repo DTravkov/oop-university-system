@@ -21,19 +21,26 @@ public abstract class User extends SerializableModel{
     private String name;
     private String surname;
     private boolean isBanned = false;
+
+	/**
+	 * soft delete flag for user. it is used instead of DB deletion,
+	 * so that we can restore any of deleted user data.
+	 */
 	private boolean isDeleted = false;
 
-	// boolean here to check if notification is read by user
+	/**
+	 * map of notifications to boolean, boolean whether notification is read/unread.
+	 */
 	private Map<Notification, Boolean> notifications = new HashMap<>(); 
 
 
 	public User(String login, String password, String name, String surname) {
-    	FieldValidator.requireNonBlank(login, "Login");
-    	FieldValidator.requireNonBlank(password, "Password");
-    	FieldValidator.requireNonBlank(name, "Name");
-    	FieldValidator.requireNonBlank(surname, "Surname");
-		FieldValidator.requireSingleWord(name, "Name");
-		FieldValidator.requireSingleWord(surname, "Surname");
+    	FieldValidator.requireNonBlank(login);
+    	FieldValidator.requireNonBlank(password);
+    	FieldValidator.requireNonBlank(name);
+    	FieldValidator.requireNonBlank(surname);
+		FieldValidator.requireSingleWord(name);
+		FieldValidator.requireSingleWord(surname);
 		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && !AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
 			FieldValidator.requirePasswordValidation(password);
 		
@@ -47,12 +54,12 @@ public abstract class User extends SerializableModel{
 
 
 	public void addNotification(Notification notification){
-		FieldValidator.requireNonNull(notification, "Notification");
+		FieldValidator.requireNonNull(notification);
 		this.notifications.put(notification, false); 
 	}
 
 	public boolean removeNotification(Notification notification){
-		FieldValidator.requireNonNull(notification, "Notification");
+		FieldValidator.requireNonNull(notification);
 		Set<Entry<Notification, Boolean>> set = new HashSet<>();
 		for(var entry : notifications.entrySet()){
 			if(entry.getKey().equals(notification)){
@@ -96,8 +103,8 @@ public abstract class User extends SerializableModel{
 	}
 
 	public void setLogin(String login) {
-		FieldValidator.requireNonBlank(login, "Login");
-		FieldValidator.requireSingleWord(login, "Login");
+		FieldValidator.requireNonBlank(login);
+		FieldValidator.requireSingleWord(login);
 		this.login = login;
 	}
 
@@ -106,8 +113,8 @@ public abstract class User extends SerializableModel{
 	}
 
 	public void setPassword(String password) {
-		FieldValidator.requireNonBlank(password, "Password");
-		FieldValidator.requireSingleWord(password, "Password");
+		FieldValidator.requireNonBlank(password);
+		FieldValidator.requireSingleWord(password);
 		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
 			FieldValidator.requirePasswordValidation(password);
         
@@ -120,8 +127,8 @@ public abstract class User extends SerializableModel{
 	}
 
 	public void setName(String name) {
-		FieldValidator.requireNonBlank(name, "Name");
-		FieldValidator.requireSingleWord(name, "Name");
+		FieldValidator.requireNonBlank(name);
+		FieldValidator.requireSingleWord(name);
 		this.name = StringUtils.capitalize(name);
 	}
 
@@ -130,8 +137,8 @@ public abstract class User extends SerializableModel{
 	}
 
 	public void setSurname(String surname) {
-		FieldValidator.requireNonBlank(surname, "Surname");
-		FieldValidator.requireSingleWord(surname, "Surname");
+		FieldValidator.requireNonBlank(surname);
+		FieldValidator.requireSingleWord(surname);
 		this.surname = surname;
 	}
 
@@ -193,7 +200,11 @@ public abstract class User extends SerializableModel{
 		return sb.toString();
 	}
 
-
+	/**
+	 * this equals override is interesting. it allows checking users by id+subclass.
+	 * so now, each user is compared as account in database, not plain java class
+	 * interesting fact: previous versions of our project were comparing each class by .getId() == .getId(), real nightmare.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;

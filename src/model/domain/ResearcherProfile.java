@@ -13,7 +13,7 @@ public class ResearcherProfile extends SerializableModel {
     private List<ResearchPaper> papers = new ArrayList<>();
 
     public ResearcherProfile(User user) {
-        FieldValidator.requireNonNull(user, "User");
+        FieldValidator.requireNonNull(user);
         this.user = user;
     }
 
@@ -22,7 +22,7 @@ public class ResearcherProfile extends SerializableModel {
     }
 
     public void setUser(User user) {
-        FieldValidator.requireNonNull(user, "User");
+        FieldValidator.requireNonNull(user);
         this.user = user;
     }
 

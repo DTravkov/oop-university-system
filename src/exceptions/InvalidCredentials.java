@@ -9,8 +9,4 @@ public class InvalidCredentials extends ApplicationException {
     public InvalidCredentials() {
         super(UIText.ERR_INVALID_CREDENTIALS);
     }
-
-    public InvalidCredentials(Object... args) {
-        super(UIText.ERR_INVALID_CREDENTIALS, args);
-    }
 }

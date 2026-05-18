@@ -15,6 +15,7 @@ import services.events.concrete.UserCreateEvent;
 import services.events.concrete.UserDeleteEvent;
 import settings.AppSettings;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * UserService is a concrete service. It implements logic for user accounts: registration rules, login, ban, lookup by login or role,
@@ -28,19 +29,19 @@ public class UserService extends GenericService<User> {
     }
 
     {
-        // Register system basic users (anonymous, deleted, default adming etc).
+        // Register system basic users (anonymous, default admin etc).
         for (User user : AppSettings.DEFAULT_SYSTEM_USERS) {
             if(!existsByLogin(user.getLogin()))
                 repository.save(user);
         }
     }
 
-    // CREATE / UPDATE / DELETE (AND RELATED COMMANDS)
+    // CREATE / UPDATE / DELETE
 
     @Override
     public User create(User user) {
         if(existsByLogin(user.getLogin())){
-            throw new AlreadyExists("User with login=" + user.getLogin());
+            throw new AlreadyExists(UIText.ERR_USER_LOGIN);
         }
         User savedUser = super.create(user);
         this.eventSystem.publish(new UserCreateEvent(savedUser));
@@ -50,18 +51,36 @@ public class UserService extends GenericService<User> {
 
     @Override
     public void delete(User user) {
+        if(AppSettings.DEFAULT_SYSTEM_LOGINS.contains(user.getLogin())){
+            throw new OperationNotAllowed(UIText.ERR_DELETE_SYSTEM_USER);
+        }
         user.markAsDeleted();
         repository.save(user);
         eventSystem.publish(new UserDeleteEvent(user));
     }
 
+    /**
+     * has additional admin paramter to check that admin is not trying to delete himself
+     * @param user
+     * @param admin
+     * @return
+     */
     public User ban(User user, Admin admin) {
+        if(AppSettings.DEFAULT_SYSTEM_LOGINS.contains(user.getLogin())){
+            throw new OperationNotAllowed(UIText.ERR_BAN_SYSTEM_USER);
+        }
         if(user.equals(admin)){
-            throw new OperationNotAllowed("banning yourself");
+            throw new OperationNotAllowed(UIText.ERR_BAN_SELF);
         }
         user.setBanned(true);
-        update(user);
+        repository.save(user);
         Logger.log("Ban " + baseName + "(" + user.getId() + ")");
+        return user;
+    }
+    public User unban(User user) {
+        user.setBanned(false);
+        repository.save(user);
+        Logger.log("Unban " + baseName + "(" + user.getId() + ")");
         return user;
     }
 
@@ -69,10 +88,10 @@ public class UserService extends GenericService<User> {
         User user = getUserByLogin(login);
 
         if(user.isBanned() || user.isDeleted()){
-            throw new UserBannedOrDeleted(); // exception
+            throw new UserBannedOrDeleted();
         }
         if (!user.getPassword().equals(password)) {
-            throw new InvalidCredentials(); // exception
+            throw new InvalidCredentials();
         }
 
         AppSettings.setActiveUser(user);
@@ -104,7 +123,7 @@ public class UserService extends GenericService<User> {
                 return user;
             }
         }
-        throw new DoesNotExist(baseName + " with login=" + login);
+        throw new DoesNotExist("User with login '" + login + "' does not exist.");
     }
 
     public boolean existsByLogin(String login){

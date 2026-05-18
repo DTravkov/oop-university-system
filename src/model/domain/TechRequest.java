@@ -14,11 +14,11 @@ public class TechRequest extends SerializableModel {
     private String content;
 
     public TechRequest(Employee employee, TechSupportSpecialist specialist, String content) {
-        FieldValidator.requireNonNull(employee, "Employee");
-        FieldValidator.requireNonNull(specialist, "Specialist");
-        FieldValidator.requireNonBlank(content, "Content");
+        FieldValidator.requireNonNull(employee);
+        FieldValidator.requireNonNull(specialist);
+        FieldValidator.requireNonBlank(content);
         if(specialist.equals(employee)){
-            throw new OperationNotAllowed("sending tech requests to self");
+            throw new OperationNotAllowed("You cannot send a tech request to yourself.");
         }
         this.employee = employee;
         this.specialist = specialist;
@@ -31,9 +31,9 @@ public class TechRequest extends SerializableModel {
     }
 
     public void setStatus(TechRequestStatus status) {
-        FieldValidator.requireNonNull(status, "Status");
+        FieldValidator.requireNonNull(status);
         if(status.getStage() < getStatus().getStage() || status.equals(getStatus())){
-            throw new OperationNotAllowed("updating status to previous state");
+            throw new OperationNotAllowed("Tech request status is already set to this value.");
         }
         this.status = status;
     }
@@ -47,7 +47,7 @@ public class TechRequest extends SerializableModel {
     }
 
     public void setSpecialist(TechSupportSpecialist specialist) {
-        FieldValidator.requireNonNull(specialist, "Specialist");
+        FieldValidator.requireNonNull(specialist);
         this.specialist = specialist;
     }
 

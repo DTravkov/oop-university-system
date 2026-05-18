@@ -18,12 +18,16 @@ public class NotificationService extends BaseService<Notification> {
         super(Notification.class);
         this.userService = userService;
     }
-
+    /**
+     * wrapper for any notification, helps to send it based on its type (multicast or unicast).
+     * this method is called each time {@link NotificationCreateEvent} is published to {@link EventSystem}
+     * @param notification
+     */
     public void sendNotification(Notification notification){
-        if(notification.isMulticast()){
-            multicast(notification);
-        }else if(notification.isUnicast()){
+        if (notification.isUnicast()) {
             unicast(notification);
+        } else if (notification.isMulticast()) {
+            multicast(notification);
         }
     }
 
@@ -33,18 +37,25 @@ public class NotificationService extends BaseService<Notification> {
     }
 
     /**
-     * this function sends a notification to all users who extend receiverClass of the Notification. 
-     * To both receiverClass and its subclassess, actually)
-     * Multicast can also be broadcast, if Notification.receiverClass == User.class.
+     * this function sends a notification to all users who extend {@link Notification.multicastClass} OR listed in {@link Notification.receivers}.
+     * {@link Notification.multicastClass} also sends notification to its subclasses.
+     * Multicast can also be broadcast, if {@link Notification.multicastClass} == User.class.
      * @param notification
      */
     private void multicast(Notification notification){
+        // create notification record in database
         repository.save(notification);
 
-        getMulticastReceivers(notification)
-            .forEach(u -> u.addNotification(notification));
+        if(!notification.getReceivers().isEmpty()){
+            notification.getReceivers()
+                .forEach(u -> u.addNotification(notification));
+        }
+        else if(notification.getMulticastClass() != null){
+            getMulticastReceivers(notification)
+                .forEach(u -> u.addNotification(notification));
+        }
 
-        //saveAll also saves other models, users in this case
+        //saveAll saves all models in whole system
         repository.saveAll();
     }
 
@@ -53,9 +64,8 @@ public class NotificationService extends BaseService<Notification> {
      * @param notification
      */
     private void unicast(Notification notification){
-        User receiver = userService.get(notification.getReceiver());
         repository.save(notification);
-        receiver.addNotification(notification);
+        notification.getReceiver().addNotification(notification);
         repository.saveAll();
     }
 
@@ -72,12 +82,14 @@ public class NotificationService extends BaseService<Notification> {
                 receiver.removeNotification(notification);
             }
         }else if(notification.isMulticast()){
-            List<User> receiverList = getMulticastReceivers(notification);
-            receiverList.forEach(r -> {
-                if(r != null){
-                    r.removeNotification(notification);
-                }
-            });
+            if(notification.getMulticastClass() != null){
+                List<User> receiverList = getMulticastReceivers(notification);
+                receiverList.forEach(r -> r.removeNotification(notification));
+            }
+            else if(!notification.getReceivers().isEmpty()){
+                List<User> receivers = notification.getReceivers();
+                receivers.forEach(r -> r.removeNotification(notification));
+            }
         }
         repository.delete(notification);
         repository.saveAll();
@@ -96,16 +108,23 @@ public class NotificationService extends BaseService<Notification> {
     protected void subscribeToEvents() {
         eventSystem.subscribe(NotificationCreateEvent.class, 
             (event) -> onNotificationCreate(event.getNotification()));
-            eventSystem.subscribe(NotificationDeleteEvent.class, 
-                (event) -> onNotificationDelete(event.getNotification()));
-    }
 
+        eventSystem.subscribe(NotificationDeleteEvent.class, 
+            (event) -> onNotificationDelete(event.getNotification()));
+    }
+    
     private void onNotificationCreate(Notification notification){
-        sendNotification(notification);
+        if(notification != null){
+            sendNotification(notification);
+        }
+        
     }
 
     private void onNotificationDelete(Notification notification){
-        recall(notification);
+        if(notification != null){
+            recall(notification);
+        }
+        
     }
 
 

@@ -8,13 +8,14 @@ import model.enumeration.LanguagePreference;
 import model.enumeration.NewsUrgencyLevel;
 import model.enumeration.TeacherType;
 import model.enumeration.TechRequestStatus;
-import utils.UIText;
 import settings.AppSettings;
+import utils.UIText;
 
 import java.util.List;
 import java.util.Scanner;
 
 import exceptions.DoesNotExist;
+import exceptions.ListIsEmpty;
 
 /**
  * UIForms is bunch of static methods that help with taking data from user in app layar.
@@ -99,19 +100,31 @@ public class UIForms {
         }
     }
 
-
+    /**
+     * one of the most useful helper in app.
+     * It takes list of {@link SerializableModel}s and asks user to pick one, then returns the choice.
+     * Makes application code short and readable.
+     * @param <T>
+     * @param scanner
+     * @param prompt
+     * @param entityList
+     * @return
+     */
     public static <T extends SerializableModel> T readIdFromList(Scanner scanner, UIText prompt, List<T> entityList) {
+        if(entityList.isEmpty()){
+            throw new ListIsEmpty();
+        }
         while (true) {
-            System.out.print(prompt.localized());
-            String input = scanner.nextLine().trim();
-            int id = Integer.parseInt(input);
             try {
+                System.out.print(prompt.localized());
+                String input = scanner.nextLine().trim();
+                int id = Integer.parseInt(input);
                 for(T entity : entityList){
                     if(entity.getId() == id){
                         return entity;
                     }
                 }
-                throw new DoesNotExist("Choice with id=" + id);
+                throw new DoesNotExist("No item with id " + id + " in the list.");
             } catch (NumberFormatException e) {
                 System.out.println(UIText.MSG_INPUT_NUMBER.localized());
             }

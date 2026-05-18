@@ -17,9 +17,9 @@ public final class DeanApp extends BaseApp {
     }
 
     public static MenuBuilder getMenu() {
-        return new MenuBuilder("Complaint Menu")
-                .addAction("View pending complaints", () -> printDeanComplaints())
-                .addAction("Close pending complaint", () -> closeComplaint())
+        return new MenuBuilder(UIText.DEAN_MENU_TITLE)
+                .addAction(UIText.DEAN_VIEW_COMPLAINTS, () -> printDeanComplaints())
+                .addAction(UIText.DEAN_CLOSE_COMPLAINT, () -> closeComplaint())
                 .addExit();
     }
 
@@ -27,21 +27,20 @@ public final class DeanApp extends BaseApp {
         Dean dean = (Dean) getActiveUser();
         List<TeacherComplaint> pending = getPendingComplaints();
         if (pending.isEmpty()) {
-            println("No pending complaints.");
+            println(UIText.MSG_NO_PENDING_COMPLAINTS);
             return;
         }
-        printHeader("Complaints");
+        printHeader(UIText.DEAN_HEADER_COMPLAINTS);
         pending.forEach(tc -> println(tc.asLine()));
         TeacherComplaint complaint = UIForms.readIdFromList(scanner, UIText.INPUT_REQUEST_ID, pending);
         complaintService.closeComplaint(complaint, dean);
-        printSuccess("Complaint closed.");
+        printSuccess(UIText.MSG_COMPLAINT_CLOSED);
     }
 
     private static void printDeanComplaints() {
-        Dean activeUser = (Dean) getActiveUser();
         List<TeacherComplaint> pending = getPendingComplaints();
         if (pending.isEmpty()) {
-            printFail("You have no complaints yet,");
+            printFail(UIText.MSG_NO_COMPLAINTS_YET);
             return;
         }
         pending.forEach(tc -> println(tc.asLine()));

@@ -6,7 +6,11 @@ public class DoesNotExist extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
-    public DoesNotExist(Object... args) {
-        super(UIText.ERR_DOES_NOT_EXIST, args);
+    public DoesNotExist(String message) {
+        super(message);
+    }
+
+    public DoesNotExist(UIText message) {
+        super(message);
     }
 }

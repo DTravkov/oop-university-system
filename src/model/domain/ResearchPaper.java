@@ -20,7 +20,7 @@ public class ResearchPaper extends SerializableModel {
     private List<ResearchPaper> references = new ArrayList<>();
 
     public ResearchPaper(String title) {
-        FieldValidator.requireNonBlank(title, "Paper title");
+        FieldValidator.requireNonBlank(title);
         this.title = title;
         this.views = 0;
         this.citations = 0;
@@ -28,7 +28,7 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void setTitle(String title) {
-        FieldValidator.requireNonBlank(title, "Paper title");
+        FieldValidator.requireNonBlank(title);
         this.title = title;
     }
 
@@ -49,7 +49,7 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void setPublishDate(Date publishDate) {
-        FieldValidator.requireNonNull(publishDate, "Publish date");
+        FieldValidator.requireNonNull(publishDate);
         this.publishDate = publishDate;
     }
 
@@ -58,12 +58,12 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void addReference(ResearchPaper reference) {
-        FieldValidator.requireNonNull(reference, "Reference");
+        FieldValidator.requireNonNull(reference);
         if (this.equals(reference)) {
-            throw new OperationNotAllowed("paper cannot reference itself");
+            throw new OperationNotAllowed("A paper cannot reference itself.");
         }
         if (references.contains(reference)) {
-            throw new AlreadyExists("reference to paper id=" + reference.getId());
+            throw new AlreadyExists("This reference is already linked to the paper.");
         }
         references.add(reference);
     }
@@ -73,7 +73,7 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public ResearcherProfile addResearcher(ResearcherProfile researcher) {
-        FieldValidator.requireNonNull(researcher, "Researcher");
+        FieldValidator.requireNonNull(researcher);
 
         if (!researchers.contains(researcher)) {
             researchers.add(researcher);
@@ -86,7 +86,7 @@ public class ResearchPaper extends SerializableModel {
     }
 
     public void removeResearcher(ResearcherProfile researcher) {
-        FieldValidator.requireNonNull(researcher, "Researcher");
+        FieldValidator.requireNonNull(researcher);
         if(researchers.contains(researcher)){
             researchers.remove(researcher);
         }

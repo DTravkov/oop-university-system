@@ -33,17 +33,17 @@ public final class ManagerApp extends BaseApp {
     }
 
     public static MenuBuilder getMenu() {
-        return new MenuBuilder("Manager Menu")
-                .addAction("View all courses", () -> CommonMenus.printAllCourses())
-                .addAction("Create course", () -> createCourse())
-                .addAction("Delete course", () -> deleteCourse())
-                .addAction("Assign teacher to a course", () -> assignTeacherToCourse())
-                .addAction("View all news", () -> printAllNews())
-                .addAction("Create news", () -> createNews())
-                .addAction("Delete news", () -> deleteNews())
-                .addAction("Get Student GPA statistics", () -> printStudentGPAStats())
-                .addAction("Get Course GPA statistics", () -> printCourseGPAStats())
-                .addAction("Get Teacher GPA statistics", () -> printTeacherGPAStats())
+        return new MenuBuilder(UIText.MANAGER_MENU_TITLE)
+                .addAction(UIText.MANAGER_VIEW_COURSES, () -> CommonMenus.printAllCourses())
+                .addAction(UIText.MANAGER_CREATE_COURSE, () -> createCourse())
+                .addAction(UIText.MANAGER_DELETE_COURSE, () -> deleteCourse())
+                .addAction(UIText.MANAGER_ASSIGN_TEACHER, () -> assignTeacherToCourse())
+                .addAction(UIText.MANAGER_VIEW_NEWS, () -> printAllNews())
+                .addAction(UIText.MANAGER_CREATE_NEWS, () -> createNews())
+                .addAction(UIText.MANAGER_DELETE_NEWS, () -> deleteNews())
+                .addAction(UIText.MANAGER_GPA_BY_STUDENT, () -> printStudentGPAStats())
+                .addAction(UIText.MANAGER_GPA_BY_COURSE, () -> printCourseGPAStats())
+                .addAction(UIText.MANAGER_GPA_BY_TEACHER, () -> printTeacherGPAStats())
                 .addExit();
     }
 
@@ -54,26 +54,26 @@ public final class ManagerApp extends BaseApp {
         CourseType type = UIForms.readCourseType(scanner);
         Course course = new Course(name, description, credits, type);
         courseService.create(course);
-        printSuccess("Course created.");
+        printSuccess(UIText.MSG_COURSE_CREATED);
     }
 
     private static void deleteCourse() {
         List<Course> courses = courseService.getAll();
         if (courses.isEmpty()) {
-            println("No courses.");
+            println(UIText.MSG_NO_COURSES);
             return;
         }
-        printHeader("Courses");
+        printHeader(UIText.COURSE_HEADER_COURSES);
         courses.forEach(c -> println(c.asLine()));
         Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
         courseService.delete(course);
-        printSuccess("Course deleted.");
+        printSuccess(UIText.MSG_COURSE_DELETED);
     }
 
     private static void assignTeacherToCourse() {
         List<Course> courses = courseService.getAll();
         if (courses.isEmpty()) {
-            println("No courses.");
+            println(UIText.MSG_NO_COURSES);
             return;
         }
         courses.forEach(c -> {
@@ -82,64 +82,64 @@ public final class ManagerApp extends BaseApp {
         Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
         List<Teacher> teachers = userService.getUsersByClass(Teacher.class);
         if (teachers.isEmpty()) {
-            println("No teachers.");
+            println(UIText.MSG_NO_TEACHERS);
             return;
         }
-        printHeader("Teachers");
+        printHeader(UIText.MANAGER_HEADER_TEACHERS);
         teachers.forEach(t -> println(t.asLine()));
         Teacher teacher = UIForms.readIdFromList(scanner, UIText.INPUT_TEACHER_ID, teachers);
         TeacherType role = UIForms.readLectureOrPractice(scanner);
         courseService.addTeacher(course, teacher, role);
-        printSuccess("Teacher assigned to course.");
+        printSuccess(UIText.MSG_TEACHER_ASSIGNED);
     }
 
     private static void printAllNews() {
         List<News> all = newsService.getAll();
         if (all.isEmpty()) {
-            println("No news.");
+            println(UIText.MSG_NO_NEWS);
             return;
         }
-        printHeader("News");
+        printHeader(UIText.MANAGER_HEADER_NEWS);
         all.forEach(n -> println(n.asLine()));
     }
 
     private static void createNews() {
         Manager manager = (Manager) getActiveUser();
-        String title = UIForms.readNonEmpty(scanner, "News title: ");
+        String title = UIForms.readNonEmpty(scanner, UIText.INPUT_NEWS_TITLE);
         String content = UIForms.readNonEmpty(scanner, UIText.INPUT_MESSAGE_CONTENT);
         NewsUrgencyLevel urgency = UIForms.readNewsUrgencyLevel(scanner);
         News news = new News(manager, title, content, urgency);
         newsService.create(news);
-        printSuccess("News posted.");
+        printSuccess(UIText.MSG_NEWS_POSTED);
     }
 
     private static void deleteNews() {
         Manager manager = (Manager) getActiveUser();
         List<News> all = newsService.getAll();
         if (all.isEmpty()) {
-            println("No news.");
+            println(UIText.MSG_NO_NEWS);
             return;
         }
-        printHeader("News");
+        printHeader(UIText.MANAGER_HEADER_NEWS);
         all.forEach(n -> println(n.asLine()));
         News news = UIForms.readIdFromList(scanner, UIText.INPUT_NEWS_ID, all);
         newsService.delete(news, manager);
-        printSuccess("News deleted.");
+        printSuccess(UIText.MSG_NEWS_DELETED);
     }
 
     private static void printStudentGPAStats() {
         List<Student> students = userService.getUsersByClass(Student.class);
         if (students.isEmpty()) {
-            println("No students.");
+            println(UIText.MSG_NO_STUDENTS);
             return;
         }
-        printHeader("Average GPA by student");
-        int totalGPA = 0;
+        printHeader(UIText.MANAGER_HEADER_GPA_STUDENT);
+        double totalGPA = 0.0;
         int totalStudents = 0;
         for (Student student : students) {
-            List<Enrollment> enrollments = enrollmentService.getEnrollmentsByStudent(student);
+            List<Enrollment> enrollments = enrollmentService.getEnrollments(student);
             if (enrollments.isEmpty()) {
-                println(student.asLine() + " | no enrollments");
+                println(UIText.MSG_NO_ENROLLMENTS_LINE, student.asLine());
                 continue;
             }
             double gpa = 0;
@@ -149,40 +149,40 @@ public final class ManagerApp extends BaseApp {
             gpa /= enrollments.size();
             totalGPA += gpa;
             totalStudents += 1;
-            println(student.asLine() + " | Avg GPA: " + String.format("%.2f", gpa));
+            println(UIText.MSG_GPA_LINE, student.asLine(), String.format("%.2f", gpa));
         }
         if (totalStudents != 0) {
-            println("Overall average GPA: " + totalGPA / totalStudents);
+            println(UIText.MSG_OVERALL_AVG_GPA, String.format("%.2f", totalGPA / totalStudents));
         }
     }
 
     private static void printCourseGPAStats() {
         List<Course> courses = courseService.getAll();
         if (courses.isEmpty()) {
-            println("No courses.");
+            println(UIText.MSG_NO_COURSES);
             return;
         }
-        printHeader("Average enrollment GPA by course");
+        printHeader(UIText.MANAGER_HEADER_GPA_COURSE);
         for (Course course : courses) {
-            List<Enrollment> enrollments = enrollmentService.getEnrollmentsByCourse(course);
+            List<Enrollment> enrollments = enrollmentService.getEnrollments(course);
             if (enrollments.isEmpty()) {
-                println(course.asLine() + " | no enrollments");
+                println(UIText.MSG_NO_ENROLLMENTS_LINE, course.asLine());
                 continue;
             }
             double avg = enrollments.stream().mapToDouble(Enrollment::getGpa).average().orElse(0.0);
-            println(course.asLine() + " | Avg GPA: " + String.format("%.2f", avg));
+            println(UIText.MSG_GPA_LINE, course.asLine(), String.format("%.2f", avg));
         }
     }
 
     private static void printTeacherGPAStats() {
         List<Teacher> teachers = userService.getUsersByClass(Teacher.class);
         if (teachers.isEmpty()) {
-            println("No teachers.");
+            println(UIText.MSG_NO_TEACHERS);
             return;
         }
-        printHeader("Average student GPA by teacher");
+        printHeader(UIText.MANAGER_HEADER_GPA_TEACHER);
         for (Teacher teacher : teachers) {
-            Map<Course, List<Enrollment>> byCourse = teacherService.getEnrollmentsByTeacher(teacher);
+            Map<Course, List<Enrollment>> byCourse = teacherService.getEnrollments(teacher);
             double sum = 0.0;
             int count = 0;
             for (List<Enrollment> enrollments : byCourse.values()) {
@@ -192,9 +192,9 @@ public final class ManagerApp extends BaseApp {
                 }
             }
             if (count == 0) {
-                println(teacher.asLine() + " | no enrollments");
+                println(UIText.MSG_NO_ENROLLMENTS_LINE, teacher.asLine());
             } else {
-                println(teacher.asLine() + " | Avg GPA: " + String.format("%.2f", sum / count));
+                println(UIText.MSG_GPA_LINE, teacher.asLine(), String.format("%.2f", sum / count));
             }
         }
     }

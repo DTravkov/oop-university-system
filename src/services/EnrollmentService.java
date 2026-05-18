@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import exceptions.AlreadyExists;
-
+import exceptions.OperationNotAllowed;
 import model.domain.Course;
 import model.domain.Enrollment;
 import model.domain.Student;
@@ -31,10 +31,18 @@ public class EnrollmentService extends GenericService<Enrollment>  {
 
     @Override
     public Enrollment create(Enrollment enrollment) {
-        if(this.find(e -> e.getStudent().equals(enrollment.getStudent()) 
-            && e.getCourse().equals(enrollment.getCourse())) != null){
-            throw new AlreadyExists("Enrollment to this course for this student");
+        if(existsByStudentAndCourse(enrollment)){
+            throw new AlreadyExists("This student is already enrolled in this course.");
         }
+        List<Enrollment> studentEnrollments = getEnrollments(enrollment.getStudent());
+        int creditCount = 0;
+        for(var enr : studentEnrollments){
+            creditCount += enr.getCourse().getCredits();
+        }
+        if(creditCount + enrollment.getCourse().getCredits() > 21){
+            throw new OperationNotAllowed("Total credits cannot exceed 21.");
+        }
+        
         return super.create(enrollment);
     }
 
@@ -47,9 +55,19 @@ public class EnrollmentService extends GenericService<Enrollment>  {
 
     // QUERIES
 
+    /**
+     * checks whether enrollment with the same student+course exist.
+     * @param enrollment
+     * @return
+     */
+    public boolean existsByStudentAndCourse(Enrollment enrollment){
+        return this.find(e -> e.getStudent().equals(enrollment.getStudent()) 
+            && e.getCourse().equals(enrollment.getCourse())) != null;
+    }
+
     public double getGpaByStudent(Student student) {
         double totalGpa = 0.0;
-        List<Enrollment> enrollments = getEnrollmentsByStudent(student);
+        List<Enrollment> enrollments = getEnrollments(student);
         if(enrollments.isEmpty()) return 0.0;
         for(var enr : enrollments){
             totalGpa += enr.getGpa();
@@ -58,15 +76,15 @@ public class EnrollmentService extends GenericService<Enrollment>  {
         return Math.round(totalGpa * 100.0 ) / 100.0;
     }
 
-    public List<Enrollment> getEnrollmentsByStudent(Student student) {
+    public List<Enrollment> getEnrollments(Student student) {
         return getAll(e -> e.getStudent().getId() == student.getId());
     }
 
-    public List<Enrollment> getEnrollmentsByCourse(Course course){
+    public List<Enrollment> getEnrollments(Course course){
         return getAll(e -> e.getCourse().getId() == course.getId());
     }
 
-    public Map<Course, List<Enrollment>> getEnrollmentsByTeacher(Teacher teacher) {
+    public Map<Course, List<Enrollment>> getEnrollments(Teacher teacher) {
         Map<Course, List<Enrollment>> map = new HashMap<>();
         for(Enrollment enr : getAll(e -> e.isTeaching(teacher))){
             map.computeIfAbsent(enr.getCourse(), (k) -> new ArrayList<>()).add(enr);
@@ -85,13 +103,13 @@ public class EnrollmentService extends GenericService<Enrollment>  {
 
     public void onUserDelete(User user) {
         if(user instanceof Student student){
-            getEnrollmentsByStudent(student).forEach(e -> delete(e));
+            getEnrollments(student).forEach(e -> delete(e));
             repository.saveAll();
         }
     }
 
     public void onCourseDelete(Course course){
-        getEnrollmentsByCourse(course).forEach(enr -> delete(enr));
+        getEnrollments(course).forEach(enr -> delete(enr));
     }
 
 

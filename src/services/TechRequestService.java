@@ -13,6 +13,7 @@ import services.events.concrete.NotificationCreateEvent;
 import services.events.concrete.UserDeleteEvent;
 import utils.Comparators;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * TechRequestService is a concrete service. It implements logic for IT support tickets: listing by employee or specialist,
@@ -32,7 +33,7 @@ public class TechRequestService extends GenericService<TechRequest>{
     @Override
     public TechRequest create(TechRequest request) {
         eventSystem.publish(new NotificationCreateEvent(
-            new Notification("Your got a new technical request. Sender: " + request.getEmployee().getFullname(), request.getSpecialist())
+            new Notification(UIText.NOTIFY_TECH_REQUEST_NEW, request.getSpecialist())
         ));
         return repository.save(request);
     }
@@ -44,7 +45,7 @@ public class TechRequestService extends GenericService<TechRequest>{
         Logger.log(baseName + "status update. From" + request.getStatus().toString() + " to " + status.toString());
         if(status == TechRequestStatus.DONE){
             eventSystem.publish(new NotificationCreateEvent(
-                new Notification("Your techical request " + request.getId() +  " is done",request.getEmployee())
+                new Notification(UIText.NOTIFY_TECH_REQUEST_DONE, request.getEmployee())
             ));
         }
     }
@@ -82,13 +83,15 @@ public class TechRequestService extends GenericService<TechRequest>{
 
             List<TechSupportSpecialist> otherSpecialists = 
                 userService.getUsersByClass(TechSupportSpecialist.class)
-                            .stream().filter(s -> !s.isBanned() && !s.isDeleted() && !s.equals(specialist))
+                            .stream().filter(s -> s.isAvailable() && !s.equals(specialist))
                             .toList();
 
             if(otherSpecialists.isEmpty()){
+                //if no specailists are found, tech.request is deleted
                 getTechRequestsBySpecialist(specialist).forEach(tr -> delete(tr));
                 return;
             }
+            //if specialists are found, the randomly receive the tasks
             getTechRequestsBySpecialist(specialist).forEach(req -> {
                 TechSupportSpecialist replacement = otherSpecialists.get(random.nextInt(0, otherSpecialists.size()));
                 req.setSpecialist(replacement);

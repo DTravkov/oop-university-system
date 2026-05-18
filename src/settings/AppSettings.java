@@ -22,6 +22,8 @@ public class AppSettings {
         DEFAULT_ADMIN
     );
 
+    public static final List<String> DEFAULT_SYSTEM_LOGINS = DEFAULT_SYSTEM_USERS.stream().map(u -> u.getLogin()).toList();
+
 
     // class lists, for different purposes
     public static final List<Class<? extends User>> ALL_USER_CLASSES = List.of(
@@ -58,7 +60,6 @@ public class AppSettings {
     // general defautls
     public static final String DEFAULT_DATA_DIRECTORY = "data/";
     public static final int RECENT_LOG_HOURS = 12;
-    public static final Class<?> NOTIFICATION_BROADCAST_CLASS = User.class;
 
     //global validation rules
     public static boolean REQUIRE_PASSWORD_VALIDATION = false;

@@ -20,10 +20,10 @@ public class News extends SerializableModel {
     private List<Comment> comments;
 
     public News(User publisher, String title, String content, NewsUrgencyLevel urgencyLevel) {
-        FieldValidator.requireNonNull(publisher, "Publisher");
-        FieldValidator.requireNonBlank(title, "News title");
-        FieldValidator.requireNonBlank(content, "News content");
-        FieldValidator.requireNonNull(urgencyLevel, "News urgency level");
+        FieldValidator.requireNonNull(publisher);
+        FieldValidator.requireNonBlank(title);
+        FieldValidator.requireNonBlank(content);
+        FieldValidator.requireNonNull(urgencyLevel);
 
         this.publisher = publisher;
         this.title = title;
@@ -36,7 +36,7 @@ public class News extends SerializableModel {
 
     public void deleteBy(Manager manager){
         if(!getPublisher().equals(manager)){
-            throw new OperationNotAllowed("deleting news while not being its publisher");
+            throw new OperationNotAllowed("Only the publisher can delete this news item.");
         }
     }
 
@@ -77,7 +77,7 @@ public class News extends SerializableModel {
     }
 
     public void setPublisher(User publisher) {
-        FieldValidator.requireNonNull(publisher, "Publisher");
+        FieldValidator.requireNonNull(publisher);
         this.publisher = publisher;
     }
 
@@ -90,7 +90,7 @@ public class News extends SerializableModel {
     }
 
     public void addComment(Comment comment) {
-        FieldValidator.requireNonNull(comment, "Comment");
+        FieldValidator.requireNonNull(comment);
         this.comments.add(comment);
     }
 
@@ -99,7 +99,7 @@ public class News extends SerializableModel {
     }
 
     public boolean removeComment(Comment comment) {
-        FieldValidator.requireNonNull(comment, "Comment");
+        FieldValidator.requireNonNull(comment);
         if (comment.getId() != 0) {
             return removeComment(comment.getId());
         }

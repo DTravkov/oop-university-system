@@ -12,6 +12,11 @@ import services.TeacherService;
 import services.TechRequestService;
 import services.UserService;
 
+
+/**
+ * singleton registry for services, that initializes services
+ * its used in {@link BaseApp} to proivde services to any application class.
+ */
 public final class ServiceRegistry {
 
     private static final ServiceRegistry INSTANCE = new ServiceRegistry();
@@ -43,7 +48,7 @@ public final class ServiceRegistry {
         courseService = new CourseService(enrollmentService);
 
         // helper services that are not related to any domain class directly
-        teacherService = new TeacherService(courseService, enrollmentService);
+        teacherService = new TeacherService(courseService, enrollmentService, userService);
         notificationService = new NotificationService(userService);
     }
 

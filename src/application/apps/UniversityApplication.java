@@ -1,5 +1,6 @@
 package application.apps;
 
+import exceptions.UserBannedOrDeleted;
 import model.domain.Admin;
 import model.domain.Dean;
 import model.domain.Employee;
@@ -22,42 +23,49 @@ import utils.UIText;
 public class UniversityApplication extends BaseApp {
 
     static final UserService userService = services.userService;
-
+    /**
+     * main CLI entry point, builds AND starts menu according to user class
+     */
     public static void start() {
 
         User user = getActiveUser();
 
-        MenuBuilder menu = new MenuBuilder("University System v0.0001")
+        //banned or self deleted
+        if(!user.isAvailable()){
+            throw new UserBannedOrDeleted();
+        }
+
+        MenuBuilder menu = new MenuBuilder(UIText.MENU_TITLE_UNIVERSITY)
         
-        .addAction("My Profile", () -> println(user.asTable()))
-        .addAction("Research Menu", () -> CommonMenus.getResearcherMenu().start())
-        .addAction("News Menu", () -> CommonMenus.getNewsMenu().start())
-        .addAction("Course Menu", () -> CommonMenus.getCourseMenu().start());
+        .addAction(UIText.MENU_MY_PROFILE, () -> println(user.asTable()))
+        .addAction(UIText.MENU_RESEARCH, () -> CommonMenus.getResearcherMenu().start())
+        .addAction(UIText.MENU_NEWS, () -> CommonMenus.getNewsMenu().start())
+        .addAction(UIText.MENU_COURSES, () -> CommonMenus.getCourseMenu().start());
 
         if(user instanceof Employee){
-            menu.addAction("Messenger Menu", () -> EmployeeApp.getMessengerMenu().start());
-            menu.addAction("Technical Request Menu", () -> EmployeeApp.getTechRequestMenu().start());
+            menu.addAction(UIText.MENU_MESSENGER, () -> EmployeeApp.getMessengerMenu().start());
+            menu.addAction(UIText.MENU_TECH_REQUEST, () -> EmployeeApp.getTechRequestMenu().start());
         }
         if (user instanceof Student) {
-            menu.addAction("Student Menu", () -> StudentApp.getMenu().start());
+            menu.addAction(UIText.MENU_STUDENT, () -> StudentApp.getMenu().start());
         }
         if (user instanceof Admin) {
-            menu.addAction("Admin Menu", () -> AdminApp.getMenu().start());
+            menu.addAction(UIText.MENU_ADMIN, () -> AdminApp.getMenu().start());
         }
         if (user instanceof TechSupportSpecialist) {
-            menu.addAction("Technical Specialist Menu", () -> TechSupportSpecialistApp.getMenu().start());
+            menu.addAction(UIText.MENU_TECH_SPECIALIST, () -> TechSupportSpecialistApp.getMenu().start());
         }
         if (user instanceof Manager) {
-            menu.addAction("Manager Menu", () -> ManagerApp.getMenu().start());
+            menu.addAction(UIText.MENU_MANAGER, () -> ManagerApp.getMenu().start());
         }
         if (user instanceof Dean) {
-            menu.addAction("Complaint Menu", () -> DeanApp.getMenu().start());
+            menu.addAction(UIText.MENU_COMPLAINT, () -> DeanApp.getMenu().start());
         }
         if (user instanceof Teacher) {
-            menu.addAction("Teacher Menu", () -> TeacherApp.getMenu().start());
+            menu.addAction(UIText.MENU_TEACHER, () -> TeacherApp.getMenu().start());
         }
 
-        menu.addAction("Notifications", () -> CommonMenus.getNotificationMenu().start());
+        menu.addAction(UIText.MENU_NOTIFICATIONS, () -> CommonMenus.getNotificationMenu().start());
 
         menu.addExit();
 
@@ -65,25 +73,29 @@ public class UniversityApplication extends BaseApp {
     }
 
 
-
+    /**
+     * form that checks user credentials
+     */
     public static void authenticate() {
-        MenuBuilder menu = new MenuBuilder("Authentication", false);
-        menu.addAction("Login", () -> {
+        MenuBuilder menu = new MenuBuilder(UIText.MENU_TITLE_AUTH, false);
+        menu.addAction(UIText.MENU_AUTH_LOGIN, () -> {
 
             String login = UIForms.readNonEmpty(scanner, UIText.INPUT_LOGIN);
             String password = UIForms.readNonEmpty(scanner, UIText.INPUT_PASSWORD);
             User user = userService.authenticate(login, password);
-            printSuccess(UIText.AUTH_WELCOME.localized(user.getName()));
+            printSuccess(UIText.AUTH_WELCOME, user.getName());
 
             menu.stop();
         });
-        menu.addAction("Exit", () -> kill());
+        menu.addAction(UIText.MENU_AUTH_EXIT, () -> kill());
         menu.start();
     }
-
+    /**
+     * simple helper form to change language for current session.
+     */
     public static void changeLanguage() {
         LanguagePreference choice = UIForms.readLanguagePreference(scanner);
         AppSettings.setLanguage(choice);
-        printSuccess(UIText.AUTH_CHANGE_LANG.localized());
+        printSuccess(UIText.AUTH_CHANGE_LANG);
     }
 }

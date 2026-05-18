@@ -19,11 +19,11 @@ public class TeacherComplaint extends SerializableModel {
     private boolean isClosed = false;
 
     public TeacherComplaint(ComplaintUrgencyLevel urgencyLevel, Teacher sender, Dean receiver, Student student, String content) {
-        FieldValidator.requireNonNull(urgencyLevel, "Urgency level");
-        FieldValidator.requireNonNull(sender, "Teacher");
-        FieldValidator.requireNonNull(receiver, "Dean");
-        FieldValidator.requireNonNull(student, "Student");
-        FieldValidator.requireNonBlank(content, "Content");
+        FieldValidator.requireNonNull(urgencyLevel);
+        FieldValidator.requireNonNull(sender);
+        FieldValidator.requireNonNull(receiver);
+        FieldValidator.requireNonNull(student);
+        FieldValidator.requireNonBlank(content);
         this.urgencyLevel = urgencyLevel;
         this.teacher = sender;
         this.dean = receiver;
@@ -34,7 +34,7 @@ public class TeacherComplaint extends SerializableModel {
 
     public void closeBy(Dean dean){
         if(getDean().getId() != dean.getId()){
-            throw new OperationNotAllowed("closing other deans' complaints");
+            throw new OperationNotAllowed("You cannot close another dean's complaint.");
         }
         this.setClosed(true);
         return;
@@ -55,7 +55,7 @@ public class TeacherComplaint extends SerializableModel {
     }
 
     public void setUrgencyLevel(ComplaintUrgencyLevel urgencyLevel) {
-        FieldValidator.requireNonNull(urgencyLevel, "Urgency level");
+        FieldValidator.requireNonNull(urgencyLevel);
         this.urgencyLevel = urgencyLevel;
     }
 
@@ -68,7 +68,7 @@ public class TeacherComplaint extends SerializableModel {
     }
 
     public void setDean(Dean dean) {
-        FieldValidator.requireNonNull(dean, "Dean");
+        FieldValidator.requireNonNull(dean);
         this.dean = dean;
     }
 
@@ -85,7 +85,7 @@ public class TeacherComplaint extends SerializableModel {
     }
 
     public void setSentDate(Date sentDate) {
-        FieldValidator.requireNonNull(sentDate, "Sent date");
+        FieldValidator.requireNonNull(sentDate);
         this.sentDate = sentDate;
     }
 

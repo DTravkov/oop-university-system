@@ -17,8 +17,8 @@ public class StudentOrganization extends SerializableModel {
     private final List<Student> members;
 
     public StudentOrganization(String name, String description, Student president) {
-        FieldValidator.requireNonBlank(name, "Organization name");
-        FieldValidator.requireNonNull(president, "President");
+        FieldValidator.requireNonBlank(name);
+        FieldValidator.requireNonNull(president);
 
         this.name = name;
         this.description = description;
@@ -29,16 +29,16 @@ public class StudentOrganization extends SerializableModel {
     }
 
     public void setPresident(Student president) {
-        FieldValidator.requireNonNull(president, "President");
+        FieldValidator.requireNonNull(president);
         if(this.president.getId() == president.getId()){
-            throw new AlreadyExists("this user is already a president");
+            throw new AlreadyExists("This user is already the president of the organization.");
         }
         this.president = president;
         this.addMember(president);
     }
 
     public void removePresident(Student substitute) {
-        FieldValidator.requireNonNull(substitute, "new president");
+        FieldValidator.requireNonNull(substitute);
         this.removeMember(president);
         this.setPresident(substitute); // president cant be null, so we need someone here
         
@@ -74,15 +74,15 @@ public class StudentOrganization extends SerializableModel {
     }
 
     public void addMember(Student member) {
-        FieldValidator.requireNonNull(member, "Member");
+        FieldValidator.requireNonNull(member);
         if(isMember(member))
-            throw new AlreadyExists("member of " + getName() + " organization with id=" + member.getId());
+            throw new AlreadyExists("This student is already a member of " + getName() + ".");
         this.members.add(member);
     }
 
     public boolean removeMember(Student member) {
         if(member.equals(president) && !president.isDeleted()){
-            throw new OperationNotAllowed("deleting actual president");
+            throw new OperationNotAllowed("The president cannot be removed without appointing a successor.");
         }
         return members.remove(member);
     }

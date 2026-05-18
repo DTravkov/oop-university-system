@@ -24,7 +24,7 @@ public abstract class GenericService<T extends SerializableModel> extends BaseSe
 
     public T create(T entity){
         if(repository.exists(entity.getId())){
-            throw new AlreadyExists(baseName + " with id " + entity.getId());
+            throw new AlreadyExists(baseName + " with id " + entity.getId() + " already exists.");
         }
         Logger.log("Create " + baseName + " (" + entity.getId() + ")");
         return repository.save(entity);
@@ -32,10 +32,10 @@ public abstract class GenericService<T extends SerializableModel> extends BaseSe
 
     public void update(T entity){
         if(!repository.exists(entity)){
-            throw new DoesNotExist(baseName + " object with id : " + entity.getId());
+            throw new DoesNotExist(baseName + " with id " + entity.getId() + " does not exist.");
         }
         if(entity.getId() == 0){
-            throw new OperationNotAllowed( baseName + " non-existing object can not be updated");
+            throw new OperationNotAllowed(baseName + " without an id cannot be updated.");
         }
         Logger.log("Update " + baseName + " (" + entity.getId() + ")");
         repository.save(entity);
@@ -43,7 +43,7 @@ public abstract class GenericService<T extends SerializableModel> extends BaseSe
 
     public void delete(T entity){
         if(!repository.exists(entity)){
-            throw new DoesNotExist( baseName + " object with id " + entity.getId());
+            throw new DoesNotExist(baseName + " with id " + entity.getId() + " does not exist.");
         }
         Logger.log("Delete " + baseName + " (" + entity.getId() + ")");
         repository.delete(entity);
@@ -56,14 +56,14 @@ public abstract class GenericService<T extends SerializableModel> extends BaseSe
         return repository.getAll().stream()
                                 .filter(entity -> entity.getId() == id)
                                 .findFirst()
-                                .orElseThrow(()-> new DoesNotExist(baseName + " with id=" + id));
+                                .orElseThrow(() -> new DoesNotExist(baseName + " with id " + id + " does not exist."));
     }
 
     public T get(T entity){
         return repository.getAll().stream()
                                 .filter(e -> e.equals(entity))
                                 .findFirst()
-                                .orElseThrow(()-> new DoesNotExist(baseName + " with id=" + entity.getId()));
+                                .orElseThrow(() -> new DoesNotExist(baseName + " with id " + entity.getId() + " does not exist."));
     }
 
     public T find(Predicate<T> query){

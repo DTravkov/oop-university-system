@@ -13,8 +13,8 @@ public class Message extends SerializableModel {
     private final Date sentDate;
 
     public Message(Employee sender,  String content) {
-        FieldValidator.requireNonNull(sender, "Sender");
-        FieldValidator.requireNonBlank(content, "Content");
+        FieldValidator.requireNonNull(sender);
+        FieldValidator.requireNonBlank(content);
         this.sender = sender;
         this.content = content;
         this.sentDate = new Date();
@@ -25,7 +25,7 @@ public class Message extends SerializableModel {
     }
 
     public void setSender(Employee sender) {
-        FieldValidator.requireNonNull(sender, "Sender");
+        FieldValidator.requireNonNull(sender);
         this.sender = sender;
     }
 

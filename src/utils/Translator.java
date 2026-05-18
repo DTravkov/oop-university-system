@@ -2,9 +2,10 @@ package utils;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.Locale;
 
 import settings.AppSettings;
+
+import java.util.Locale;
 
 /**
  * Translator loads translations from java bundles from {@code messages_*.properties} for the language preference {@link Locale},

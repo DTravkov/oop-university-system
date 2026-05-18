@@ -34,7 +34,7 @@ public class CourseService extends GenericService<Course>  {
     @Override
     public Course create(Course course) {
         if(existsByName(course.getName())){
-            throw new AlreadyExists("course with the " +  course.getName() + " name");
+            throw new AlreadyExists("A course named '" + course.getName() + "' already exists.");
         }
         return super.create(course);
     }
@@ -60,12 +60,12 @@ public class CourseService extends GenericService<Course>  {
 
 
     // QUERIES
-
-    public List<Enrollment> getEnrollmentsByStudent(Student student) {
-        return enrollmentService.getEnrollmentsByStudent(student);
-    }
-
-    public Map<TeacherType, List<Course>> getCoursesByTeacher(Teacher teacher) {
+    /**
+     * finds all courses that teacher is lecturing or practicing, returns Map.
+     * @param teacher
+     * @return
+     */
+    public Map<TeacherType, List<Course>> getCourses(Teacher teacher) {
         Map<TeacherType, List<Course>> map = new HashMap<>();
         map.put(TeacherType.LECTURE, new ArrayList<>());
         map.put(TeacherType.PRACTICE, new ArrayList<>());

@@ -25,8 +25,8 @@ public final class EmployeeApp extends BaseApp {
     public static MenuBuilder getMessengerMenu() {
         Employee employee = (Employee) getActiveUser();
 
-        MenuBuilder menu = new MenuBuilder("Messenger");
-        menu.addAction("Start new chat", () -> {
+        MenuBuilder menu = new MenuBuilder(UIText.EMPLOYEE_MESSENGER_TITLE);
+        menu.addAction(UIText.EMPLOYEE_START_CHAT, () -> {
             startChat();
             menu.stop();
             getMessengerMenu().start();
@@ -34,27 +34,27 @@ public final class EmployeeApp extends BaseApp {
         for (Chat chat : messageService.getChatsByMember(employee)) {
             menu.addAction(chat.getTitleFor(employee), () -> openChat(chat));
         }
-        menu.addAction("Back", () -> menu.stop());
+        menu.addAction(UIText.MENU_BACK, () -> menu.stop());
         return menu;
     }
 
     public static MenuBuilder getTechRequestMenu() {
-        MenuBuilder menu = new MenuBuilder("Technical Request Menu");
-        menu.addAction("View my requests", () -> printTechRequests());
-        menu.addAction("Send a new request", () -> sendTechRequest());
-        menu.addAction("Back", () -> menu.stop());
+        MenuBuilder menu = new MenuBuilder(UIText.EMPLOYEE_TECH_MENU_TITLE);
+        menu.addAction(UIText.EMPLOYEE_VIEW_REQUESTS, () -> printTechRequests());
+        menu.addAction(UIText.EMPLOYEE_SEND_REQUEST, () -> sendTechRequest());
+        menu.addAction(UIText.MENU_BACK, () -> menu.stop());
         return menu;
     }
 
     private static void startChat() {
         Employee activeUser = (Employee) getActiveUser();
-        printHeader("Employees");
+        printHeader(UIText.EMPLOYEE_HEADER_EMPLOYEES);
         List<Employee> employees = userService.getUsersByClass(Employee.class)
                 .stream()
                 .filter(u -> !u.equals(activeUser))
                 .toList();
         if (employees.isEmpty()) {
-            println("No employees.");
+            println(UIText.MSG_NO_EMPLOYEES);
             return;
         }
         employees.forEach(e -> println(e.asLine()));
@@ -67,13 +67,13 @@ public final class EmployeeApp extends BaseApp {
         Employee employee = (Employee) getActiveUser();
         MenuBuilder menu = new MenuBuilder("");
         chat.getMessages().forEach(msg -> menu.addLabel(msg.asLine()));
-        menu.addAction("Send Message", () -> {
+        menu.addAction(UIText.EMPLOYEE_SEND_MESSAGE, () -> {
             String content = UIForms.readNonEmpty(scanner, UIText.INPUT_MESSAGE_CONTENT);
             messageService.sendMessage(new Message(employee, content), chat.getOtherMember(employee));
             openChat(messageService.get(chat));
             menu.stop();
         });
-        menu.addAction("Back", () -> menu.stop());
+        menu.addAction(UIText.MENU_BACK, () -> menu.stop());
         menu.start();
     }
 
@@ -84,22 +84,22 @@ public final class EmployeeApp extends BaseApp {
                 .filter(u -> !u.isBanned() && !u.isDeleted())
                 .toList();
         if (specialists.isEmpty()) {
-            printFail("No tech support specialists available.");
+            printFail(UIText.MSG_NO_TECH_SPECIALISTS_AVAILABLE);
             return;
         }
-        printHeader("Tech Support Specialists");
+        printHeader(UIText.EMPLOYEE_HEADER_TECH_SPECIALISTS);
         specialists.forEach(s -> println(s.asLine()));
         TechSupportSpecialist specialist = UIForms.readIdFromList(scanner, UIText.INPUT_RECEIVER_ID, specialists);
         String content = UIForms.readNonEmpty(scanner, UIText.INPUT_MESSAGE_CONTENT);
         techRequestService.create(new TechRequest(employee, specialist, content));
-        printSuccess("Tech request sent.");
+        printSuccess(UIText.MSG_TECH_REQUEST_SENT);
     }
 
     private static void printTechRequests() {
         Employee employee = (Employee) getActiveUser();
         List<TechRequest> requests = techRequestService.getTechRequestsByEmployee(employee);
         if (requests.isEmpty()) {
-            printFail("You have no tech requests yet.");
+            printFail(UIText.MSG_NO_TECH_REQUESTS_YET);
             return;
         }
         requests.forEach(r -> println(r.asLine()));

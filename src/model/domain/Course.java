@@ -32,7 +32,7 @@ public class Course extends SerializableModel {
 
     public void addTeacher(Teacher teacher, TeacherType typeToAdd){
         if(typeToAdd == TeacherType.BOTH)
-            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
+            throw new OperationNotAllowed("TeacherType BOTH cannot be used when adding a teacher.");
 
         if(typeToAdd == TeacherType.LECTURE){
             addLectureTeacher(teacher);
@@ -45,7 +45,7 @@ public class Course extends SerializableModel {
 
     public void removeTeacher(Teacher teacher, TeacherType typeToDelete){
         if(typeToDelete == TeacherType.BOTH)
-            throw new OperationNotAllowed(" passing 'BOTH' as a TeacherType");
+            throw new OperationNotAllowed("TeacherType BOTH cannot be used when adding a teacher.");
         if(typeToDelete == TeacherType.LECTURE){
             removeLectureTeacher(teacher);
         }
@@ -56,24 +56,24 @@ public class Course extends SerializableModel {
     }
 
     private void addLectureTeacher(Teacher lectureTeacher) {
-        FieldValidator.requireNonNull(lectureTeacher, "Lecture teacher");
+        FieldValidator.requireNonNull(lectureTeacher);
         if(!lectureTeacher.isLecturer())
-            throw new OperationNotAllowed("Adding non-lecturer as a lecture teacher");
+            throw new OperationNotAllowed("Only lecturers can be assigned as lecture teachers.");
         if(lectureTeachers.contains(lectureTeacher)){
-            throw new AlreadyExists("teacher with id=" + lectureTeacher.getId() + " as a lecture teacher");
+            throw new AlreadyExists("This teacher is already assigned as a lecture teacher on this course.");
         }
         this.lectureTeachers.add(lectureTeacher);
         
     }
 
     private void addPracticeTeacher(Teacher practiceTeacher) {
-        FieldValidator.requireNonNull(practiceTeacher, "Practice teacher");
+        FieldValidator.requireNonNull(practiceTeacher);
 
         if(!practiceTeacher.isPractice())
-            throw new OperationNotAllowed("Adding non-practice as a practice teacher");
+            throw new OperationNotAllowed("Only practice teachers can be assigned as practice teachers.");
 
         if(practiceTeachers.contains(practiceTeacher)){
-            throw new AlreadyExists("teacher with id=" + practiceTeacher.getId() + " as a practice teacher");
+            throw new AlreadyExists("This teacher is already assigned as a practice teacher on this course.");
         }
         
         this.practiceTeachers.add(practiceTeacher);

@@ -7,7 +7,8 @@ import model.enumeration.LanguagePreference;
 import java.util.Locale;
 
 /**
- * SessionData is a singleton that stores data about user language and who the user is
+ * SessionData is a singleton that stores data about user language and who the user is.
+ * data is stored only in memory, each restart erases it.
  */
 public class SessionData {
 

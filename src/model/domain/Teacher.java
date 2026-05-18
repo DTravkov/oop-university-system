@@ -12,7 +12,7 @@ public class Teacher extends Employee {
 	private TeacherType type;
 	
 	public Teacher(String login, String password, String name, String surname, TeacherType type) {
-		FieldValidator.requireNonNull(type, "Teacher type");
+		FieldValidator.requireNonNull(type);
 		super(login, password, name, surname);
 		this.type = type;
 	}

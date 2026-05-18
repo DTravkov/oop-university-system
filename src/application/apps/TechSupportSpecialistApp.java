@@ -18,10 +18,10 @@ public final class TechSupportSpecialistApp extends BaseApp {
     }
 
     public static MenuBuilder getMenu() {
-        return new MenuBuilder("Technical Specialist Menu")
-                .addAction("View all requests", () -> printSpecialistRequests())
-                .addAction("View requests (by status)", () -> printSpecialistRequestsByStatus())
-                .addAction("Update request", () -> updateTechRequest())
+        return new MenuBuilder(UIText.TECH_MENU_TITLE)
+                .addAction(UIText.TECH_VIEW_ALL_REQUESTS, () -> printSpecialistRequests())
+                .addAction(UIText.TECH_VIEW_BY_STATUS, () -> printSpecialistRequestsByStatus())
+                .addAction(UIText.TECH_UPDATE_REQUEST, () -> updateTechRequest())
                 .addExit();
     }
 
@@ -29,7 +29,7 @@ public final class TechSupportSpecialistApp extends BaseApp {
         TechSupportSpecialist specialist = (TechSupportSpecialist) getActiveUser();
         List<TechRequest> requests = techRequestService.getTechRequestsBySpecialist(specialist);
         if (requests.isEmpty()) {
-            printFail("No requests");
+            printFail(UIText.MSG_NO_REQUESTS);
             return;
         }
         requests.forEach(r -> println(r.asLine()));
@@ -42,10 +42,10 @@ public final class TechSupportSpecialistApp extends BaseApp {
                 .filter(r -> r.getStatus() == status)
                 .toList();
         if (requests.isEmpty()) {
-            printFail("No requests with status " + status + ".");
+            printFail(UIText.MSG_NO_REQUESTS_STATUS, status);
             return;
         }
-        printHeader(status + " Requests");
+        printHeader(UIText.TECH_HEADER_STATUS_REQUESTS.localized(status));
         requests.forEach(r -> println(r.asLine()));
     }
 
@@ -53,14 +53,14 @@ public final class TechSupportSpecialistApp extends BaseApp {
         TechSupportSpecialist specialist = (TechSupportSpecialist) getActiveUser();
         List<TechRequest> requests = techRequestService.getTechRequestsBySpecialist(specialist);
         if (requests.isEmpty()) {
-            printFail("You have no tech requests.");
+            printFail(UIText.MSG_NO_TECH_REQUESTS);
             return;
         }
-        printHeader("My Requests");
+        printHeader(UIText.TECH_HEADER_MY_REQUESTS);
         requests.forEach(r -> println(r.asLine()));
         TechRequest request = UIForms.readIdFromList(scanner, UIText.INPUT_REQUEST_ID, requests);
         TechRequestStatus status = UIForms.readTechRequestStatus(scanner);
         techRequestService.updateStatus(request, status);
-        printSuccess("Request updated.");
+        printSuccess(UIText.MSG_REQUEST_UPDATED);
     }
 }

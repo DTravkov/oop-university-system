@@ -5,14 +5,14 @@ import java.util.*;
 import utils.FieldValidator;
 
 
-public class Student extends User implements IEnrollable {
+public class Student extends User {
 	
 	private static final long serialVersionUID = 1L;
 
     protected Date admissionDate;
 
     public Student(String login, String password, String name, String surname, Date admissionDate) {
-		FieldValidator.requireNonNull(admissionDate, "Date of admission");
+		FieldValidator.requireNonNull(admissionDate);
 		super(login, password, name, surname);
 		this.admissionDate = admissionDate;
 	}

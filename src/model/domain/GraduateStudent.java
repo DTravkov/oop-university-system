@@ -7,18 +7,18 @@ public class GraduateStudent extends Student {
 	
 	private static final long serialVersionUID = 1L;
 
-	private ResearcherProfile supervisor = null;
+	private Teacher supervisor = null;
 
     public GraduateStudent(String login, String password, String name, String surname, Date admissionDate) {
 		super(login, password, name, surname, admissionDate);
 	}
 
 	
-	public ResearcherProfile getSupervisor() {
+	public Teacher getSupervisor() {
 		return supervisor;
 	}
 
-	public void setSupervisor(ResearcherProfile supervisor) {
+	public void setSupervisor(Teacher supervisor) {
 		this.supervisor = supervisor;
 	}
 

@@ -16,10 +16,10 @@ public class Chat extends SerializableModel {
     private List<Message> messages = new ArrayList<>();
 
     public Chat(Employee memberOne, Employee memberTwo) {
-        FieldValidator.requireNonNull(memberOne, "Member one");
-        FieldValidator.requireNonNull(memberTwo, "Member two");
+        FieldValidator.requireNonNull(memberOne);
+        FieldValidator.requireNonNull(memberTwo);
         if (memberOne.equals(memberTwo)) {
-            throw new OperationNotAllowed("c hat members must be distinct users");
+            throw new OperationNotAllowed("Chat members must be two different users.");
         }
         this.members.add(memberOne);
         this.members.add(memberTwo);
@@ -56,12 +56,12 @@ public class Chat extends SerializableModel {
     }
 
     public void sendMessage(Message message) {
-        FieldValidator.requireNonNull(message, "Message");
+        FieldValidator.requireNonNull(message);
         if(messages.contains(message)){
-            throw new OperationNotAllowed("adding a duplicate message to chat");
+            throw new OperationNotAllowed("This message is already in the chat.");
         }
         if(!isMember(message.getSender())){
-            throw new OperationNotAllowed("sending message to inappropriate chat");
+            throw new OperationNotAllowed("The sender is not a member of this chat.");
         }
         this.messages.add(message);
     }
@@ -71,7 +71,7 @@ public class Chat extends SerializableModel {
     }
 
     public boolean removeMessage(Message message) {
-        FieldValidator.requireNonNull(message, "Message");
+        FieldValidator.requireNonNull(message);
         return messages.remove(message);
     }
 

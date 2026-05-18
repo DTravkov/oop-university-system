@@ -6,6 +6,7 @@ import java.util.Map;
 import model.domain.Course;
 import model.domain.Dean;
 import model.domain.Enrollment;
+import model.domain.GraduateStudent;
 import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.TeacherComplaint;
@@ -32,48 +33,49 @@ public final class TeacherApp extends BaseApp {
     }
 
     public static MenuBuilder getMenu() {
-        return new MenuBuilder("Teacher Menu")
-                .addAction("View my courses", () -> printTeacherCourses())
-                .addAction("View my students", () -> printTeacherStudents())
-                .addAction("Put a mark", () -> putMarkToStudent())
-                .addAction("Complaint Menu", () -> getComplaintMenu().start())
+        return new MenuBuilder(UIText.TEACHER_MENU_TITLE)
+                .addAction(UIText.TEACHER_VIEW_COURSES, () -> printTeacherCourses())
+                .addAction(UIText.TEACHER_VIEW_STUDENTS, () -> printTeacherStudents())
+                .addAction(UIText.TEACHER_PUT_MARK, () -> putMarkToStudent())
+                .addAction(UIText.TEACHER_COMPLAINT_MENU, () -> getComplaintMenu().start())
+                .addAction(UIText.TEACHER_BECOME_SUPERVISOR, () -> becomeSupervisor())
                 .addExit();
     }
 
     public static MenuBuilder getComplaintMenu() {
-        MenuBuilder complaintMenu = new MenuBuilder("Complaint Menu");
-        complaintMenu.addAction("View my complaints", () -> printTeacherComplaints());
-        complaintMenu.addAction("Send new complaint", () -> sendComplaint());
-        complaintMenu.addAction("Back", () -> complaintMenu.stop());
+        MenuBuilder complaintMenu = new MenuBuilder(UIText.TEACHER_COMPLAINT_MENU);
+        complaintMenu.addAction(UIText.TEACHER_VIEW_COMPLAINTS, () -> printTeacherComplaints());
+        complaintMenu.addAction(UIText.TEACHER_SEND_COMPLAINT, () -> sendComplaint());
+        complaintMenu.addAction(UIText.MENU_BACK, () -> complaintMenu.stop());
         return complaintMenu;
     }
 
     private static void putMarkToStudent() {
         Teacher activeUser = (Teacher) getActiveUser();
-        Map<Course, List<Enrollment>> enrollmentMap = teacherService.getEnrollmentsByTeacher(activeUser);
+        Map<Course, List<Enrollment>> enrollmentMap = teacherService.getEnrollments(activeUser);
         List<Course> courses = enrollmentMap.keySet().stream().toList();
         if (enrollmentMap.isEmpty()) {
-            printFail("No enrollments");
+            printFail(UIText.MSG_NO_ENROLLMENTS);
             return;
         }
 
-        printHeader("Courses");
+        printHeader(UIText.TEACHER_HEADER_COURSES);
         courses.forEach(c -> println(c.asLine()));
         Course course = UIForms.readIdFromList(scanner, UIText.INPUT_COURSE_ID, courses);
         List<Enrollment> courseEnrollments = enrollmentMap.get(course);
-        printHeader(course.getName() + " Enrollments");
+        printHeader(course.getName() + UIText.TEACHER_ENROLLMENTS_SUFFIX.localized());
         courseEnrollments.forEach(en -> println(en.asLine()));
         Enrollment enrollment = UIForms.readIdFromList(scanner, UIText.INPUT_ENROLLMENT_ID, courseEnrollments);
         AttestationType type = UIForms.readAttestationType(scanner);
         double pointsToAdd = UIForms.readDouble(scanner, UIText.INPUT_POINTS_TO_ADD);
         enrollmentService.addPoints(enrollment, activeUser, type, pointsToAdd);
-        printSuccess("Mark recorded.");
+        printSuccess(UIText.MSG_MARK_RECORDED);
     }
 
     private static void printTeacherStudents() {
         Teacher activeUser = (Teacher) getActiveUser();
         Map<Course, List<Student>> students = teacherService.getStudentsByTeacher(activeUser);
-        printHeader("Students");
+        printHeader(UIText.TEACHER_HEADER_STUDENTS);
         for (var entry : students.entrySet()) {
             printHeader(entry.getKey().getName());
             entry.getValue().forEach(s -> println(s.asLine()));
@@ -82,7 +84,7 @@ public final class TeacherApp extends BaseApp {
 
     private static void printTeacherCourses() {
         Teacher activeUser = (Teacher) getActiveUser();
-        Map<TeacherType, List<Course>> courseMap = teacherService.getCoursesByTeacher(activeUser);
+        Map<TeacherType, List<Course>> courseMap = teacherService.getCourses(activeUser);
         for (var entry : courseMap.entrySet()) {
             printHeader(StringUtils.capitalize(entry.getKey().name()));
             entry.getValue().forEach(c -> println(c.asLine()));
@@ -94,19 +96,19 @@ public final class TeacherApp extends BaseApp {
 
         List<Dean> deans = userService.getUsersByClass(Dean.class);
         if (deans.isEmpty()) {
-            println("No deans.");
+            println(UIText.MSG_NO_DEANS);
             return;
         }
-        printHeader("Deans");
+        printHeader(UIText.TEACHER_HEADER_DEANS);
         deans.forEach(d -> println(d.asLine()));
         Dean dean = UIForms.readIdFromList(scanner, UIText.INPUT_RECEIVER_ID, deans);
 
         List<Student> students = userService.getUsersByClass(Student.class);
         if (students.isEmpty()) {
-            println("No students.");
+            println(UIText.MSG_NO_STUDENTS);
             return;
         }
-        printHeader("Students");
+        printHeader(UIText.TEACHER_HEADER_STUDENTS);
         students.forEach(s -> println(s.asLine()));
         Student student = UIForms.readIdFromList(scanner, UIText.INPUT_STUDENT_ID, students);
 
@@ -115,16 +117,32 @@ public final class TeacherApp extends BaseApp {
 
         TeacherComplaint complaint = new TeacherComplaint(urgency, teacher, dean, student, content);
         complaintService.create(complaint);
-        printSuccess("Complaint sent.");
+        printSuccess(UIText.MSG_COMPLAINT_SENT);
     }
+
+    
 
     private static void printTeacherComplaints() {
         Teacher activeUser = (Teacher) getActiveUser();
         List<TeacherComplaint> complaints = complaintService.getComplaintsByTeacher(activeUser);
         if (complaints.isEmpty()) {
-            printFail("You have no complaints yet,");
+            printFail(UIText.MSG_NO_COMPLAINTS_YET);
             return;
         }
         complaints.forEach(tc -> println(tc.asLine()));
+    }
+
+
+    private static void becomeSupervisor(){
+        Teacher teacher = (Teacher) getActiveUser();
+        List<GraduateStudent> graduates = userService.getUsersByClass(GraduateStudent.class);
+        if(graduates.isEmpty()){
+            println(UIText.MSG_NO_GRADUATE_STUDENTS);
+            return;
+        }
+        graduates.forEach(gs -> println(gs.asLine()));
+        GraduateStudent graduate = UIForms.readIdFromList(scanner, UIText.INPUT_STUDENT_ID, graduates);
+        teacherService.becomeSupervisor(graduate, teacher);
+        printSuccess(UIText.TEACHER_SUCCESS_SUPERVISOR);
     }
 }

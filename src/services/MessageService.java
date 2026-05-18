@@ -30,11 +30,11 @@ public class MessageService extends GenericService<Chat>{
         Employee receiver = (Employee) chat.getOtherMember(sender);
 
         if(!sender.isAvailable() || !receiver.isAvailable()){
-            throw new OperationNotAllowed(" sending messages to/from deleted accounts");
+            throw new OperationNotAllowed("Messages cannot be sent to or from deleted accounts.");
         }
 
         if (!chat.isMember(sender)) {
-            throw new DoesNotExist(msg.getSender() + " is not a member of the chat");
+            throw new DoesNotExist("The sender is not a member of this chat.");
         }
         
         chat.sendMessage(msg);
@@ -49,7 +49,7 @@ public class MessageService extends GenericService<Chat>{
         Employee receiver = (Employee) to;
 
         if(!sender.isAvailable() || !receiver.isAvailable()){
-            throw new OperationNotAllowed(" sending messages to/from deleted accounts");
+            throw new OperationNotAllowed("Messages cannot be sent to or from deleted accounts.");
         }
         
         Chat chat;
@@ -80,7 +80,7 @@ public class MessageService extends GenericService<Chat>{
         return getAll().stream()
                        .filter(chat -> chat.isMember(memberOne) && chat.isMember(memberTwo))
                        .findFirst()
-                       .orElseThrow(() -> new DoesNotExist("chat for users " + memberOne + " and " + memberTwo));
+                       .orElseThrow(() -> new DoesNotExist("No chat exists between these two users."));
     }
 
     public boolean exists(Employee memberOne, Employee memberTwo){

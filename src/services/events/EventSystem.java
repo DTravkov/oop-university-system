@@ -11,7 +11,7 @@ import utils.FieldValidator;
 
 /**
  * Used by services to react to events, e.g Employee deletion leads to clean up of his messenger data.
- * It was insired by Express.js event system, and is global in every service.
+ * It was insired by Express.js event system, and is accessible in every service.
  * My favourite pattern :3
  */
 
@@ -33,7 +33,7 @@ public class EventSystem {
     }
     
     public void publish(Event event) {
-        FieldValidator.requireNonNull(event, "Event");
+        FieldValidator.requireNonNull(event);
         //event.getClass() because keys of map are actually class literals
         List<Consumer<Event>> handlerList = handlers.get(event.getClass());
         if(handlerList == null || handlerList.isEmpty()){

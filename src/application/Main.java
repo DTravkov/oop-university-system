@@ -16,18 +16,15 @@ public class Main{
      * but it only renders menu based on who the user is.
      */
     public static void main(String[] args){
+
         UniversityApplication.changeLanguage();
-
+        
         UniversityApplication.authenticate();
-
-        //MockDataFactory.seedDemo();
         
         if(UniversityApplication.isAuthenticated())
             UniversityApplication.start();
 
         UniversityApplication.kill();
-
-
 
     }
 

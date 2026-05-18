@@ -12,6 +12,11 @@ import utils.Translator;
 import utils.UIForms;
 import utils.UIText;
 
+/**
+ * Base class that every application must inherit.
+ * Gives tons of helpers for printing data, handling {@link ApplicationException}.
+ * Also contains subclass {@link MenuBuilder}, to create CLI menus quickly.
+ */
 public abstract class BaseApp {
 
     protected static final Scanner scanner = new Scanner(System.in);
@@ -53,6 +58,34 @@ public abstract class BaseApp {
         System.out.println("||| " + data + " |||");
     }
 
+    public static void printHeader(UIText text) {
+        printHeader(text.localized());
+    }
+
+    public static void println(UIText text) {
+        println(text.localized());
+    }
+
+    public static void println(UIText text, Object... args) {
+        println(text.localized(args));
+    }
+
+    public static void printSuccess(UIText text) {
+        printSuccess(text.localized());
+    }
+
+    public static void printSuccess(UIText text, Object... args) {
+        printSuccess(text.localized(args));
+    }
+
+    public static void printFail(UIText text) {
+        printFail(text.localized());
+    }
+
+    public static void printFail(UIText text, Object... args) {
+        printFail(text.localized(args));
+    }
+
     public static void printSuccess(String data) {
         System.out.println("[" + UIText.SUCCESS.localized() + "] " + data);
     }
@@ -77,6 +110,10 @@ public abstract class BaseApp {
         println(Translator.translate(UIText.MSG_INVALID_CHOICE));
     }
 
+    /**
+     * protected subclass of {@link BaseApp}.
+     * gives nice and clear way to build menus using {@link Action} subclass 
+     */
     protected static class MenuBuilder {
 
         private final List<Action> actions = new ArrayList<>();
@@ -91,7 +128,19 @@ public abstract class BaseApp {
             this.menuTitle = "\n||| " + menuTitle + " |||";
         }
 
+        protected MenuBuilder(UIText menuTitle) {
+            this(menuTitle.localized());
+        }
+
+        protected MenuBuilder(UIText menuTitle, Object... args) {
+            this(menuTitle.localized(args));
+        }
+
         protected MenuBuilder(String menuTitle, boolean withExit) {
+            this(menuTitle);
+        }
+
+        protected MenuBuilder(UIText menuTitle, boolean withExit) {
             this(menuTitle);
         }
 
@@ -125,11 +174,20 @@ public abstract class BaseApp {
             return this;
         }
 
+        protected MenuBuilder addAction(UIText actionTitle, Runnable callback) {
+            return addAction(actionTitle.localized(), callback);
+        }
+
         protected MenuBuilder addExit() {
             actions.add(new Action(UIText.MENU_EXIT.localized(), this::stop));
             return this;
         }
 
+        /**
+         * private subclass of {@link MenuBuilder}.
+         * stores {@link String} title and {@link Runnable} callback to represent a button in Menu.
+         * each method passed as {@link Runnable} callback handles {@link exceptions.ApplicationException}, 
+         */
         private final class Action {
 
             public final String title;
