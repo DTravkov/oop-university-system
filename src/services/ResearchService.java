@@ -37,7 +37,7 @@ public class ResearchService extends BaseService<SerializableModel> {
     // RESEARCHERS
     public ResearcherProfile createProfile(User user) {
         if (isResearcher(user)) {
-            throw new AlreadyExists("A researcher profile already exists for this user.");
+            throw new AlreadyExists(UIText.ERR_RESEARCHER_PROFILE_EXISTS);
         }
 
         ResearcherProfile profile = profileRepository.save(new ResearcherProfile(user));
@@ -105,7 +105,7 @@ public class ResearchService extends BaseService<SerializableModel> {
     public ResearcherProfile getProfile(User user) {
         ResearcherProfile match = profileRepository.find(p -> p.getUser().equals(user));
         if (match == null) {
-            throw new DoesNotExist("No researcher profile exists for this user.");
+            throw new DoesNotExist(UIText.ERR_RESEARCHER_PROFILE_MISSING);
         }
         return match;
     }

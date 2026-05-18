@@ -6,6 +6,7 @@ import java.util.List;
 import exceptions.AlreadyExists;
 import exceptions.OperationNotAllowed;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class StudentOrganization extends SerializableModel {
 
@@ -31,7 +32,7 @@ public class StudentOrganization extends SerializableModel {
     public void setPresident(Student president) {
         FieldValidator.requireNonNull(president);
         if(this.president.getId() == president.getId()){
-            throw new AlreadyExists("This user is already the president of the organization.");
+            throw new AlreadyExists(UIText.ERR_ORG_ALREADY_PRESIDENT);
         }
         this.president = president;
         this.addMember(president);
@@ -76,13 +77,13 @@ public class StudentOrganization extends SerializableModel {
     public void addMember(Student member) {
         FieldValidator.requireNonNull(member);
         if(isMember(member))
-            throw new AlreadyExists("This student is already a member of " + getName() + ".");
+            throw new AlreadyExists(UIText.ERR_ORG_MEMBER_ALREADY_IN_ORG);
         this.members.add(member);
     }
 
     public boolean removeMember(Student member) {
         if(member.equals(president) && !president.isDeleted()){
-            throw new OperationNotAllowed("The president cannot be removed without appointing a successor.");
+            throw new OperationNotAllowed(UIText.ERR_ORG_PRESIDENT_CANNOT_REMOVE);
         }
         return members.remove(member);
     }

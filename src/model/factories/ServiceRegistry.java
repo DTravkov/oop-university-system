@@ -42,10 +42,10 @@ public final class ServiceRegistry {
         studentOrganizationService = new StudentOrganizationService();
         researchService = new ResearchService();
         complaintService = new ComplaintService();
+        courseService = new CourseService();
 
         // services that depend on basic services
         techRequestService = new TechRequestService(userService);
-        courseService = new CourseService(enrollmentService);
 
         // helper services that are not related to any domain class directly
         teacherService = new TeacherService(courseService, enrollmentService, userService);

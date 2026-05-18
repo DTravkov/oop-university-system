@@ -16,6 +16,7 @@ import model.enumeration.AttestationType;
 import services.events.concrete.CourseDeleteEvent;
 import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * EnrollmentService is a concrete service. It implements logic for enrollments. 
@@ -32,7 +33,7 @@ public class EnrollmentService extends GenericService<Enrollment>  {
     @Override
     public Enrollment create(Enrollment enrollment) {
         if(existsByStudentAndCourse(enrollment)){
-            throw new AlreadyExists("This student is already enrolled in this course.");
+            throw new AlreadyExists(UIText.ERR_ALREADY_ENROLLED);
         }
         List<Enrollment> studentEnrollments = getEnrollments(enrollment.getStudent());
         int creditCount = 0;
@@ -40,7 +41,7 @@ public class EnrollmentService extends GenericService<Enrollment>  {
             creditCount += enr.getCourse().getCredits();
         }
         if(creditCount + enrollment.getCourse().getCredits() > 21){
-            throw new OperationNotAllowed("Total credits cannot exceed 21.");
+            throw new OperationNotAllowed(UIText.ERR_CREDITS_EXCEED_21);
         }
         
         return super.create(enrollment);

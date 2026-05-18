@@ -28,7 +28,7 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
     @Override
     public StudentOrganization create(StudentOrganization org){
         if(isPresident(org.getPresident()) || isMember(org.getPresident())){
-            throw new AlreadyExists("The nominated person already leads or belongs to another organization.");
+            throw new AlreadyExists(UIText.ERR_ORG_NOMINEE_BUSY);
         }
         org = super.create(org);
         eventSystem.publish(new NotificationCreateEvent(
@@ -39,7 +39,7 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public void makePresident(StudentOrganization org, Student student){
         if(isPresident(student)){
-            throw new AlreadyExists("This student already leads another organization.");
+            throw new AlreadyExists(UIText.ERR_ORG_ALREADY_LEADS);
         }
         org.setPresident(student);
         update(org);
@@ -54,7 +54,7 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public void addMember(StudentOrganization org, Student student){
         if(isMember(student)){
-            throw new AlreadyExists("This student already belongs to another organization.");
+            throw new AlreadyExists(UIText.ERR_ORG_ALREADY_MEMBER);
         }
         org.addMember(student);
         Logger.log("Add member (" + student.asLine() + ") to organization (" + org.getId() + ")");
@@ -63,7 +63,7 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public void removeMember(StudentOrganization org, Student student){
         if(!org.removeMember(student)){
-            throw new DoesNotExist("This student is not a member of " + org.getName() + ".");
+            throw new DoesNotExist(UIText.ERR_ORG_STUDENT_NOT_MEMBER);
         }
         Logger.log("Remove member (" + student.asLine() + ") from organization (" + org.getId() + ")");
         update(org);
@@ -75,13 +75,13 @@ public class StudentOrganizationService extends GenericService<StudentOrganizati
 
     public StudentOrganization getOrganizationByMember(Student member){
         StudentOrganization match = find(org -> org.getMembers().contains(member));
-        if(match == null) throw new DoesNotExist("This student is not a member of any organization.");
+        if(match == null) throw new DoesNotExist(UIText.ERR_ORG_STUDENT_NOT_IN_ANY);
         return match;
     }
 
     public StudentOrganization getOrganizationByPresident(Student president){
         StudentOrganization match = find(org -> org.getPresident().equals(president));
-        if(match == null) throw new DoesNotExist("This student is not a president of any organization.");
+        if(match == null) throw new DoesNotExist(UIText.ERR_ORG_STUDENT_NOT_PRESIDENT);
         return match;
     }
 

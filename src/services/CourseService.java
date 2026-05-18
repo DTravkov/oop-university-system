@@ -8,25 +8,22 @@ import java.util.Map;
 import exceptions.AlreadyExists;
 
 import model.domain.Course;
-import model.domain.Enrollment;
-import model.domain.Student;
 import model.domain.Teacher;
 import model.domain.User;
 import model.enumeration.TeacherType;
 import services.events.concrete.CourseDeleteEvent;
 import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * CourseService is a concrete service. It implements logic for managing courses.
  */
 public class CourseService extends GenericService<Course>  {
 
-    private final EnrollmentService enrollmentService;
 
-    public CourseService(EnrollmentService enrollmentService) {
+    public CourseService() {
         super(Course.class);
-        this.enrollmentService = enrollmentService;
     }
 
     // CREATE / UPDATE / DELETE
@@ -34,7 +31,7 @@ public class CourseService extends GenericService<Course>  {
     @Override
     public Course create(Course course) {
         if(existsByName(course.getName())){
-            throw new AlreadyExists("A course named '" + course.getName() + "' already exists.");
+            throw new AlreadyExists(UIText.ERR_COURSE_NAME_EXISTS);
         }
         return super.create(course);
     }

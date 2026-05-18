@@ -7,6 +7,7 @@ import java.util.Set;
 
 import exceptions.OperationNotAllowed;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class Chat extends SerializableModel {
 
@@ -19,7 +20,7 @@ public class Chat extends SerializableModel {
         FieldValidator.requireNonNull(memberOne);
         FieldValidator.requireNonNull(memberTwo);
         if (memberOne.equals(memberTwo)) {
-            throw new OperationNotAllowed("Chat members must be two different users.");
+            throw new OperationNotAllowed(UIText.ERR_CHAT_SAME_MEMBER);
         }
         this.members.add(memberOne);
         this.members.add(memberTwo);
@@ -58,10 +59,10 @@ public class Chat extends SerializableModel {
     public void sendMessage(Message message) {
         FieldValidator.requireNonNull(message);
         if(messages.contains(message)){
-            throw new OperationNotAllowed("This message is already in the chat.");
+            throw new OperationNotAllowed(UIText.ERR_CHAT_MESSAGE_EXISTS);
         }
         if(!isMember(message.getSender())){
-            throw new OperationNotAllowed("The sender is not a member of this chat.");
+            throw new OperationNotAllowed(UIText.ERR_CHAT_SENDER_NOT_MEMBER);
         }
         this.messages.add(message);
     }

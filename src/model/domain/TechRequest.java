@@ -3,6 +3,7 @@ package model.domain;
 import exceptions.OperationNotAllowed;
 import model.enumeration.TechRequestStatus;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class TechRequest extends SerializableModel {
 
@@ -18,7 +19,7 @@ public class TechRequest extends SerializableModel {
         FieldValidator.requireNonNull(specialist);
         FieldValidator.requireNonBlank(content);
         if(specialist.equals(employee)){
-            throw new OperationNotAllowed("You cannot send a tech request to yourself.");
+            throw new OperationNotAllowed(UIText.ERR_TECH_REQUEST_SELF);
         }
         this.employee = employee;
         this.specialist = specialist;
@@ -33,7 +34,7 @@ public class TechRequest extends SerializableModel {
     public void setStatus(TechRequestStatus status) {
         FieldValidator.requireNonNull(status);
         if(status.getStage() < getStatus().getStage() || status.equals(getStatus())){
-            throw new OperationNotAllowed("Tech request status is already set to this value.");
+            throw new OperationNotAllowed(UIText.ERR_TECH_REQUEST_STATUS_SAME);
         }
         this.status = status;
     }

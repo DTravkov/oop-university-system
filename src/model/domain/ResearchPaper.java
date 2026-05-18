@@ -8,6 +8,7 @@ import exceptions.AlreadyExists;
 import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class ResearchPaper extends SerializableModel {
     private static final long serialVersionUID = 1L;
@@ -60,10 +61,10 @@ public class ResearchPaper extends SerializableModel {
     public void addReference(ResearchPaper reference) {
         FieldValidator.requireNonNull(reference);
         if (this.equals(reference)) {
-            throw new OperationNotAllowed("A paper cannot reference itself.");
+            throw new OperationNotAllowed(UIText.ERR_PAPER_SELF_REFERENCE);
         }
         if (references.contains(reference)) {
-            throw new AlreadyExists("This reference is already linked to the paper.");
+            throw new AlreadyExists(UIText.ERR_PAPER_REFERENCE_EXISTS);
         }
         references.add(reference);
     }

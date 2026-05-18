@@ -8,6 +8,7 @@ import exceptions.OperationNotAllowed;
 import model.enumeration.CourseType;
 import model.enumeration.TeacherType;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class Course extends SerializableModel {
 
@@ -32,7 +33,7 @@ public class Course extends SerializableModel {
 
     public void addTeacher(Teacher teacher, TeacherType typeToAdd){
         if(typeToAdd == TeacherType.BOTH)
-            throw new OperationNotAllowed("TeacherType BOTH cannot be used when adding a teacher.");
+            throw new OperationNotAllowed(UIText.ERR_COURSE_TEACHER_TYPE_BOTH);
 
         if(typeToAdd == TeacherType.LECTURE){
             addLectureTeacher(teacher);
@@ -45,7 +46,7 @@ public class Course extends SerializableModel {
 
     public void removeTeacher(Teacher teacher, TeacherType typeToDelete){
         if(typeToDelete == TeacherType.BOTH)
-            throw new OperationNotAllowed("TeacherType BOTH cannot be used when adding a teacher.");
+            throw new OperationNotAllowed(UIText.ERR_COURSE_TEACHER_TYPE_BOTH);
         if(typeToDelete == TeacherType.LECTURE){
             removeLectureTeacher(teacher);
         }
@@ -58,9 +59,9 @@ public class Course extends SerializableModel {
     private void addLectureTeacher(Teacher lectureTeacher) {
         FieldValidator.requireNonNull(lectureTeacher);
         if(!lectureTeacher.isLecturer())
-            throw new OperationNotAllowed("Only lecturers can be assigned as lecture teachers.");
+            throw new OperationNotAllowed(UIText.ERR_COURSE_LECTURE_TEACHER_ONLY);
         if(lectureTeachers.contains(lectureTeacher)){
-            throw new AlreadyExists("This teacher is already assigned as a lecture teacher on this course.");
+            throw new AlreadyExists(UIText.ERR_COURSE_LECTURE_TEACHER_EXISTS);
         }
         this.lectureTeachers.add(lectureTeacher);
         
@@ -70,10 +71,10 @@ public class Course extends SerializableModel {
         FieldValidator.requireNonNull(practiceTeacher);
 
         if(!practiceTeacher.isPractice())
-            throw new OperationNotAllowed("Only practice teachers can be assigned as practice teachers.");
+            throw new OperationNotAllowed(UIText.ERR_COURSE_PRACTICE_TEACHER_ONLY);
 
         if(practiceTeachers.contains(practiceTeacher)){
-            throw new AlreadyExists("This teacher is already assigned as a practice teacher on this course.");
+            throw new AlreadyExists(UIText.ERR_COURSE_PRACTICE_TEACHER_EXISTS);
         }
         
         this.practiceTeachers.add(practiceTeacher);

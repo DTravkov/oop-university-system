@@ -2,12 +2,14 @@ package services;
 
 import java.util.List;
 
+import exceptions.OperationNotAllowed;
 import model.domain.Comment;
 import model.domain.Manager;
 import model.domain.News;
 import model.enumeration.NewsUrgencyLevel;
 import utils.Comparators;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * NewsService is a concrete service. It implements logic for news and comments: publishing, filters,
@@ -30,7 +32,7 @@ public class NewsService extends GenericService<News>{
 
     @Override
     public void delete(News news) {
-        throw new RuntimeException("Illegal delete method is used. refer to other overload");
+        throw new OperationNotAllowed(UIText.ERR_NEWS_DELETE_METHOD);
     }
 
     public void assignComment(News news, Comment comment) {

@@ -123,7 +123,7 @@ public class UserService extends GenericService<User> {
                 return user;
             }
         }
-        throw new DoesNotExist("User with login '" + login + "' does not exist.");
+        throw new DoesNotExist(UIText.ERR_USER_LOGIN_NOT_FOUND);
     }
 
     public boolean existsByLogin(String login){

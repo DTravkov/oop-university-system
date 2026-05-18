@@ -7,6 +7,7 @@ import java.util.List;
 import exceptions.OperationNotAllowed;
 import model.enumeration.NewsUrgencyLevel;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class News extends SerializableModel {
 
@@ -36,7 +37,7 @@ public class News extends SerializableModel {
 
     public void deleteBy(Manager manager){
         if(!getPublisher().equals(manager)){
-            throw new OperationNotAllowed("Only the publisher can delete this news item.");
+            throw new OperationNotAllowed(UIText.ERR_NEWS_DELETE_PUBLISHER_ONLY);
         }
     }
 

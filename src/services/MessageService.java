@@ -10,6 +10,7 @@ import model.domain.Message;
 import model.domain.User;
 import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
+import utils.UIText;
 
 /**
  * MessageService is a concrete service. It implements logic for employee chats: sending messages inside a chat,
@@ -30,11 +31,11 @@ public class MessageService extends GenericService<Chat>{
         Employee receiver = (Employee) chat.getOtherMember(sender);
 
         if(!sender.isAvailable() || !receiver.isAvailable()){
-            throw new OperationNotAllowed("Messages cannot be sent to or from deleted accounts.");
+            throw new OperationNotAllowed(UIText.ERR_MESSAGE_DELETED_ACCOUNT);
         }
 
         if (!chat.isMember(sender)) {
-            throw new DoesNotExist("The sender is not a member of this chat.");
+            throw new DoesNotExist(UIText.ERR_CHAT_SENDER_NOT_MEMBER);
         }
         
         chat.sendMessage(msg);
@@ -49,7 +50,7 @@ public class MessageService extends GenericService<Chat>{
         Employee receiver = (Employee) to;
 
         if(!sender.isAvailable() || !receiver.isAvailable()){
-            throw new OperationNotAllowed("Messages cannot be sent to or from deleted accounts.");
+            throw new OperationNotAllowed(UIText.ERR_MESSAGE_DELETED_ACCOUNT);
         }
         
         Chat chat;

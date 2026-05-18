@@ -5,6 +5,7 @@ import java.util.Date;
 import exceptions.OperationNotAllowed;
 import model.enumeration.ComplaintUrgencyLevel;
 import utils.FieldValidator;
+import utils.UIText;
 
 public class TeacherComplaint extends SerializableModel {
 
@@ -34,7 +35,7 @@ public class TeacherComplaint extends SerializableModel {
 
     public void closeBy(Dean dean){
         if(getDean().getId() != dean.getId()){
-            throw new OperationNotAllowed("You cannot close another dean's complaint.");
+            throw new OperationNotAllowed(UIText.ERR_COMPLAINT_CLOSE_NOT_OWNER);
         }
         this.setClosed(true);
         return;

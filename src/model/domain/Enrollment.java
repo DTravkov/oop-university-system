@@ -4,6 +4,7 @@ import exceptions.DoesNotExist;
 import exceptions.OperationNotAllowed;
 import model.enumeration.AttestationType;
 import utils.FieldValidator;
+import utils.UIText;
 
 import java.util.Date;
 
@@ -25,7 +26,7 @@ public class Enrollment extends SerializableModel {
         FieldValidator.requireNonNull(student);
         this.course = course;
         if (course.getLectureTeachers().isEmpty() || course.getPracticeTeachers().isEmpty()) {
-            throw new DoesNotExist("This course must have at least one lecture teacher and one practice teacher.");
+            throw new DoesNotExist(UIText.ERR_ENROLLMENT_NO_TEACHERS);
         }
         this.student = student;
         this.enrollmentDate = new Date();
@@ -89,7 +90,7 @@ public class Enrollment extends SerializableModel {
 
     public void incrementMark(double point, Teacher teacher, AttestationType attestationType) {
         if (!isTeaching(teacher)) {
-            throw new OperationNotAllowed("You cannot grade students assigned to another teacher.");
+            throw new OperationNotAllowed(UIText.ERR_ENROLLMENT_GRADE_NOT_TEACHER);
         }
         mark.addPoints(attestationType, point);
     }
