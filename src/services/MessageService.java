@@ -11,6 +11,7 @@ import model.domain.User;
 import services.events.concrete.UserDeleteEvent;
 import utils.Logger;
 import utils.UIText;
+import utils.UIText;
 
 /**
  * MessageService is a concrete service. It implements logic for employee chats: sending messages inside a chat,
@@ -81,7 +82,7 @@ public class MessageService extends GenericService<Chat>{
         return getAll().stream()
                        .filter(chat -> chat.isMember(memberOne) && chat.isMember(memberTwo))
                        .findFirst()
-                       .orElseThrow(() -> new DoesNotExist("No chat exists between these two users."));
+                       .orElseThrow(() -> new DoesNotExist(UIText.ERR_CHAT_NOT_FOUND));
     }
 
     public boolean exists(Employee memberOne, Employee memberTwo){

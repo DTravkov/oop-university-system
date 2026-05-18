@@ -124,7 +124,7 @@ public class UIForms {
                         return entity;
                     }
                 }
-                throw new DoesNotExist("No item with id " + id + " in the list.");
+                throw new DoesNotExist(UIText.ERR_LIST_ITEM_NOT_FOUND);
             } catch (NumberFormatException e) {
                 System.out.println(UIText.MSG_INPUT_NUMBER.localized());
             }

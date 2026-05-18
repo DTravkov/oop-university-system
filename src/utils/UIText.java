@@ -371,7 +371,14 @@ public enum UIText {
     ERR_COURSE_LECTURE_TEACHER_ONLY("err.course_lecture_teacher_only"),
     ERR_COURSE_LECTURE_TEACHER_EXISTS("err.course_lecture_teacher_exists"),
     ERR_COURSE_PRACTICE_TEACHER_ONLY("err.course_practice_teacher_only"),
-    ERR_COURSE_PRACTICE_TEACHER_EXISTS("err.course_practice_teacher_exists");
+    ERR_COURSE_PRACTICE_TEACHER_EXISTS("err.course_practice_teacher_exists"),
+    ERR_LIST_ITEM_NOT_FOUND("err.list_item_not_found"),
+    ERR_CHAT_NOT_FOUND("err.chat_not_found"),
+    ERR_USER_BUILDER_NO_CLASS("err.user_builder_no_class"),
+    ERR_USER_BUILDER_CLASS_NOT_REGISTRABLE("err.user_builder_class_not_registrable"),
+    ERR_USER_BUILDER_NO_TEACHER_TYPE("err.user_builder_no_teacher_type"),
+    ERR_USER_BUILDER_NO_ADMISSION_DATE("err.user_builder_no_admission_date"),
+    ERR_USER_BUILDER_UNSUPPORTED_CLASS("err.user_builder_unsupported_class");
 
     private final String key;
 

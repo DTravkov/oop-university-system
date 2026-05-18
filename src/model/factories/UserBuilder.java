@@ -2,6 +2,7 @@ package model.factories;
 
 import java.util.Date;
 
+import exceptions.OperationNotAllowed;
 import model.domain.Dean;
 import model.domain.GraduateStudent;
 import model.domain.Manager;
@@ -11,6 +12,7 @@ import model.domain.TechSupportSpecialist;
 import model.domain.User;
 import model.enumeration.TeacherType;
 import settings.AppSettings;
+import utils.UIText;
 
 
 public class UserBuilder {
@@ -60,14 +62,14 @@ public class UserBuilder {
 
     public User build() {
 
-        if (userClass == null) 
-            throw new RuntimeException("No userClass is passed before calling .build");
-        if (!AppSettings.REGISTRABLE_USER_CLASSES.contains(userClass)) 
-            throw new RuntimeException("Passed userClass can not be registered. Check REGISTRABLE_USER_CLASSES");
-        if (userClass.equals(Teacher.class) && teacherType == null) 
-            throw new RuntimeException("No teacherType is passed on Teacher before calling .build");
-        if (Student.class.isAssignableFrom(userClass) && admissionDate == null) 
-            throw new RuntimeException("No admissionDate is passed on Student before calling .build");
+        if (userClass == null)
+            throw new OperationNotAllowed(UIText.ERR_USER_BUILDER_NO_CLASS);
+        if (!AppSettings.REGISTRABLE_USER_CLASSES.contains(userClass))
+            throw new OperationNotAllowed(UIText.ERR_USER_BUILDER_CLASS_NOT_REGISTRABLE);
+        if (userClass.equals(Teacher.class) && teacherType == null)
+            throw new OperationNotAllowed(UIText.ERR_USER_BUILDER_NO_TEACHER_TYPE);
+        if (Student.class.isAssignableFrom(userClass) && admissionDate == null)
+            throw new OperationNotAllowed(UIText.ERR_USER_BUILDER_NO_ADMISSION_DATE);
 
         if (userClass == Student.class) return new Student(login, password, name, surname, admissionDate);
         if (userClass == GraduateStudent.class) return new GraduateStudent(login, password, name, surname, admissionDate);
@@ -76,6 +78,6 @@ public class UserBuilder {
         if (userClass == Manager.class) return new Manager(login, password, name, surname);
         if (userClass == TechSupportSpecialist.class) return new TechSupportSpecialist(login, password, name, surname);
 
-        throw new IllegalArgumentException("Unsupported user class: " + userClass.getSimpleName());
+        throw new OperationNotAllowed(UIText.ERR_USER_BUILDER_UNSUPPORTED_CLASS);
     }
 }
