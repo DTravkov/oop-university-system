@@ -25,7 +25,7 @@ public class GraduateStudent extends Student {
 
 	@Override
 	public String asLine() {
-		return super.asLine() + " | Graduate";
+		return super.asLine();
 	}
 
 	@Override

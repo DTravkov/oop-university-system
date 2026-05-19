@@ -10,7 +10,7 @@ public class TechSupportSpecialist extends Employee {
 
     @Override
     public String asLine() {
-        return super.asLine() + " | TechSupport";
+        return super.asLine();
     }
 
     @Override

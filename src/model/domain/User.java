@@ -181,11 +181,17 @@ public abstract class User extends SerializableModel{
 
 	@Override
 	public String asLine() {
+		String line = "";
 		if(isDeleted){
-			return String.format("ID: %d | Deleted User", id);
+			line = String.format("ID: %d | Deleted User", id);
+			return line;
 		}
-		return String.format("ID: %d | Name: %s ",
+		line = String.format("ID: %d | Name: %s ",
 				id, getFullname());
+		if(isBanned()){
+			line += "| Banned";
+		}
+		return line;
 	}
 
 	@Override

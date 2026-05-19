@@ -9,9 +9,9 @@ public class Manager extends Employee {
     }
 
     @Override
-    public String asLine() {
-        return super.asLine() + " | Manager";
-    }
+	public String asLine() {
+		return super.asLine();
+	}
 
     @Override
     public String asTable() {

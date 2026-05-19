@@ -9,9 +9,10 @@ public class Dean extends Employee {
 		super(login, password, name, surname);
 	}
 
+	
 	@Override
 	public String asLine() {
-		return super.asLine() + " | Dean";
+		return super.asLine();
 	}
 
 	@Override

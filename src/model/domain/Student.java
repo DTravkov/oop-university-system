@@ -28,8 +28,7 @@ public class Student extends User {
 
 	@Override
 	public String asLine() {
-		return String.format("ID: %d | Name: %s",
-				id, getFullname());
+		return super.asLine();
 	}
 
 	@Override

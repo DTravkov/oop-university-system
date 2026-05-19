@@ -39,8 +39,7 @@ public class Message extends SerializableModel {
 
     @Override
     public String asLine() {
-        String preview = content.length() > 40 ? content.substring(0, 37) + "..." : content;
-        return String.format("ID: %d | From: %s | %s", id, sender.getFullname(), preview);
+        return String.format("ID: %d | From: %s | %s", id, sender.getFullname(), content);
     }
 
     @Override

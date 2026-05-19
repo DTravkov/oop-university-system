@@ -11,7 +11,7 @@ public abstract class Employee extends User{
 
 	@Override
 	public String asLine() {
-		return super.asLine();
+		return super.asLine() + " | " + this.getClass().getSimpleName();
 	}
 
 	@Override

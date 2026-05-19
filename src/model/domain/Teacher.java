@@ -34,7 +34,7 @@ public class Teacher extends Employee {
 
 	@Override
 	public String asLine() {
-		return super.asLine() + String.format(" | Teacher type: %s", type);
+		return super.asLine() + String.format(" | type: %s", type);
 	}
 
 	@Override

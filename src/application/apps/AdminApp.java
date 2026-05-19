@@ -31,6 +31,7 @@ public final class AdminApp extends BaseApp {
                 .addAction(UIText.ADMIN_GET_ALL_USERS, () -> printAllUsersByClass(User.class))
                 .addAction(UIText.ADMIN_CREATE_USER, () -> createUser())
                 .addAction(UIText.ADMIN_DELETE_USER, () -> deleteUser())
+                .addAction(UIText.ADMIN_RESTORE_DELETED, () -> restoreDeletedUser())
                 .addAction(UIText.ADMIN_BAN_USER, () -> banUser())
                 .addAction(UIText.ADMIN_UNBAN_USER, () -> unbanUser())
                 .addExit();
@@ -38,14 +39,14 @@ public final class AdminApp extends BaseApp {
 
     private static void banUser() {
         Admin admin = (Admin) getActiveUser();
-        List<User> users = userService.getUsersByClass(User.class);
-        if (users.isEmpty()) {
+        List<User> unbannedUsers = userService.getAll(u -> !u.isBanned());
+        if (unbannedUsers.isEmpty()) {
             println(UIText.ADMIN_NO_USERS);
             return;
         }
         printHeader(UIText.ADMIN_HEADER_USER);
-        users.stream().filter(u -> !u.equals(getActiveUser())).forEach(u -> println(u.asLine()));
-        User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, users);
+        unbannedUsers.stream().filter(u -> !u.equals(getActiveUser())).forEach(u -> println(u.asLine()));
+        User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, unbannedUsers);
         userService.ban(user, admin);
         printSuccess(UIText.ADMIN_USER_BANNED, user.asLine());
     }
@@ -75,6 +76,20 @@ public final class AdminApp extends BaseApp {
         User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, users);
         userService.delete(user);
         printSuccess(UIText.ADMIN_USER_DELETED, user.asLine());
+    }
+
+    private static void restoreDeletedUser() {
+        List<User> users = userService.getAll(u -> u.isDeleted());
+        if (users.isEmpty()) {
+            println(UIText.ADMIN_NO_USERS);
+            return;
+        }
+        printHeader(UIText.ADMIN_HEADER_USER);
+        users.forEach(u -> println(u.asLine()));
+        User user = UIForms.readIdFromList(scanner, UIText.INPUT_USER_ID, users);
+        user.unmarkAsDeleted();
+        userService.update(user);
+        printSuccess(UIText.ADMIN_USER_RESTORED, user.asLine());
     }
 
     private static void createUser() {
