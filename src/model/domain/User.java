@@ -41,7 +41,7 @@ public abstract class User extends SerializableModel{
     	FieldValidator.requireNonBlank(surname);
 		FieldValidator.requireSingleWord(name);
 		FieldValidator.requireSingleWord(surname);
-		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && !AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && !AppSettings.DEFAULT_SYSTEM_LOGINS.contains(this.getLogin()))
 			FieldValidator.requirePasswordValidation(password);
 		
     	this.login = login;
@@ -115,7 +115,7 @@ public abstract class User extends SerializableModel{
 	public void setPassword(String password) {
 		FieldValidator.requireNonBlank(password);
 		FieldValidator.requireSingleWord(password);
-		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && AppSettings.REGISTRABLE_USER_CLASSES.contains(this.getClass()))
+		if(AppSettings.REQUIRE_PASSWORD_VALIDATION && !AppSettings.DEFAULT_SYSTEM_LOGINS.contains(this.getLogin()))
 			FieldValidator.requirePasswordValidation(password);
         
 

@@ -62,7 +62,7 @@ public class AppSettings {
     public static final int RECENT_LOG_HOURS = 12;
 
     //global validation rules
-    public static boolean REQUIRE_PASSWORD_VALIDATION = false;
+    public static boolean REQUIRE_PASSWORD_VALIDATION = true;
 
 
     //helpers and etc.

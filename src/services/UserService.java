@@ -43,8 +43,9 @@ public class UserService extends GenericService<User> {
         if(existsByLogin(user.getLogin())){
             throw new AlreadyExists(UIText.ERR_USER_LOGIN);
         }
-        User savedUser = super.create(user);
+        User savedUser = repository.save(user);
         this.eventSystem.publish(new UserCreateEvent(savedUser));
+        Logger.log("Create User id=" + savedUser.getId());
         return savedUser;
     }
 
@@ -95,7 +96,7 @@ public class UserService extends GenericService<User> {
         }
 
         AppSettings.setActiveUser(user);
-        Logger.log("Logged in as " + baseName + "(" + user.getId() + ")");
+        Logger.log("Logged in as " + baseName + "id=" + user.getId());
         return user;
     }
 
