@@ -12,8 +12,8 @@ public class Teacher extends Employee {
 	private TeacherType type;
 	
 	public Teacher(String login, String password, String name, String surname, TeacherType type) {
-		FieldValidator.requireNonNull(type);
 		super(login, password, name, surname);
+		FieldValidator.requireNonNull(type);
 		this.type = type;
 	}
 	

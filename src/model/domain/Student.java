@@ -12,8 +12,8 @@ public class Student extends User {
     protected Date admissionDate;
 
     public Student(String login, String password, String name, String surname, Date admissionDate) {
-		FieldValidator.requireNonNull(admissionDate);
 		super(login, password, name, surname);
+		FieldValidator.requireNonNull(admissionDate);
 		this.admissionDate = admissionDate;
 	}
 
