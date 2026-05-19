@@ -28,7 +28,7 @@ public class Student extends User {
 
 	@Override
 	public String asLine() {
-		return super.asLine();
+		return super.asLine() + "| " + getClass().getSimpleName();
 	}
 
 	@Override
